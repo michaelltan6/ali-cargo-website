@@ -176,7 +176,7 @@ function st_agregar($m) {
     if (!empty($m['insert_extra'])) {
         foreach ($m['insert_extra'] as $f) { $cols[] = $f; $vals[] = st_post($f); }
     }
-    if (!empty($m['secret'])) { $cols[] = $m['secret']; $vals[] = claves(st_post($m['secret'])); }
+    if (!empty($m['secret'])) { $cols[] = $m['secret']; $vals[] = ali_make_hash(st_post($m['secret']), $m['table']); }
     $cols[] = 'estado'; $vals[] = st_estado();
     if (!empty($m['with_type'])) { $cols[] = 'type'; $vals[] = isset($_POST['type']) ? (int)$_POST['type'] : 0; }
     $sql = 'INSERT INTO ' . $m['table'] . ' (' . implode(',', $cols) . (!empty($m['date']) ? ',date' : '') . ') VALUES (' . implode(',', array_fill(0, count($cols), '?')) . (!empty($m['date']) ? ',CURDATE()' : '') . ')';
@@ -199,7 +199,7 @@ function st_actualizar($m) {
     $sets = array(); $vals = array();
     foreach (array_keys($m['fields']) as $f) { $sets[] = $f . ' = ?'; $vals[] = st_post($f); }
     // password dikosongkan = tidak diubah
-    if (!empty($m['secret']) && st_post($m['secret']) !== '') { $sets[] = $m['secret'] . ' = ?'; $vals[] = claves(st_post($m['secret'])); }
+    if (!empty($m['secret']) && st_post($m['secret']) !== '') { $sets[] = $m['secret'] . ' = ?'; $vals[] = ali_make_hash(st_post($m['secret']), $m['table']); }
     $sets[] = 'estado = ?'; $vals[] = st_estado();
     if (!empty($m['protect_self'])) {
         // jangan sampai admin menonaktifkan akunnya sendiri
@@ -215,7 +215,11 @@ function st_actualizar($m) {
     if (!empty($m['protect_self']) && !empty($m['secret']) && st_post($m['secret']) !== '') {
         $stmt = dbQuery('SELECT name FROM ' . $m['table'] . ' WHERE ' . $m['key'] . ' = ?', array($id));
         $row = dbFetchAssoc($stmt);
-        if ($row && $row['name'] === $_SESSION['user_name']) { $_SESSION['pwd'] = claves(st_post($m['secret'])); }
+        if ($row && $row['name'] === $_SESSION['user_name']) {
+            $stmt = dbQuery('SELECT ' . $m['secret'] . ' AS p FROM ' . $m['table'] . ' WHERE ' . $m['key'] . ' = ?', array($id));
+            $pr = dbFetchAssoc($stmt);
+            if ($pr) { $_SESSION['pwd'] = ali_pwd_fp($pr['p']); }
+        }
     }
     st_json(array('msg' => 'ok'));
 }

@@ -10,7 +10,7 @@ ini_set('error_log', __DIR__ . '/php_error.log');
 
 // Initialize session if not started
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
 }
 
 // Fallback definition for limpiar() to preserve valid date formats
@@ -129,7 +129,7 @@ try {
                 throw new Exception("Authentication required to add consignment.");
             }
             error_log("Action received: add-cons");
-            error_log("POST data: " . print_r($_POST, true));
+            // (log data dimatikan) error_log("POST data: " . print_r($_POST, true));
 
             $cons_no = limpiar($_POST['cons_no'] ?? '');
             $ship_name = limpiar($_POST['ship_name'] ?? '');
@@ -256,7 +256,7 @@ try {
                 $receiver_email, $ship_type, $mode, $total_declarate, $office, $pickup_time, $etd, $eta, $comments, $weight, $total_volume,
                 $qty, $freight, $variable, $status_delivered, $officename, $tracking_link, $progress_percentage
             ];
-            error_log("Insert parameters for add-cons: " . print_r($params, true));
+            // (log data dimatikan) error_log("Insert parameters for add-cons: " . print_r($params, true));
 
             global $dbConn;
             if (!isset($dbConn)) {

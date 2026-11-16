@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'activ
 }
 
 try {
-    error_log("update_duedate.php started, POST data: " . print_r($_POST, true));
+    // (log data dimatikan) error_log("update_duedate.php started, POST data: " . print_r($_POST, true));
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_duedate' && isset($_POST['cid'])) {
         $cid = filter_var($_POST['cid'], FILTER_SANITIZE_NUMBER_INT);
         $due_date = !empty($_POST['due_date']) ? filter_var($_POST['due_date'], FILTER_SANITIZE_STRING) : null;
@@ -50,7 +50,7 @@ try {
             }
         }
     } else {
-        error_log("Invalid request to update_duedate.php: " . print_r($_POST, true));
+        // (log data dimatikan) error_log("Invalid request to update_duedate.php: " . print_r($_POST, true));
         echo json_encode(['success' => false, 'message' => 'Invalid request']);
     }
 } catch (PDOException $e) {

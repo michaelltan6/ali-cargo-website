@@ -3,7 +3,7 @@ require_once __DIR__ . '/courier-lib.php';
 
 ob_start();
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
 }
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 ini_set('display_errors', 0);
@@ -16,7 +16,7 @@ require_once('funciones.php');
 
 requireAdmin();
 
-error_log("Session data in add-courier.php: " . print_r($_SESSION, true));
+// (log data dimatikan) error_log("Session data in add-courier.php: " . print_r($_SESSION, true));
 
 // Fetch offices
 $offices = [];

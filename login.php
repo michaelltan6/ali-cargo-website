@@ -6,7 +6,7 @@ ini_set('error_log', __DIR__ . '/php_error.log');
 error_reporting(E_ALL);
 
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
 }
 require_once('deprixa/database.php');
 require_once('deprixa/library.php');
@@ -26,7 +26,7 @@ if (isset($_SESSION['user_name']) && !empty($_SESSION['user_name']) && isUser())
     session_unset();
     session_destroy();
     if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
     }
 }
 

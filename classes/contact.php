@@ -1,4 +1,4 @@
-<?php if ( !isset( $_SESSION ) ) session_start();
+<?php if ( !isset( $_SESSION ) ) if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
 
 if ( !$_POST ) exit;
 

@@ -8,7 +8,7 @@ ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/php_error.log');
 
 // Initialize session
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
 
 // Include required files with output buffering
 ob_start();
@@ -73,7 +73,7 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
 
 if ($count > 0) {
     $data = dbFetchAssoc($stmt);
-    error_log("Retrieved data from courier table: " . print_r($data, true));
+    // (log data dimatikan) error_log("Retrieved data from courier table: " . print_r($data, true));
     extract($data);
 
     // Fetch company details
@@ -94,7 +94,7 @@ if ($count > 0) {
         $total_weight += $item['quantity'] * $item['weight'];
         $total_volume += $item['quantity'] * $item['volume'];
     }
-    error_log("Retrieved items: " . print_r($items, true));
+    // (log data dimatikan) error_log("Retrieved items: " . print_r($items, true));
 
     // Fetch modes
     $modes = [];

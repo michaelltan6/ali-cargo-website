@@ -3,7 +3,7 @@
 // Pengunjung selalu dikembalikan ke halaman Hubungi Kami dengan status hasilnya.
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
 require_once __DIR__ . '/deprixa/database.php';
 
 function pf_back($status) {

@@ -4,7 +4,7 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/php_error.log');
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
 require_once('database.php');
 require_once('library.php');
 require_once('funciones.php');
@@ -17,7 +17,7 @@ if (!function_exists('isUser') || !isUser()) {
 }
 
 // Log session data for debugging
-error_log("Session data in service_mode.php: " . print_r($_SESSION, true));
+// (log data dimatikan) error_log("Session data in service_mode.php: " . print_r($_SESSION, true));
 ?>
 
 <!DOCTYPE html>

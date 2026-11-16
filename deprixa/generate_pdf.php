@@ -22,7 +22,7 @@ try {
         $params = ['start' => $start, 'end' => $end];
     }
     $sql .= " ORDER BY cid";
-    error_log("PDF query: $sql, params: " . print_r($params, true));
+    // (log data dimatikan) error_log("PDF query: $sql, params: " . print_r($params, true));
     $stmt = dbQuery($sql, $params);
     $rowCount = dbNumRows($stmt);
     error_log("PDF query returned $rowCount rows");

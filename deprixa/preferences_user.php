@@ -2,7 +2,7 @@
 
  
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
 require_once('database.php');
 require_once('library.php');
 
@@ -80,10 +80,10 @@ requireAdmin();
 											<?php
 
 											require_once('database.php');
-												$sql_1 = "SELECT * FROM manager_user where name='$qname' LIMIT 1";
-												$result45 = dbQuery($sql_1);		
+												$result45 = dbQuery("SELECT * FROM manager_user WHERE name = ? LIMIT 1", [$qname]);		
 											while($data = dbFetchAssoc($result45)) {
 												extract($data);
+												$pwd = ''; // hash password tidak boleh ditampilkan
 											?>
 										<form action="process.php?action=change-pass"  method="post"  class="form-horizontal" > 
 												<div class="row">

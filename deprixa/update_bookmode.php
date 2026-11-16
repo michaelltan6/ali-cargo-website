@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', 'php_error.log');
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
 require_once('database.php');
 require_once('library.php');
 
@@ -22,7 +22,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 try {
     requireAdmin();
-    error_log("Session data in update_bookmode.php: " . print_r($_SESSION, true));
+    // (log data dimatikan) error_log("Session data in update_bookmode.php: " . print_r($_SESSION, true));
     if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['action']) || $_POST['action'] !== 'update_bookmode') {
         throw new Exception("Invalid request.");
     }
@@ -39,7 +39,7 @@ try {
     }
     // Verify update
     $verify = dbFetchAssoc(dbQuery("SELECT cid, cons_no, book_mode, officename, status FROM courier WHERE cid = :cid", ['cid' => $cid]));
-    error_log("Verified data for cid=$cid: " . print_r($verify, true));
+    // (log data dimatikan) error_log("Verified data for cid=$cid: " . print_r($verify, true));
     $response = ['success' => true, 'message' => 'Status pembayaran berhasil diperbarui.', 'book_mode' => $book_mode];
     error_log("JSON response: " . json_encode($response));
     echo json_encode($response);

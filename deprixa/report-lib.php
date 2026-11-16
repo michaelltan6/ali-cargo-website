@@ -9,7 +9,7 @@ function rp_is_admin() { return isset($_SESSION['user_type']) && $_SESSION['user
 
 // $adminOnly = true: pegawai dialihkan ke dashboard.
 function rp_boot($adminOnly = true) {
-    if (session_status() === PHP_SESSION_NONE) { session_start(); }
+    if (session_status() === PHP_SESSION_NONE) { if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); } }
     requireAdmin();
     if ($adminOnly && !rp_is_admin()) { header('Location: admin.php'); exit; }
     courier_columns_ready();
