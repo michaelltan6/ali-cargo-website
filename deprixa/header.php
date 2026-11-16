@@ -155,6 +155,7 @@ if (!function_exists('isUser') || !isUser()) {
                                 <li><a href="delivered-list.php"><i class="fa fa-truck"></i> Daftar Pengiriman yang telah Sampai Tujuan</a></li>
                                 <li><a href="list-of-shipping-paid.php"><i class="fa fa-money"></i> Daftar Pengiriman yang telah Dibayar</a></li>
                                 <li><a href="list-of-shipping-topaid.php"><i class="fa fa-credit-card"></i> Daftar Pengiriman yang untuk dibayar</a></li>
+                                <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') { ?><li><a href="export-monthly.php"><i class="fa fa-file-excel-o"></i> Export Excel Bulanan</a></li><?php } ?>
                             </ul>
                         </li>
                         <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') { ?>

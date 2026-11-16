@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/courier-lib.php';
+
 ob_start();
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -262,6 +264,22 @@ ob_end_clean();
                             <option value="30">Tempo 30 hari</option>
                         </select>
                         <span class="hint" id="term-hint" style="display:none">Hitungan tempo belum jalan. Aktifkan sendiri nanti di Daftar Pengiriman yang untuk dibayar.</span>
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="spb_no">Nomor SPB (surat jalan)</label>
+                        <input type="number" name="spb_no" id="spb_no" min="1" value="<?php echo (int)courier_next_spb(); ?>">
+                        <span class="hint">Otomatis lanjut urut. Samakan dengan nomor cetak di surat jalan.</span>
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="partner">Via / Partner</label>
+                        <input type="text" name="partner" id="partner" placeholder="Ekspedisi / mitra, kosongkan kalau tidak ada">
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="charge_unit">Dihitung per</label>
+                        <select name="charge_unit" id="charge_unit">
+                            <option value="kg" selected="selected">Kg (berat)</option>
+                            <option value="m3">M&sup3; (volume)</option>
+                        </select>
                     </div>
                     <div class="ac-f ac-4">
                         <label for="mode">Service (Mode) <em>*</em></label>

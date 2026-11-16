@@ -46,6 +46,8 @@ if (!empty($userOutput)) {
 ob_clean();
 
 // Main logic
+require_once __DIR__ . '/courier-lib.php';
+courier_columns_ready();
 $cid = isset($_GET['cid']) ? (int)$_GET['cid'] : 0;
 if ($cid <= 0 && !empty($_POST['cons'])) {
     $cons_no = limpiar($_POST['cons']);
@@ -372,6 +374,29 @@ if ($count > 0) {
                                             </div>                            
                                             <br>
                                             <br>
+                                            <div class="row">
+                                                <div class="col-sm-4 form-group">
+                                                    <label class="control-label" for="spb_no"><strong>NOMOR SPB</strong></label>
+                                                    <input type="number" min="1" class="form-control" name="spb_no" id="spb_no" value="<?php echo htmlspecialchars((string)($spb_no ?? '')); ?>">
+                                                </div>
+                                                <div class="col-sm-4 form-group">
+                                                    <label class="control-label" for="spb_return"><strong>SPB KEMBALI (TANGGAL)</strong></label>
+                                                    <input type="date" class="form-control" name="spb_return" id="spb_return" value="<?php echo htmlspecialchars((string)($spb_return ?? '')); ?>">
+                                                </div>
+                                                <div class="col-sm-3 form-group">
+                                                    <label class="control-label" for="charge_unit"><strong>DIHITUNG PER</strong></label>
+                                                    <select class="form-control" name="charge_unit" id="charge_unit">
+                                                        <option value="kg" <?php echo (($charge_unit ?? 'kg') !== 'm3') ? 'selected' : ''; ?>>Kg (berat)</option>
+                                                        <option value="m3" <?php echo (($charge_unit ?? '') === 'm3') ? 'selected' : ''; ?>>M3 (volume)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-11 form-group">
+                                                    <label class="control-label" for="partner"><strong>VIA / PARTNER</strong></label>
+                                                    <input type="text" class="form-control" name="partner" id="partner" value="<?php echo htmlspecialchars((string)($partner ?? '')); ?>" placeholder="Ekspedisi / mitra">
+                                                </div>
+                                            </div>
                                             <div class="row">
                                                 <div class="col-sm-11 form-group">
                                                     <label class="control-label" for="cons_no"><strong>TRACKING NUMBER</strong></label>

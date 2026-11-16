@@ -3,6 +3,10 @@
 //   customer_id   : tautan ke Customer Profile
 //   payment_term  : cash / 7 / 14 / 30 (hari tempo)
 //   tempo_start   : tanggal admin mengaktifkan tempo (hitungan jatuh tempo mulai dari sini)
+//   spb_no        : nomor SPB / surat jalan (urut, mengikuti nomor cetakan di surat jalan)
+//   spb_return    : tanggal surat jalan (SPB) kembali dari customer
+//   partner       : ekspedisi / mitra yang dipakai (Via / Partner)
+//   charge_unit   : hitungan ukuran, 'kg' atau 'm3'
 require_once __DIR__ . '/database.php';
 
 function courier_columns_ready() {
@@ -12,7 +16,11 @@ function courier_columns_ready() {
     try {
         $want = ['customer_id' => ['INT UNSIGNED NULL', 'INTEGER NULL'],
                  'payment_term' => ['VARCHAR(10) NULL', 'TEXT NULL'],
-                 'tempo_start' => ['DATE NULL', 'TEXT NULL']];
+                 'tempo_start' => ['DATE NULL', 'TEXT NULL'],
+                 'spb_no' => ['INT UNSIGNED NULL', 'INTEGER NULL'],
+                 'spb_return' => ['DATE NULL', 'TEXT NULL'],
+                 'partner' => ['VARCHAR(100) NULL', 'TEXT NULL'],
+                 'charge_unit' => ['VARCHAR(5) NULL', 'TEXT NULL']];
         $sqlite = $dbConn->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
         $have = [];
         if ($sqlite) { foreach ($dbConn->query("PRAGMA table_info(courier)") as $c) { $have[$c['name']] = true; } }
@@ -33,4 +41,29 @@ function courier_term_label($term) {
     $term = (string)$term;
     if ($term === '7' || $term === '14' || $term === '30') { return 'Tempo ' . $term . ' hari'; }
     return 'Cash';
+}
+
+// Nomor SPB berikutnya = nomor tertinggi yang sudah dipakai + 1.
+// Kalau belum ada satu pun, mulai dari 7507 (lanjutan dari file laporan September).
+function courier_next_spb() {
+    if (!courier_columns_ready()) { return 7507; }
+    $r = dbFetchAssoc(dbQuery("SELECT MAX(spb_no) AS m FROM courier"));
+    $m = (int)($r['m'] ?? 0);
+    return $m > 0 ? $m + 1 : 7507;
+}
+
+// Nomor SPB sudah dipakai pengiriman lain? ($exceptCid = pengiriman yang sedang diedit)
+function courier_spb_taken($spb, $exceptCid = 0) {
+    $r = dbFetchAssoc(dbQuery("SELECT COUNT(*) AS c FROM courier WHERE spb_no = ? AND cid <> ?", [(int)$spb, (int)$exceptCid]));
+    return (int)($r['c'] ?? 0) > 0;
+}
+
+// Wilayah untuk pengelompokan laporan, ditentukan dari kota tujuan. Selain Sumatera dan Timur dianggap Jawa.
+function courier_region($dest) {
+    $d = strtolower(trim((string)$dest));
+    $sumatera = ['aceh','medan','sumatera','sumut','sumbar','sumsel','binjai','stabat','pematang','siantar','tebing','padang','bukittinggi','pekanbaru','riau','dumai','batam','tanjung pinang','tanjungpinang','kepri','jambi','bungo','palembang','lubuk','bengkulu','lampung','bangka','belitung','pangkal','kerinci','sibolga','rantau','kisaran','lhokseumawe','tanjung balai','tanjungbalai','metro'];
+    $timur = ['kalimantan','banjarmasin','banjarbaru','pontianak','balikpapan','samarinda','palangkaraya','palangka','tarakan','sampit','singkawang','bontang','bali','denpasar','nusa','lombok','mataram','ntb','ntt','kupang','sulawesi','makassar','manado','kendari','palu','gorontalo','ambon','maluku','ternate','papua','sorong','jayapura','merauke','timika','mamuju','bau-bau','flores','labuan bajo','sumbawa','bima','biak','manokwari','halmahera','kolaka','morowali','luwuk','palopo','parepare','toraja'];
+    foreach ($sumatera as $k) { if ($d !== '' && strpos($d, $k) !== false) { return 'SUMATERA'; } }
+    foreach ($timur as $k) { if ($d !== '' && strpos($d, $k) !== false) { return 'TIMUR'; } }
+    return 'JAWA';
 }

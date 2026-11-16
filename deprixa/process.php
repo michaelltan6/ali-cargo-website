@@ -231,6 +231,17 @@ try {
                 throw new Exception("Lengkapi dulu: " . implode(', ', $kurang) . ".");
             }
 
+            // Nomor SPB: kosong = otomatis (lanjut urut). Kalau diisi harus belum dipakai.
+            require_once __DIR__ . '/courier-lib.php';
+            courier_columns_ready();
+            $spb_no = (int)($_POST['spb_no'] ?? 0);
+            if ($spb_no <= 0) { $spb_no = courier_next_spb(); }
+            if (courier_spb_taken($spb_no, 0)) {
+                throw new Exception("Nomor SPB $spb_no sudah dipakai pengiriman lain.");
+            }
+            $partner = mb_substr(trim(limpiar($_POST['partner'] ?? '')), 0, 100);
+            $charge_unit = (($_POST['charge_unit'] ?? 'kg') === 'm3') ? 'm3' : 'kg';
+
             $stmt = dbQuery("SELECT COUNT(*) AS count FROM courier WHERE cons_no = ?", [$cons_no]);
             if (dbFetchAssoc($stmt)['count'] > 0) {
                 throw new Exception("Tracking number already exists: $cons_no");
@@ -296,7 +307,7 @@ try {
                     }
                     if (courier_columns_ready()) {
                         $custVal = ($linkId > 0 && cp_get($linkId)) ? $linkId : null;
-                        dbQuery("UPDATE courier SET customer_id = ?, payment_term = ? WHERE cid = ?", [$custVal, $payment_term, $courier_id]);
+                        dbQuery("UPDATE courier SET customer_id = ?, payment_term = ?, spb_no = ?, partner = ?, charge_unit = ? WHERE cid = ?", [$custVal, $payment_term, $spb_no, $partner, $charge_unit, $courier_id]);
                     }
                 } catch (Exception $e) {
                     error_log("Tautan customer gagal: " . $e->getMessage());
@@ -426,6 +437,20 @@ try {
                 ]
             );
             error_log("Updated courier record with cid: $cid, collection_date: {$data['collection_date']}, etd: {$data['etd']}, eta: {$data['eta']}, progress_percentage: {$data['progress_percentage']}");
+
+            // Data SPB: nomor SPB, tanggal SPB kembali, partner, satuan hitung
+            require_once __DIR__ . '/courier-lib.php';
+            if (courier_columns_ready() && array_key_exists('spb_no', $_POST)) {
+                $spb_no = (int)($_POST['spb_no'] ?? 0);
+                if ($spb_no > 0 && courier_spb_taken($spb_no, (int)$cid)) {
+                    throw new Exception("Nomor SPB $spb_no sudah dipakai pengiriman lain.");
+                }
+                $rt = trim((string)($_POST['spb_return'] ?? ''));
+                $rtd = DateTime::createFromFormat('Y-m-d', $rt);
+                $spb_return = ($rtd && $rtd->format('Y-m-d') === $rt) ? $rt : null;
+                dbQuery("UPDATE courier SET spb_no = ?, spb_return = ?, partner = ?, charge_unit = ? WHERE cid = ?",
+                    [$spb_no > 0 ? $spb_no : null, $spb_return, mb_substr(trim(limpiar($_POST['partner'] ?? '')), 0, 100), (($_POST['charge_unit'] ?? 'kg') === 'm3') ? 'm3' : 'kg', $cid]);
+            }
 
             // Update courier items
             if (isset($_POST['item_name']) && is_array($_POST['item_name'])) {
