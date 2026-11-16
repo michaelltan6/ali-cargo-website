@@ -9,6 +9,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once('database.php');
 require_once('library.php');
+require_once('courier-lib.php');
+courier_columns_ready();
 
 try {
     requireAdmin();
@@ -162,6 +164,14 @@ try {
             }
         }
     </style>
+<style>
+.tempo-box { text-align: left; margin-bottom: 6px; font-size: 12px; }
+.tempo-label { font-weight: 600; }
+.tempo-off { color: #b45309; margin-left: 4px; }
+.tempo-on { color: #15803d; margin-left: 4px; }
+.tempo-act { margin-top: 4px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.tempo-act input { height: 26px; font-size: 12px; padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; }
+</style>
 </head>
 <body>
 <?php include("header.php"); ?>
@@ -242,7 +252,25 @@ try {
                                 </td>
                                 <td align="center">
                                     <?php if ($_SESSION['user_type'] == 'Administrator') { ?>
-                                        <div class="due-date-container">
+                                        <?php
+                        $term = (string)($row['payment_term'] ?? '');
+                        $isTempo = in_array($term, ['7', '14', '30'], true);
+                    ?>
+                    <?php if ($isTempo) { ?>
+                        <div class="tempo-box" data-cid="<?php echo (int)$row['cid']; ?>">
+                            <span class="tempo-label"><?php echo htmlspecialchars(courier_term_label($term)); ?></span>
+                            <?php if (empty($row['due_date'])) { ?>
+                                <span class="tempo-off">belum aktif</span>
+                                <div class="tempo-act">
+                                    <input type="date" class="tempo-start" value="<?php echo date('Y-m-d'); ?>" title="Tanggal mulai hitung tempo">
+                                    <button type="button" class="btn btn-xs btn-success tempo-go">Aktifkan tempo</button>
+                                </div>
+                            <?php } elseif (!empty($row['tempo_start'])) { ?>
+                                <span class="tempo-on">aktif sejak <?php echo htmlspecialchars(date('d-m-Y', strtotime($row['tempo_start']))); ?></span>
+                            <?php } ?>
+                        </div>
+                    <?php } ?>
+                    <div class="due-date-container">
                                             <form class="update-duedate-form" style="margin-bottom: 0;">
                                                 <input type="hidden" name="cid" value="<?php echo htmlspecialchars($row['cid']); ?>">
                                                 <input type="hidden" name="action" value="update_duedate">
@@ -256,7 +284,7 @@ try {
                                             <?php } ?>
                                         </div>
                                     <?php } else { ?>
-                                        <span class="due-date-text" data-due-date="<?php echo htmlspecialchars($row['due_date'] ?? ''); ?>"><?php echo htmlspecialchars($row['due_date'] ?? 'Not set'); ?></span>
+                                        <?php $t2 = (string)($row['payment_term'] ?? ''); if (in_array($t2, ['7','14','30'], true)) { echo '<small>' . htmlspecialchars(courier_term_label($t2)) . '</small><br>'; } ?><span class="due-date-text" data-due-date="<?php echo htmlspecialchars($row['due_date'] ?? ''); ?>"><?php echo htmlspecialchars($row['due_date'] ?? 'Not set'); ?></span>
                                     <?php } ?>
                                 </td>
                             </tr>
@@ -447,7 +475,29 @@ try {
                 });
             });
 
-            // Trigger focus on click or calendar icon
+            // Aktifkan tempo (hitungan jatuh tempo mulai dari tanggal yang dipilih admin)
+$(document).on('click', '.tempo-go', function() {
+    var box = $(this).closest('.tempo-box');
+    var cid = box.data('cid');
+    var start = box.find('.tempo-start').val();
+    if (!start) { Swal.fire({ icon: 'warning', title: 'Pilih tanggal mulai tempo' }); return; }
+    var btn = $(this).prop('disabled', true);
+    $.ajax({
+        url: 'update_duedate.php', type: 'POST', dataType: 'json', cache: false,
+        data: { action: 'activate_tempo', cid: cid, start_date: start },
+        success: function(res) {
+            if (res && res.success) {
+                Swal.fire({ icon: 'success', title: 'Tempo aktif', text: res.message, timer: 1800, showConfirmButton: false }).then(function() { location.reload(); });
+            } else {
+                btn.prop('disabled', false);
+                Swal.fire({ icon: 'error', title: 'Gagal', text: res ? res.message : 'Tidak ada respons dari server' });
+            }
+        },
+        error: function() { btn.prop('disabled', false); Swal.fire({ icon: 'error', title: 'Gagal menghubungi server' }); }
+    });
+});
+
+// Trigger focus on click or calendar icon
             $(document).on('click', '.due-date-picker, .input-group-addon', function() {
                 console.log('Click event on:', this);
                 $(this).closest('.input-group').find('.due-date-picker').trigger('focus');

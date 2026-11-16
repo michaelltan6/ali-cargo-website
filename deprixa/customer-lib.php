@@ -32,27 +32,9 @@ function cp_ensure_table() {
     $done = true;
 }
 
-// Kolom customer_id di tabel courier (boleh kosong) supaya pengiriman bisa ditautkan ke customer.
-function cp_courier_has_customer_col() {
-    global $dbConn;
-    static $has = null;
-    if ($has !== null) { return $has; }
-    try {
-        if ($dbConn->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
-            $has = false;
-            foreach ($dbConn->query("PRAGMA table_info(courier)") as $c) { if ($c['name'] === 'customer_id') { $has = true; } }
-            if (!$has) { $dbConn->exec("ALTER TABLE courier ADD COLUMN customer_id INTEGER NULL"); $has = true; }
-        } else {
-            $r = $dbConn->query("SHOW COLUMNS FROM courier LIKE 'customer_id'")->fetch();
-            if (!$r) { $dbConn->exec("ALTER TABLE courier ADD COLUMN customer_id INT UNSIGNED NULL, ADD KEY idx_customer (customer_id)"); }
-            $has = true;
-        }
-    } catch (Exception $e) {
-        error_log('cp_courier_has_customer_col: ' . $e->getMessage());
-        $has = false;
-    }
-    return $has;
-}
+// Kolom customer_id di tabel courier dibuat oleh courier-lib.php
+require_once __DIR__ . '/courier-lib.php';
+function cp_courier_has_customer_col() { return courier_columns_ready(); }
 
 function cp_clean($v, $max) {
     $v = preg_replace('/[\x00-\x1F\x7F]+/u', ' ', (string)$v);

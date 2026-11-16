@@ -5,6 +5,25 @@ require_once('library.php');
 requireAdmin(true);
 if (!sameOriginOk()) { http_response_code(403); echo json_encode(['success' => false, 'message' => 'Permintaan ditolak.']); exit; }
 
+// Aktifkan tempo: jatuh tempo = tanggal mulai + lama tempo (7/14/30 hari) yang dipilih saat pengiriman dibuat.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'activate_tempo') {
+    require_once('courier-lib.php');
+    $fail = function ($m) { echo json_encode(['success' => false, 'message' => $m]); exit; };
+    $cid = (int)($_POST['cid'] ?? 0);
+    $start = (string)($_POST['start_date'] ?? '');
+    $d = DateTime::createFromFormat('Y-m-d', $start);
+    if (!$d || $d->format('Y-m-d') !== $start) { $fail('Tanggal mulai tidak valid.'); }
+    if (!courier_columns_ready()) { $fail('Kolom tempo belum siap. Coba muat ulang halaman.'); }
+    $row = dbFetchAssoc(dbQuery("SELECT payment_term FROM courier WHERE cid = ?", [$cid]));
+    if (!$row) { $fail('Pengiriman tidak ditemukan.'); }
+    $term = (string)($row['payment_term'] ?? '');
+    if (!in_array($term, ['7', '14', '30'], true)) { $fail('Pengiriman ini tidak memakai tempo 7/14/30 hari.'); }
+    $due = (clone $d)->modify('+' . $term . ' days')->format('Y-m-d');
+    dbQuery("UPDATE courier SET tempo_start = ?, due_date = ? WHERE cid = ?", [$start, $due, $cid]);
+    echo json_encode(['success' => true, 'message' => 'Tempo aktif. Jatuh tempo ' . $due, 'due_date' => $due, 'tempo_start' => $start]);
+    exit;
+}
+
 try {
     error_log("update_duedate.php started, POST data: " . print_r($_POST, true));
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_duedate' && isset($_POST['cid'])) {

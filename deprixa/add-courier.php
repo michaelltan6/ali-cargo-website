@@ -209,12 +209,12 @@ ob_end_clean();
                         <input type="text" name="shipper_pic" id="shipper_pic" maxlength="120" placeholder="opsional">
                     </div>
                     <div class="ac-f ac-6">
-                        <label for="shipper_phone">Nomor kontak <em>*</em></label>
-                        <input type="text" name="shipper_phone" id="shipper_phone" required inputmode="tel" placeholder="0812xxxxxxx">
+                        <label for="shipper_phone">Nomor kontak</label>
+                        <input type="text" name="shipper_phone" id="shipper_phone" inputmode="tel" placeholder="0812xxxxxxx">
                     </div>
                     <div class="ac-f ac-12">
-                        <label for="shipper_address">Alamat pengirim <em>*</em></label>
-                        <input type="text" name="shipper_address" id="shipper_address" required placeholder="Alamat lengkap pengirim">
+                        <label for="shipper_address">Alamat pengirim</label>
+                        <input type="text" name="shipper_address" id="shipper_address" placeholder="Alamat lengkap pengirim">
                     </div>
                 </div>
                 <label class="ac-check" id="save-cust-wrap" style="display:none"><input type="checkbox" name="save_customer" value="1" id="save_customer"> Simpan juga sebagai customer baru</label>
@@ -233,17 +233,17 @@ ob_end_clean();
                         <input type="text" name="receiver_cc" id="receiver_cc" maxlength="20" placeholder="opsional">
                     </div>
                     <div class="ac-f ac-6">
-                        <label for="receiver_phone">Nomor kontak <em>*</em></label>
-                        <input type="text" name="receiver_phone" id="receiver_phone" required inputmode="tel" placeholder="0812xxxxxxx">
+                        <label for="receiver_phone">Nomor kontak</label>
+                        <input type="text" name="receiver_phone" id="receiver_phone" inputmode="tel" placeholder="0812xxxxxxx">
                     </div>
                     <div class="ac-f ac-6">
-                        <label for="receiver_email">Email <em>*</em></label>
-                        <input type="text" name="receiver_email" id="receiver_email" required placeholder="nama@perusahaan.com">
-                        <span class="hint">Harus benar, dipakai untuk pemberitahuan pengiriman.</span>
+                        <label for="receiver_email">Email</label>
+                        <input type="text" name="receiver_email" id="receiver_email" placeholder="nama@perusahaan.com">
+                        <span class="hint">Opsional. Kalau diisi, pastikan benar.</span>
                     </div>
                     <div class="ac-f ac-12">
-                        <label for="receiver_address">Alamat penerima <em>*</em></label>
-                        <input type="text" name="receiver_address" id="receiver_address" required placeholder="Alamat lengkap penerima">
+                        <label for="receiver_address">Alamat penerima</label>
+                        <input type="text" name="receiver_address" id="receiver_address" placeholder="Alamat lengkap penerima">
                     </div>
                 </div>
             </section>
@@ -251,13 +251,17 @@ ob_end_clean();
             <!-- 3. INFORMASI PENGIRIMAN -->
             <section class="ac-card">
                 <h4><i class="fa fa-info-circle"></i> Informasi pengiriman</h4>
+                <input type="hidden" name="office" id="office" value="<?php echo htmlspecialchars($offices[0] ?? ''); ?>">
                 <div class="ac-grid">
                     <div class="ac-f ac-4">
-                        <label for="book_mode">Mode pembayaran</label>
-                        <select name="book_mode" id="book_mode">
-                            <option selected="selected" value="Paid">Dibayar</option>
-                            <option value="ToPay">Untuk Dibayar</option>
+                        <label for="payment_term">Metode pembayaran</label>
+                        <select name="payment_term" id="payment_term">
+                            <option value="cash" selected="selected">Cash</option>
+                            <option value="7">Tempo 7 hari</option>
+                            <option value="14">Tempo 14 hari</option>
+                            <option value="30">Tempo 30 hari</option>
                         </select>
+                        <span class="hint" id="term-hint" style="display:none">Hitungan tempo belum jalan. Aktifkan sendiri nanti di Daftar Pengiriman yang untuk dibayar.</span>
                     </div>
                     <div class="ac-f ac-4">
                         <label for="mode">Service (Mode) <em>*</em></label>
@@ -269,27 +273,11 @@ ob_end_clean();
                         </select>
                     </div>
                     <div class="ac-f ac-4">
-                        <label for="ship_type">Produk / tipe barang <em>*</em></label>
-                        <input type="text" name="ship_type" id="ship_type" required placeholder="mis. Sparepart, Elektronik">
-                    </div>
-                    <div class="ac-f ac-4">
-                        <label for="office">Kantor asal</label>
-                        <select name="office" id="office">
-                            <?php foreach ($offices as $office): ?>
-                                <option value="<?php echo htmlspecialchars($office); ?>"><?php echo htmlspecialchars($office); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="ac-f ac-4">
                         <label for="pickup_time">Kota tujuan <em>*</em></label>
                         <input type="text" name="pickup_time" id="pickup_time" required placeholder="mis. Surabaya">
                     </div>
                     <div class="ac-f ac-4">
-                        <label for="total_declarate"><?php echo htmlspecialchars($company['currency'] ?? 'IDR'); ?> Asuransi pengiriman</label>
-                        <input type="text" name="total_declarate" id="total_declarate" maxlength="20" inputmode="numeric" placeholder="0">
-                    </div>
-                    <div class="ac-f ac-4">
-                        <label for="pick_date">Tanggal pengumpulan</label>
+                        <label for="pick_date">Tanggal barang kami terima</label>
                         <input type="date" name="pick_date" id="pick_date" value="<?php echo date('Y-m-d'); ?>">
                     </div>
                     <div class="ac-f ac-4">
@@ -299,7 +287,8 @@ ob_end_clean();
                     <div class="ac-f ac-4">
                         <label for="status">Status</label>
                         <select name="status" id="status">
-                            <option selected="selected" value="In-Transit">On Delivery</option>
+                            <option value="In-Transit" selected="selected">On Delivery</option>
+                            <option value="On-Hold">On Hold</option>
                         </select>
                     </div>
                     <div class="ac-f ac-12">
@@ -604,6 +593,9 @@ ob_end_clean();
   $('mode-existing').addEventListener('click', function () { setMode('existing'); });
   $('mode-manual').addEventListener('click', function () { setMode('manual'); });
 })();
+</script>
+<script>
+(function(){var t=document.getElementById('payment_term'),h=document.getElementById('term-hint');function u(){h.style.display=t.value==='cash'?'none':'block';}t.addEventListener('change',u);u();})();
 </script>
 </body>
 </html>

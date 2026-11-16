@@ -134,9 +134,13 @@ try {
             $ship_name = limpiar($_POST['ship_name'] ?? '');
             $rev_name = limpiar($_POST['rev_name'] ?? '');
             $collection_date = limpiar($_POST['pick_date'] ?? ''); // Changed from collection_date to match form
-            $book_mode = limpiar($_POST['book_mode'] ?? '');
+            // Metode pembayaran: cash / 7 / 14 / 30 hari. Cash dicatat 'Paid', tempo dicatat 'ToPay'.
+            // Hitungan jatuh tempo baru mulai setelah admin mengaktifkan tempo secara manual.
+            $payment_term = in_array(($_POST['payment_term'] ?? 'cash'), ['cash', '7', '14', '30'], true) ? $_POST['payment_term'] : 'cash';
+            $book_mode = ($payment_term === 'cash') ? 'Paid' : 'ToPay';
             $user = $_SESSION['user_name'] ?? 'Unknown';
-            $status = limpiar($_POST['status'] ?? 'In-Transit');
+            // Dari halaman tambah pengiriman hanya boleh On Delivery atau On Hold. Delivered diubah dari halaman lain.
+            $status = in_array(($_POST['status'] ?? ''), ['In-Transit', 'On-Hold'], true) ? $_POST['status'] : 'In-Transit';
             $shipping_subtotal = str_replace(['.', ','], '', $_POST['shipping_subtotal'] ?? 0);
             $book_date = date('Y-m-d H:i:s');
             $shipper_address = limpiar($_POST['shipper_address'] ?? '');
@@ -219,13 +223,8 @@ try {
             if (empty($_POST['item_name']) || !is_array($_POST['item_name'])) {
                 throw new Exception("At least one item is required.");
             }
-            // Kode/ID customer (shipper_cc, receiver_cc) boleh kosong. Sisanya wajib.
-            $wajib = [
-                'Nomor kontak pengirim' => $shipper_phone, 'Alamat pengirim' => $shipper_address,
-                'Nomor kontak penerima' => $receiver_phone, 'Alamat penerima' => $receiver_address,
-                'Email penerima' => $receiver_email, 'Produk / tipe barang' => $ship_type,
-                'Service (Mode)' => $mode, 'Kantor asal' => $office, 'Kota tujuan' => $pickup_time,
-            ];
+            // Kontak, alamat, dan email boleh kosong. Yang wajib: nama pengirim/penerima (dicek di atas), service, kota tujuan.
+            $wajib = ['Service (Mode)' => $mode, 'Kota tujuan' => $pickup_time];
             $kurang = [];
             foreach ($wajib as $label => $nilai) { if (trim((string)$nilai) === '' || $nilai === '0') { $kurang[] = $label; } }
             if ($kurang) {
@@ -295,8 +294,9 @@ try {
                         ]);
                         if (cp_validate($cpf) === '') { $linkId = cp_create($cpf); }
                     }
-                    if ($linkId > 0 && cp_get($linkId) && cp_courier_has_customer_col()) {
-                        dbQuery("UPDATE courier SET customer_id = ? WHERE cid = ?", [$linkId, $courier_id]);
+                    if (courier_columns_ready()) {
+                        $custVal = ($linkId > 0 && cp_get($linkId)) ? $linkId : null;
+                        dbQuery("UPDATE courier SET customer_id = ?, payment_term = ? WHERE cid = ?", [$custVal, $payment_term, $courier_id]);
                     }
                 } catch (Exception $e) {
                     error_log("Tautan customer gagal: " . $e->getMessage());
