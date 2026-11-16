@@ -359,6 +359,16 @@ if ($count > 0) {
             </section>
         </form>
 
+        <section class="ac-card" id="finish-card">
+            <h4><i class="fa fa-check-circle"></i> Selesaikan pengiriman</h4>
+            <?php if (($status ?? '') === 'Delivered'): ?>
+                <p class="ac-sub">Pengiriman ini sudah selesai (Delivered).</p>
+            <?php else: ?>
+                <p class="ac-sub">Tandai pengiriman <b><?php echo htmlspecialchars($cons_no ?? ''); ?></b> sudah sampai dan selesai. Status jadi Delivered, progres 100%, dan tercatat di riwayat.</p>
+                <button type="button" class="ac-btn" id="btn-finish" data-cid="<?php echo (int)$cid; ?>">Selesaikan pengiriman</button>
+            <?php endif; ?>
+        </section>
+
         <section class="ac-card">
             <h4><i class="fa fa-flag"></i> Perbarui status</h4>
             <form action="process.php?action=update-status" method="post" name="frmShipment" id="frmShipment">
@@ -666,6 +676,27 @@ if ($count > 0) {
                 return isValid;
             }
         });
+    </script>
+    <script>
+    $(document).on('click', '#btn-finish', function() {
+        var btn = $(this), cid = btn.data('cid');
+        var go = function() {
+            btn.prop('disabled', true);
+            $.ajax({ url: 'finish-shipment.php', type: 'POST', dataType: 'json', data: { cid: cid },
+                success: function(res) {
+                    if (res && res.success) {
+                        (window.Swal ? Swal.fire({ icon: 'success', title: 'Selesai', text: res.message, timer: 1600, showConfirmButton: false }) : Promise.resolve()).then(function() { location.href = 'admin.php'; });
+                    } else {
+                        btn.prop('disabled', false);
+                        window.Swal ? Swal.fire({ icon: 'error', title: 'Gagal', text: res ? res.message : 'Tidak ada respons' }) : alert(res ? res.message : 'Gagal');
+                    }
+                },
+                error: function() { btn.prop('disabled', false); alert('Gagal menghubungi server'); } });
+        };
+        if (window.Swal) {
+            Swal.fire({ title: 'Selesaikan pengiriman?', icon: 'question', showCancelButton: true, confirmButtonText: 'Ya, selesaikan', cancelButtonText: 'Batal' }).then(function(r) { if (r.isConfirmed) { go(); } });
+        } else if (confirm('Selesaikan pengiriman ini?')) { go(); }
+    });
     </script>
 </body>
 </html>

@@ -587,7 +587,7 @@ try {
             $response = [
                 'success' => true,
                 'message' => 'Booking mode updated successfully.',
-                'redirect' => 'list-of-shipping-topaid.php'
+                'redirect' => 'laporan-piutang.php'
             ];
         } elseif ($_GET['action'] === 'logOut') {
             if (!$authenticated) {

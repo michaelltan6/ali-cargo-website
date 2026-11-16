@@ -76,7 +76,7 @@ function dash_pay($row) {
                 <a class="dash-tile" href="#" data-filter=""><span>Pengiriman aktif</span><b><?php echo $cActive; ?></b></a>
                 <a class="dash-tile" href="#" data-filter="On Delivery"><span>On Delivery</span><b><?php echo $cTransit; ?></b></a>
                 <a class="dash-tile" href="#" data-filter="On Hold"><span>On Hold</span><b><?php echo $cHold; ?></b></a>
-                <a class="dash-tile warn" href="list-of-shipping-topaid.php"><span>Tempo belum aktif</span><b><?php echo $cTempo; ?></b></a>
+                <a class="dash-tile warn" href="laporan-piutang.php"><span>Tempo belum aktif</span><b><?php echo $cTempo; ?></b></a>
                 <div class="dash-tile ok"><span>Selesai bulan ini</span><b><?php echo $cDoneMon; ?></b></div>
             </div>
 
@@ -119,9 +119,8 @@ function dash_pay($row) {
                                 <td><?php echo htmlspecialchars(ali_ship_date($row)); ?></td>
                                 <td><span class="st <?php echo $stClass; ?>"><?php echo htmlspecialchars($stLabel); ?></span></td>
                                 <td class="dash-act">
-                                    <button type="button" class="act-btn finish" data-cid="<?php echo $cid; ?>" data-no="<?php echo htmlspecialchars($row['cons_no']); ?>" title="Tandai pengiriman selesai"><i class="fa fa-check"></i> Selesaikan</button>
                                     <?php if ($isAdmin) { ?>
-                                        <a class="act-btn" href="edit-courier.php?cid=<?php echo $cid; ?>" title="Edit"><i class="fa fa-pencil"></i> Edit</a>
+                                        <a class="act-btn" href="edit-courier.php?cid=<?php echo $cid; ?>" title="Buka halaman edit (pengiriman diselesaikan dari sini)"><i class="fa fa-pencil"></i> Edit / Selesaikan</a>
                                         <button type="button" class="act-btn del" data-cid="<?php echo $cid; ?>" data-no="<?php echo htmlspecialchars($row['cons_no']); ?>" title="Hapus"><i class="fa fa-trash"></i></button>
                                     <?php } ?>
                                 </td>
@@ -166,37 +165,6 @@ $(document).ready(function() {
         e.preventDefault();
         table.column(6).search($(this).data('filter') || '').draw();
         $('.dash-tile').removeClass('on'); $(this).addClass('on');
-    });
-
-    function notify(opts) {
-        if (window.Swal) { return Swal.fire(opts); }
-        alert((opts.title ? opts.title + ': ' : '') + (opts.text || ''));
-        return Promise.resolve({ isConfirmed: true });
-    }
-
-    // Selesaikan pengiriman langsung dari dashboard
-    $('#dash-table').on('click', '.act-btn.finish', function() {
-        var btn = $(this), cid = btn.data('cid'), no = btn.data('no');
-        var go = function() {
-            btn.prop('disabled', true);
-            $.ajax({
-                url: 'finish-shipment.php', type: 'POST', dataType: 'json', data: { cid: cid },
-                success: function(res) {
-                    if (res && res.success) {
-                        table.row(btn.closest('tr')).remove().draw(false);
-                        notify({ icon: 'success', title: 'Selesai', text: res.message, timer: 1600, showConfirmButton: false });
-                    } else {
-                        btn.prop('disabled', false);
-                        notify({ icon: 'error', title: 'Gagal', text: res ? res.message : 'Tidak ada respons dari server' });
-                    }
-                },
-                error: function() { btn.prop('disabled', false); notify({ icon: 'error', title: 'Gagal menghubungi server' }); }
-            });
-        };
-        if (window.Swal) {
-            Swal.fire({ title: 'Selesaikan pengiriman?', text: no + ' akan ditandai Delivered.', icon: 'question', showCancelButton: true, confirmButtonText: 'Ya, selesaikan', cancelButtonText: 'Batal' })
-                .then(function(r) { if (r.isConfirmed) { go(); } });
-        } else if (confirm('Selesaikan pengiriman ' + no + '?')) { go(); }
     });
 
     $('#dash-table').on('click', '.act-btn.del', function() {

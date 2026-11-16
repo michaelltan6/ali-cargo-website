@@ -152,10 +152,13 @@ if (!function_exists('isUser') || !isUser()) {
                         <li class="has-submenu">
                             <a href="#"><i class="zmdi zmdi-collection-text"></i> <span> LAPORAN </span></a>
                             <ul class="submenu">
-                                <li><a href="delivered-list.php"><i class="fa fa-truck"></i> Daftar Pengiriman yang telah Sampai Tujuan</a></li>
-                                <li><a href="list-of-shipping-paid.php"><i class="fa fa-money"></i> Daftar Pengiriman yang telah Dibayar</a></li>
-                                <li><a href="list-of-shipping-topaid.php"><i class="fa fa-credit-card"></i> Daftar Pengiriman yang untuk dibayar</a></li>
-                                <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') { ?><li><a href="export-monthly.php"><i class="fa fa-file-excel-o"></i> Export Excel Bulanan</a></li><?php } ?>
+                                <li><a href="laporan-selesai.php"><i class="fa fa-check-circle"></i> Pengiriman selesai</a></li>
+                                <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') { ?>
+                                <li><a href="laporan-piutang.php"><i class="fa fa-credit-card"></i> Piutang dan tempo</a></li>
+                                <li><a href="laporan-lunas.php"><i class="fa fa-money"></i> Sudah dibayar</a></li>
+                                <li><a href="laporan-rekap.php"><i class="fa fa-bar-chart"></i> Rekap bulanan</a></li>
+                                <li><a href="export-monthly.php"><i class="fa fa-file-excel-o"></i> Export Excel bulanan</a></li>
+                                <?php } ?>
                             </ul>
                         </li>
                         <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') { ?>

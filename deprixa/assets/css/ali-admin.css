@@ -104,3 +104,12 @@ a.dash-tile:hover, .dash-tile.on { border-color: #1f9d55; color: #333; text-deco
 .st-go { background: #e3f6ea; color: #17824a; } .st-hold { background: #fff1d6; color: #9a6200; } .st-fin { background: #e9ecef; color: #444; }
 .st-arr { background: #e3efff; color: #1b5fb5; } .st-late { background: #fdecea; color: #b0372b; }
 @media (max-width: 900px) { .dash-tiles { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---- halaman laporan ---- */
+.rp-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; font-size: .9rem; }
+.rp-bar label { margin: 0; font-weight: 600; color: #444; font-size: .85rem; }
+.rp-bar input, .rp-bar select, .rp-date { height: 34px; border: 1px solid #c9ced6; border-radius: 8px; padding: 4px 8px; font-size: .88rem; background: #fff; }
+.rp-date { height: 30px; font-size: .82rem; }
+.rp-two { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.rp-two .ac-card { margin-bottom: 0; padding-bottom: 14px; }
+@media (max-width: 900px) { .rp-two { grid-template-columns: 1fr; } }
