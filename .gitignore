@@ -1,0 +1,8 @@
+deprixa/config.local.php
+*.log
+php_error.log
+*.sqlite
+*.sql
+*.bak
+.env
+.DS_Store
