@@ -15,7 +15,7 @@ if ($cons) {
     $sql = "SELECT c.*, ci.item_name, ci.quantity, ci.length, ci.width, ci.height, ci.weight AS item_weight, ci.volume 
             FROM courier c 
             LEFT JOIN courier_items ci ON c.cid = ci.courier_id 
-            WHERE c.cons_no = :cons";
+            WHERE REPLACE(UPPER(c.cons_no), ' ', '') = REPLACE(UPPER(:cons), ' ', '')";
     $result = dbQuery($sql, [':cons' => $cons]);
     $no = dbNumRows($result);
 

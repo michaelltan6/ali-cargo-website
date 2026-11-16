@@ -7,6 +7,7 @@
 //   spb_return    : tanggal surat jalan (SPB) kembali dari customer
 //   partner       : ekspedisi / mitra yang dipakai (Via / Partner)
 //   charge_unit   : hitungan ukuran, 'kg' atau 'm3'
+//   book_code     : pembukuan, 'ALI' atau 'ANK' (awalan nomor tracking)
 require_once __DIR__ . '/database.php';
 
 function courier_columns_ready() {
@@ -20,7 +21,8 @@ function courier_columns_ready() {
                  'spb_no' => ['INT UNSIGNED NULL', 'INTEGER NULL'],
                  'spb_return' => ['DATE NULL', 'TEXT NULL'],
                  'partner' => ['VARCHAR(100) NULL', 'TEXT NULL'],
-                 'charge_unit' => ['VARCHAR(5) NULL', 'TEXT NULL']];
+                 'charge_unit' => ['VARCHAR(5) NULL', 'TEXT NULL'],
+                 'book_code' => ['VARCHAR(5) NULL', 'TEXT NULL']];
         $sqlite = $dbConn->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
         $have = [];
         if ($sqlite) { foreach ($dbConn->query("PRAGMA table_info(courier)") as $c) { $have[$c['name']] = true; } }
@@ -67,3 +69,7 @@ function courier_region($dest) {
     foreach ($timur as $k) { if ($d !== '' && strpos($d, $k) !== false) { return 'TIMUR'; } }
     return 'JAWA';
 }
+
+// Nomor tracking = awalan pembukuan + nomor SPB, contoh "ALI 7507" atau "ANK 7508".
+function courier_book_code($v) { return strtoupper(trim((string)$v)) === 'ANK' ? 'ANK' : 'ALI'; }
+function courier_tracking_no($book, $spb) { return courier_book_code($book) . ' ' . (int)$spb; }

@@ -104,7 +104,7 @@ requireAdmin();
 							?>
 							<tbody>
 							<?php  					
-								$result3 = dbQuery("SELECT * FROM courier WHERE book_mode = 'Cash-on-Delivery'  ORDER BY cid");
+								$result3 = dbQuery("SELECT * FROM courier WHERE book_mode = 'Cash-on-Delivery'  ORDER BY cid DESC");
 								while($row = dbFetchAssoc($result3)) {					
 							?> 
 							  <tr>							  
@@ -114,7 +114,7 @@ requireAdmin();
 										  <td><font color="#000"><?php echo $row['cons_no']; ?></font></td>
 										  <td><?php echo $row['ship_name']; ?></td>
 										  <td><?php echo $row['rev_name']; ?></td>
-										  <td><?php echo $row['pick_date']; ?></td>
+										  <td><?php echo htmlspecialchars(ali_ship_date($row)); ?></td>
 										   <td><?php echo $row['user']; ?></td>
 										  <td align="center"><span class="label <?php echo $row['book_mode']; ?> label-large"><?php echo $row['book_mode']; ?></span></td>     
 							  </tr>
@@ -126,7 +126,7 @@ requireAdmin();
 							?>
 							<tbody>
 							<?php  					
-								$result3 = dbQuery("SELECT * FROM courier WHERE book_mode = 'Cash-on-Delivery' and officename='".$_SESSION["user_type"]."' ORDER BY cid");
+								$result3 = dbQuery("SELECT * FROM courier WHERE book_mode = 'Cash-on-Delivery' and officename='".$_SESSION["user_type"]."' ORDER BY cid DESC");
 								while($row = dbFetchAssoc($result3)) {					
 							?> 
 							  <tr>							  
@@ -136,7 +136,7 @@ requireAdmin();
 										  <td><font color="#000"><?php echo $row['cons_no']; ?></font></td>
 										  <td><?php echo $row['ship_name']; ?></td>
 										  <td><?php echo $row['rev_name']; ?></td>
-										  <td><?php echo $row['pick_date']; ?></td>
+										  <td><?php echo htmlspecialchars(ali_ship_date($row)); ?></td>
 										   <td><?php echo $row['officename']; ?></td>
 										  <td align="center"><span class="label <?php echo $row['book_mode']; ?> label-large"><?php echo $row['book_mode']; ?></span></td>     
 							  </tr>
@@ -196,7 +196,7 @@ requireAdmin();
 
                 //Buttons examples
                 var table = $('#datatable-buttons').DataTable({
-                    lengthChange: false,
+                    pageLength: 20, lengthChange: true, lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'Semua']],
                     buttons: ['copy', 'excel', 'pdf', 'colvis']
                 });
 

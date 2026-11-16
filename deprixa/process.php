@@ -217,7 +217,7 @@ try {
             if ($elapsed > $totalDuration) $elapsed = $totalDuration;
             $progress_percentage = ($totalDuration > 0) ? min(100, max(0, ($elapsed / $totalDuration) * 100)) : 0;
 
-            if (empty($cons_no) || empty($ship_name) || empty($rev_name)) {
+            if (empty($ship_name) || empty($rev_name)) { // nomor tracking dibuat otomatis dari pembukuan + nomor SPB
                 throw new Exception("Consignment No, Shipper Name, and Receiver Name are required.");
             }
             if (empty($_POST['item_name']) || !is_array($_POST['item_name'])) {
@@ -239,6 +239,8 @@ try {
             if (courier_spb_taken($spb_no, 0)) {
                 throw new Exception("Nomor SPB $spb_no sudah dipakai pengiriman lain.");
             }
+            $book_code = courier_book_code($_POST['book_code'] ?? 'ALI');
+            $cons_no = courier_tracking_no($book_code, $spb_no); // nomor tracking = pembukuan + nomor SPB
             $partner = mb_substr(trim(limpiar($_POST['partner'] ?? '')), 0, 100);
             $charge_unit = (($_POST['charge_unit'] ?? 'kg') === 'm3') ? 'm3' : 'kg';
 
@@ -307,7 +309,7 @@ try {
                     }
                     if (courier_columns_ready()) {
                         $custVal = ($linkId > 0 && cp_get($linkId)) ? $linkId : null;
-                        dbQuery("UPDATE courier SET customer_id = ?, payment_term = ?, spb_no = ?, partner = ?, charge_unit = ? WHERE cid = ?", [$custVal, $payment_term, $spb_no, $partner, $charge_unit, $courier_id]);
+                        dbQuery("UPDATE courier SET customer_id = ?, payment_term = ?, spb_no = ?, partner = ?, charge_unit = ?, book_code = ? WHERE cid = ?", [$custVal, $payment_term, $spb_no, $partner, $charge_unit, $book_code, $courier_id]);
                     }
                 } catch (Exception $e) {
                     error_log("Tautan customer gagal: " . $e->getMessage());
@@ -448,8 +450,25 @@ try {
                 $rt = trim((string)($_POST['spb_return'] ?? ''));
                 $rtd = DateTime::createFromFormat('Y-m-d', $rt);
                 $spb_return = ($rtd && $rtd->format('Y-m-d') === $rt) ? $rt : null;
-                dbQuery("UPDATE courier SET spb_no = ?, spb_return = ?, partner = ?, charge_unit = ? WHERE cid = ?",
-                    [$spb_no > 0 ? $spb_no : null, $spb_return, mb_substr(trim(limpiar($_POST['partner'] ?? '')), 0, 100), (($_POST['charge_unit'] ?? 'kg') === 'm3') ? 'm3' : 'kg', $cid]);
+                $book_code = courier_book_code($_POST['book_code'] ?? 'ALI');
+                dbQuery("UPDATE courier SET spb_no = ?, spb_return = ?, partner = ?, charge_unit = ?, book_code = ? WHERE cid = ?",
+                    [$spb_no > 0 ? $spb_no : null, $spb_return, mb_substr(trim(limpiar($_POST['partner'] ?? '')), 0, 100), (($_POST['charge_unit'] ?? 'kg') === 'm3') ? 'm3' : 'kg', $book_code, $cid]);
+                // Metode pembayaran dari halaman edit: cash -> Paid, tempo -> ToPay. 'keep' = biarkan seperti sekarang.
+                $pt = (string)($_POST['payment_term'] ?? 'keep');
+                if (in_array($pt, ['cash', '7', '14', '30'], true)) {
+                    dbQuery("UPDATE courier SET payment_term = ?, book_mode = ? WHERE cid = ?", [$pt, $pt === 'cash' ? 'Paid' : 'ToPay', $cid]);
+                }
+                // Nomor tracking ikut nomor SPB + pembukuan
+                if ($spb_no > 0) {
+                    $newCons = courier_tracking_no($book_code, $spb_no);
+                    $old = dbFetchAssoc(dbQuery("SELECT cons_no FROM courier WHERE cid = ?", [$cid]));
+                    if ($old && $old['cons_no'] !== $newCons) {
+                        $dupe = dbFetchAssoc(dbQuery("SELECT COUNT(*) AS c FROM courier WHERE cons_no = ? AND cid <> ?", [$newCons, $cid]));
+                        if ((int)$dupe['c'] > 0) { throw new Exception("Nomor tracking $newCons sudah dipakai pengiriman lain."); }
+                        dbQuery("UPDATE courier SET cons_no = ? WHERE cid = ?", [$newCons, $cid]);
+                        try { dbQuery("UPDATE courier_track SET cons_no = ? WHERE cid = ?", [$newCons, $cid]); } catch (Exception $e) { error_log('courier_track cons_no: ' . $e->getMessage()); }
+                    }
+                }
             }
 
             // Update courier items

@@ -43,7 +43,8 @@ if (!function_exists('isUser') || !isUser()) {
         ga('create', 'UA-79190402-1', 'auto');
         ga('send', 'pageview');
     </script>
-    <style>
+    <link rel="stylesheet" href="assets/css/ali-admin.css?v=<?php echo @filemtime(__DIR__ . '/assets/css/ali-admin.css'); ?>">
+<style>
         /* Menu bertambah (CUSTOMER), rapatkan jarak antar menu supaya tidak turun ke baris kedua */
         @media (min-width: 992px) {
             #topnav .navigation-menu > li > a { padding-left: 13px !important; padding-right: 13px !important; }

@@ -10,13 +10,14 @@ require_once('courier-lib.php');
 require_once('xlsx-lib.php');
 courier_columns_ready();
 
+$book = courier_book_code($_GET['book'] ?? 'ALI');
 $month = (string)($_GET['month'] ?? date('Y-m'));
 if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)) { $month = date('Y-m'); }
 
 if (isset($_GET['download'])) {
     $from = $month . '-01';
     $to = date('Y-m-d', strtotime($from . ' +1 month'));
-    $q = dbQuery("SELECT * FROM courier WHERE collection_date >= ? AND collection_date < ? ORDER BY (spb_no IS NULL), spb_no, collection_date, cid", [$from, $to]);
+    $q = dbQuery("SELECT * FROM courier WHERE collection_date >= ? AND collection_date < ? AND COALESCE(book_code, 'ALI') = ? ORDER BY (spb_no IS NULL), spb_no, collection_date, cid", [$from, $to, $book]);
     $groups = ['JAWA' => [], 'TIMUR' => [], 'SUMATERA' => []];
     while ($c = dbFetchAssoc($q)) {
         $items = []; $koli = 0; $kg = 0.0; $m3 = 0.0;
@@ -88,7 +89,7 @@ if (isset($_GET['download'])) {
     $tmp = tempnam(sys_get_temp_dir(), 'lp');
     if (!$x->save($tmp)) { http_response_code(500); echo 'Gagal membuat file Excel.'; exit; }
     $bulan = ['01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April', '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus', '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'];
-    $fn = 'Laporan Penjualan (PPh) ' . $bulan[substr($month, 5, 2)] . ' ' . substr($month, 0, 4) . ' - PT ALI.xlsx';
+    $fn = 'Laporan Penjualan (PPh) ' . $bulan[substr($month, 5, 2)] . ' ' . substr($month, 0, 4) . ' - ' . ($book === 'ANK' ? 'ANK' : 'PT ALI') . '.xlsx';
     while (ob_get_level()) { ob_end_clean(); }
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="' . $fn . '"');
@@ -121,7 +122,9 @@ if (isset($_GET['download'])) {
                 <p>Hasilnya satu file Excel untuk satu bulan, dengan sheet JAWA, TIMUR, dan SUMATERA seperti format yang dipakai admin. Kolom COGS, harga jual, dan pembayaran dibiarkan kosong untuk diisi finance.</p>
                 <form method="get" action="export-monthly.php" class="form-inline">
                     <input type="hidden" name="download" value="1">
-                    <label for="month">Bulan&nbsp;</label>
+                    <label for="book">Pembukuan&nbsp;</label>
+                    <select class="form-control" name="book" id="book"><option value="ALI"<?php echo $book === 'ALI' ? ' selected' : ''; ?>>ALI</option><option value="ANK"<?php echo $book === 'ANK' ? ' selected' : ''; ?>>ANK</option></select>
+                    &nbsp;<label for="month">Bulan&nbsp;</label>
                     <input type="month" class="form-control" name="month" id="month" value="<?php echo htmlspecialchars($month); ?>" required>
                     &nbsp;<button type="submit" class="btn btn-success"><i class="fa fa-download"></i> Download Excel</button>
                 </form>

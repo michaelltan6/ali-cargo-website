@@ -78,7 +78,7 @@ requireAdmin();
 								<tbody>
 								
 									<?php  					
-										$result3 = dbQuery("SELECT * FROM upload_image_bank  ORDER BY cid");
+										$result3 = dbQuery("SELECT * FROM upload_image_bank  ORDER BY cid DESC");
 										while($row = dbFetchAssoc($result3)) {					
 									?> 
 								  <tr>											  					  
@@ -144,7 +144,7 @@ requireAdmin();
 
                 //Buttons examples
                 var table = $('#datatable-buttons').DataTable({
-                    lengthChange: false,
+                    pageLength: 20, lengthChange: true, lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'Semua']],
                     buttons: ['copy', 'excel', 'pdf', 'colvis']
                 });
 

@@ -162,7 +162,7 @@ require_once('library.php');
 
                 //Buttons examples
                 var table = $('#datatable-buttons').DataTable({
-                    lengthChange: false,
+                    pageLength: 20, lengthChange: true, lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'Semua']],
                     buttons: ['copy', 'excel', 'pdf', 'colvis']
                 });
 

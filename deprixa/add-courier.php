@@ -109,64 +109,6 @@ ob_end_clean();
 </head>
 <body>
 <?php include("header.php"); ?>
-<style>
-    .ac-page { max-width: 1060px; margin: 0 auto; padding-bottom: 30px; }
-    .ac-title { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin: 8px 0 14px; }
-    .ac-title h3 { margin: 0; font-size: 1.5rem; font-weight: 600; }
-    .ac-title span { color: #6b7280; font-size: .9rem; }
-    .ac-card { background: #fff; border: 1px solid #e3e6ea; border-radius: 12px; padding: 18px 20px 8px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
-    .ac-card > h4 { margin: 0 0 14px; font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-    .ac-card > h4 i { color: #1f9d55; }
-    .ac-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0 16px; }
-    .ac-f { margin-bottom: 14px; min-width: 0; }
-    .ac-3 { grid-column: span 3; } .ac-4 { grid-column: span 4; } .ac-5 { grid-column: span 5; } .ac-6 { grid-column: span 6; } .ac-8 { grid-column: span 8; } .ac-12 { grid-column: span 12; }
-    .ac-f label { display: block; font-size: .8rem; font-weight: 600; color: #444; margin-bottom: 4px; letter-spacing: .01em; }
-    .ac-f label em { color: #c0392b; font-style: normal; }
-    .ac-f .hint { display: block; margin-top: 3px; font-size: .78rem; color: #8a8f98; }
-    .ac-f input[type=text], .ac-f input[type=url], .ac-f input[type=date], .ac-f input[type=number], .ac-f input[type=email], .ac-f select, .ac-f textarea {
-        width: 100%; box-sizing: border-box; height: 40px; padding: 8px 11px; border: 1px solid #c9ced6; border-radius: 8px; font-size: .95rem; font-family: inherit; background: #fff; color: #222; }
-    .ac-f textarea { height: auto; min-height: 76px; resize: vertical; }
-    .ac-f input:focus, .ac-f select:focus, .ac-f textarea:focus, .ac-search:focus { outline: 2px solid #1f9d55; outline-offset: 1px; border-color: #1f9d55; }
-    .ac-f input[readonly] { background: #f3f4f6; color: #555; }
-    .ac-seg { display: inline-flex; background: #eef0f3; border-radius: 10px; padding: 3px; margin-bottom: 14px; }
-    .ac-seg button { border: 0; background: transparent; padding: 8px 16px; border-radius: 8px; font-size: .9rem; cursor: pointer; color: #555; }
-    .ac-seg button.on { background: #fff; color: #17824a; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
-    .ac-pick { position: relative; margin-bottom: 14px; }
-    .ac-search { width: 100%; box-sizing: border-box; height: 44px; padding: 8px 14px 8px 38px; border: 1px solid #c9ced6; border-radius: 10px; font-size: 1rem; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%23888' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") no-repeat 12px center; }
-    .ac-results { position: absolute; left: 0; right: 0; top: 48px; z-index: 50; background: #fff; border: 1px solid #d5d9df; border-radius: 10px; box-shadow: 0 10px 28px rgba(0,0,0,.14); max-height: 300px; overflow-y: auto; display: none; }
-    .ac-results.open { display: block; }
-    .ac-res { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f0f1f3; }
-    .ac-res:last-child { border-bottom: 0; }
-    .ac-res.on, .ac-res:hover { background: #eaf7ef; }
-    .ac-res b { display: block; font-weight: 600; }
-    .ac-res small { color: #6b7280; }
-    .ac-res .cd { float: right; font-size: .72rem; background: #eaf3ff; color: #1b5fb5; padding: 1px 8px; border-radius: 999px; font-weight: 600; }
-    .ac-none { padding: 12px 14px; color: #6b7280; font-size: .92rem; }
-    .ac-chip { display: none; align-items: center; justify-content: space-between; gap: 10px; background: #eaf7ef; border: 1px solid #b9e2c8; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; }
-    .ac-chip.on { display: flex; }
-    .ac-chip b { font-weight: 600; } .ac-chip small { color: #4b6b59; display: block; }
-    .ac-chip button { border: 0; background: #fff; border: 1px solid #b9e2c8; color: #17824a; border-radius: 8px; padding: 5px 12px; cursor: pointer; font-size: .85rem; }
-    .ac-check { display: flex; align-items: center; gap: 8px; font-size: .9rem; color: #444; margin: 2px 0 14px; }
-    .ac-check input { width: 17px; height: 17px; }
-    .ac-items { overflow-x: auto; margin-bottom: 10px; }
-    .ac-items table { width: 100%; border-collapse: collapse; min-width: 760px; }
-    .ac-items th { text-align: left; font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; color: #6b7280; padding: 6px 6px 8px; }
-    .ac-items td { padding: 4px 6px 4px 0; }
-    .ac-items td input { width: 100%; box-sizing: border-box; height: 38px; padding: 6px 9px; border: 1px solid #c9ced6; border-radius: 8px; font-size: .92rem; }
-    .ac-items td input:focus { outline: 2px solid #1f9d55; outline-offset: 1px; border-color: #1f9d55; }
-    .ac-items .remove-row { height: 38px; width: 38px; border: 1px solid #e6b5af; background: #fff; color: #c0392b; border-radius: 8px; cursor: pointer; font-size: 1.1rem; line-height: 1; }
-    .ac-items .remove-row:hover { background: #fdecea; }
-    .ac-btn { border: 0; border-radius: 9px; padding: 10px 18px; font-size: .95rem; cursor: pointer; background: #1f9d55; color: #fff; }
-    .ac-btn:hover { background: #17824a; }
-    .ac-btn.sec { background: #eef0f3; color: #333; }
-    .ac-btn.sec:hover { background: #e0e4e9; }
-    .ac-totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0 6px; }
-    .ac-save { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between; }
-    .ac-save .ac-f { flex: 1 1 320px; margin-bottom: 14px; }
-    .ac-save .ac-btn { padding: 12px 28px; font-size: 1rem; margin-bottom: 14px; }
-    .ac-who { color: #6b7280; font-size: .85rem; }
-    @media (max-width: 820px) { .ac-3, .ac-4, .ac-5, .ac-6, .ac-8 { grid-column: span 12; } .ac-totals { grid-template-columns: 1fr; } }
-</style>
 <div class="wrapper" id="main">
     <div class="container">
         <?php include("icon_settings.php"); ?>
@@ -266,6 +208,14 @@ ob_end_clean();
                         <span class="hint" id="term-hint" style="display:none">Hitungan tempo belum jalan. Aktifkan sendiri nanti di Daftar Pengiriman yang untuk dibayar.</span>
                     </div>
                     <div class="ac-f ac-4">
+                        <label for="book_code">Pembukuan</label>
+                        <select name="book_code" id="book_code">
+                            <option value="ALI" selected="selected">ALI</option>
+                            <option value="ANK">ANK</option>
+                        </select>
+                        <span class="hint">Menentukan awalan nomor tracking.</span>
+                    </div>
+                    <div class="ac-f ac-4">
                         <label for="spb_no">Nomor SPB (surat jalan)</label>
                         <input type="number" name="spb_no" id="spb_no" min="1" value="<?php echo (int)courier_next_spb(); ?>">
                         <span class="hint">Otomatis lanjut urut. Samakan dengan nomor cetak di surat jalan.</span>
@@ -355,7 +305,8 @@ ob_end_clean();
                 <div class="ac-save">
                     <div class="ac-f">
                         <label for="cons_no">Nomor tracking</label>
-                        <input type="text" name="cons_no" id="cons_no" value="ALI<?php echo rand(1, 1000000000000); ?>">
+                        <input type="text" name="cons_no" id="cons_no" readonly value="ALI <?php echo (int)courier_next_spb(); ?>">
+                        <span class="hint">Otomatis: pembukuan + nomor SPB.</span>
                     </div>
                     <input class="ac-btn" name="Submit" type="submit" id="submit" value="Simpan pengiriman">
                 </div>
@@ -614,6 +565,9 @@ ob_end_clean();
 </script>
 <script>
 (function(){var t=document.getElementById('payment_term'),h=document.getElementById('term-hint');function u(){h.style.display=t.value==='cash'?'none':'block';}t.addEventListener('change',u);u();})();
+</script>
+<script>
+(function(){var b=document.getElementById('book_code'),n=document.getElementById('spb_no'),c=document.getElementById('cons_no');function u(){c.value=b.value+' '+(n.value||'');}b.addEventListener('change',u);n.addEventListener('input',u);u();})();
 </script>
 </body>
 </html>

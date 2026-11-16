@@ -213,7 +213,7 @@ try {
                                 $sql .= " AND officename = :officename";
                                 $params = ['officename' => $_SESSION['user_name']];
                             }
-                            $sql .= " ORDER BY cid";
+                            $sql .= " ORDER BY collection_date DESC, cid DESC";
                             error_log("ToPay query: $sql, params: " . print_r($params, true));
                             $stmt = dbQuery($sql, $params);
                             $rowCount = dbNumRows($stmt);
@@ -233,7 +233,7 @@ try {
                                 <td><font color="#000"><?php echo htmlspecialchars($row['cons_no']); ?></font></td>
                                 <td><?php echo htmlspecialchars($row['ship_name']); ?></td>
                                 <td><?php echo htmlspecialchars($row['rev_name']); ?></td>
-                                <td><?php echo htmlspecialchars($row['pick_date']); ?></td>
+                                <td><?php echo htmlspecialchars(ali_ship_date($row)); ?></td>
                                 <td><?php echo htmlspecialchars($row['user']); ?></td>
                                 <td align="center">
                                     <?php if ($_SESSION['user_type'] == 'Administrator') { ?>
@@ -368,7 +368,7 @@ try {
             // Initialize DataTables
             var table = $('#datatable-buttons').DataTable({
                 responsive: true,
-                lengthChange: false,
+                pageLength: 20, lengthChange: true, lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'Semua']], order: [[4, 'desc']],
                 buttons: ['copy', 'excel', 'pdf', 'print', 'colvis'],
                 columnDefs: [
                     {

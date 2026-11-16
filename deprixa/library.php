@@ -81,4 +81,12 @@ function sameOriginOk() {
     }
     return false;
 }
-?>
+
+// Tanggal pengiriman (tanggal barang kami terima) untuk daftar. Pakai collection_date, kalau kosong pakai pick_date.
+function ali_ship_date($row) {
+    foreach (['collection_date', 'pick_date'] as $k) {
+        $v = trim((string)($row[$k] ?? ''));
+        if ($v !== '' && strpos($v, '0000') !== 0) { return substr($v, 0, 10); }
+    }
+    return '';
+}

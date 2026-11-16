@@ -146,367 +146,291 @@ if ($count > 0) {
 <?php include("header.php"); ?>
 <div class="wrapper">
     <div class="container">
-        <?php include("icon_settings.php"); ?> 
-        <div class="row">
-            <div class="col-xs-12 col-lg-12 col-xl-7">
-                <div class="card-box">
-                    <div class="text-xs-center">
-                        <tbody>
-                            <h3 class="classic-title"><span><strong><i class="fa fa-truck icon text-default-lter"></i> UPDATE Pengiriman</strong></h3>                                                                                    
-                            <form action="process.php?action=update-addcourier" name="formulario" id="formulario" method="post"> 
-                                <table border="0" align="center" width="100%">
-                                    <div class="row">
-                                        <fieldset class="col-md-6">
-                                            <legend><strong>Data pengirim:</strong></legend>    
-                                            <div class="row">
-                                                <div class="col-sm-3 form-group">
-                                                    <label class="control-label" for="officename"><i class="fa fa-user icon text-default-lter"></i> Staff Role<span class="required-field">*</span></label>
-                                                    <input type="text" name="officename" id="officename" value="<?php echo htmlspecialchars($_SESSION['user_type'] ?? ''); ?>" class="form-control" readonly="true">
-                                                </div>
-                                                <div class="col-sm-3 form-group">
-                                                    <label class="control-label" for="user"><i class="fa fa-user icon text-default-lter"></i> Staff User<span class="required-field">*</span></label>
-                                                    <input type="text" name="user" id="user" value="<?php echo htmlspecialchars($_SESSION['user_name'] ?? ''); ?>" class="form-control" readonly="true">
-                                                </div>
-                                                <div class="col-sm-6 form-group">
-                                                    <label class="control-label" for="ship_name">NAMA PENGIRIM<span class="required-field">*</span></label>                                
-                                                    <input type="text" name="ship_name" id="ship_name" class="form-control" autocomplete="off" required value="<?php echo htmlspecialchars($ship_name ?? ''); ?>">                                                                      
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-5 form-group">
-                                                    <label class="control-label" for="shipper_address">ALAMAT<span class="required-field">*</span></label>
-                                                    <input type="text" name="shipper_address" id="shipper_address" class="form-control" required value="<?php echo htmlspecialchars($shipper_address ?? ''); ?>">
-                                                </div>
-                                                <div class="col-sm-3 form-group">
-                                                    <label class="control-label" for="shipper_phone"><i class="fa fa-phone icon text-default-lter"></i> PHONE</label>
-                                                    <input type="text" class="form-control" name="shipper_phone" id="shipper_phone" required value="<?php echo htmlspecialchars($shipper_phone ?? ''); ?>">
-                                                </div>
-                                                <div class="col-sm-4 form-group">
-                                                    <label class="control-label" for="shipper_cc">ID</label>
-                                                    <input type="text" name="shipper_cc" id="shipper_cc" class="form-control" value="<?php echo htmlspecialchars($shipper_cc ?? ''); ?>" required>
-                                                </div>                                    
-                                            </div>    
-                                            <legend><strong>Informasi Pengiriman:</strong></legend>
-                                            <div class="row">
-                                                <div class="col-sm-3 form-group">
-                                                    <label class="control-label" for="book_mode"><i class="fa fa-database icon text-default-lter"></i> <strong>Pembayaran</strong></label>
-                                                    <select name="book_mode" class="form-control" id="book_mode">
-                                                        <option value="ToPay" <?php echo ($book_mode == 'ToPay') ? 'selected' : ''; ?>>Untuk Dibayar</option>
-                                                        <option value="Paid" <?php echo ($book_mode == 'Paid') ? 'selected' : ''; ?>>Dibayar</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-sm-5 form-group">
-                                                    <label class="control-label" for="ship_type">Product/Type</label>
-                                                    <input name="ship_type" id="ship_type" class="form-control" value="<?php echo htmlspecialchars($ship_type ?? ''); ?>">
-                                                </div>
-                                                <div class="col-sm-4 form-group">
-                                                    <label class="control-label" for="mode"><i class="fa fa-plane icon text-default-lter"></i> Service</label>
-                                                    <select name="mode" class="form-control" id="mode" required>
-                                                        <option value="0">Pilih</option>
-                                                        <?php foreach ($modes as $mode_option): ?>
-                                                            <option value="<?php echo htmlspecialchars($mode_option); ?>" <?php echo (isset($mode) && $mode == $mode_option) ? 'selected' : ''; ?>><?php echo htmlspecialchars($mode_option); ?></option>
-                                                        <?php endforeach; ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-3 form-group">
-                                                    <label class="control-label" for="total_declarate"><?php echo htmlspecialchars($company['currency'] ?? 'IDR'); ?> Insurance</label>
-                                                    <input name="total_declarate" id="total_declarate" class="form-control" value="<?php echo htmlspecialchars($total_declarate ?? ''); ?>"/>
-                                                </div>
-                                                <div class="col-sm-4 form-group">
-                                                    <label class="control-label" for="office"><i class="fa fa-angle-double-right icon text-default-lter"></i> ORIGIN</label>
-                                                    <input name="office" id="office" class="form-control" value="<?php echo htmlspecialchars($office ?? ''); ?>">
-                                                </div>
-                                                <div class="col-sm-5 form-group">
-                                                    <label class="control-label" for="pickup_time"><i class="fa fa-angle-double-right icon text-default-lter"></i> DESTINATION</label>
-                                                    <input name="pickup_time" id="pickup_time" class="form-control" value="<?php echo htmlspecialchars($pickup_time ?? ''); ?>">
-                                                </div>        
-                                            </div>    
-                                            <div class="row">
-                                                <div class="col-sm-11 form-group">
-                                                    <label class="control-label" for="pick_date"><i class="fa fa-calendar icon text-default-lter"></i> COLLECTION DATE AND TIME</label>
-                                                    <div class="input-group">
-                                                        <input type="date" class="form-control date-input" name="pick_date" id="pick_date" value="<?php echo htmlspecialchars(date('Y-m-d', strtotime($collection_date ?? 'now'))); ?>" required>
-                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                                    </div>
-                                                </div>                                                        
-                                            </div>                                                        
-                                            <div class="row">
-                                                <div class="col-sm-4 form-group">
-                                                    <label class="control-label" for="status"><i class="fa fa-sort-amount-asc icon text-default-lter"></i> STATUS</label>
-                                                    <input class="form-control" name="status" id="status" value="<?php echo htmlspecialchars($status ?? ''); ?>" readonly="true">
-                                                </div>                                
-                                                <div class="col-sm-7 form-group">
-                                                    <label class="control-label" for="schedule"><i class="fa fa-calendar icon text-default-lter"></i> Schedule Delivery (ETD)</label>
-                                                    <div class="input-group">
-                                                        <input type="date" class="form-control date-input" name="schedule" id="schedule" value="<?php echo htmlspecialchars(date('Y-m-d', strtotime($etd ?? 'now'))); ?>" required>
-                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                                    </div>        
-                                                </div>                    
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-12 form-group">
-                                                    <label class="control-label" for="tracking_link"><i class="fa fa-link icon text-default-lter"></i> Tracking Link</label>
-                                                    <input type="text" class="form-control" name="tracking_link" id="tracking_link" value="<?php echo htmlspecialchars($tracking_link ?? ''); ?>">
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-12 form-group">
-                                                    <label class="control-label"><i class="fa fa-bar-chart icon text-default-lter"></i> Progress Tracker</label>
-                                                    <div class="progress-container">
-                                                        <div class="progress">
-                                                            <div id="progress-bar" class="progress-bar" role="progressbar" style="width: <?php echo htmlspecialchars($progress_percentage ?? 0); ?>%;" aria-valuenow="<?php echo htmlspecialchars($progress_percentage ?? 0); ?>" aria-valuemin="0" aria-valuemax="100">
-                                                                <span class="progress-text"><?php echo htmlspecialchars($progress_percentage ?? 0); ?>%</span>
-                                                            </div>
-                                                            <img id="cartoon-box" src="assets/images/cartoon-box.png" alt="Cartoon Box" class="cartoon-box">
-                                                        </div>
-                                                    </div>
-                                                    <input type="hidden" name="progress_percentage" id="progress_percentage" value="<?php echo htmlspecialchars($progress_percentage ?? 0); ?>">
-                                                    <div class="row">
-                                                        <div class="col-sm-6 form-group">
-                                                            <label class="control-label" for="eta"><i class="fa fa-clock-o icon text-default-lter"></i> ETA (Estimated Time of Arrival)</label>
-                                                            <div class="input-group">
-                                                                <input type="date" class="form-control date-input" name="eta" id="eta" value="<?php echo htmlspecialchars(date('Y-m-d', strtotime($eta ?? '')) ?: date('Y-m-d', strtotime('now + 1 day'))); ?>" required>
-                                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <small>Progress updates from Schedule Delivery (ETD) to ETA. Set to 100% when status is Delivered.</small>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-12 form-group">
-                                                    <label class="control-label" for="comments"><i class="fa fa-comments icon text-default-lter"></i> Shipping Detail</label>
-                                                    <textarea class="form-control" name="comments" id="comments"><?php echo htmlspecialchars($comments ?? ''); ?></textarea>
-                                                </div>
-                                                <div class="col-sm-12 form-group">
-                                                    <h4><strong>Rincian Barang</strong></h4>
-                                                    <table class="table table-bordered" id="items-table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Nama Barang</th>
-                                                                <th>Qty</th>
-                                                                <th>Panjang (cm)</th>
-                                                                <th>Lebar (cm)</th>
-                                                                <th>Tinggi (cm)</th>
-                                                                <th>Berat (Kg)</th>
-                                                                <th>Volume (m³)</th>
-                                                                <th></th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody id="item-rows">
-                                                            <?php foreach ($items as $item): ?>
-                                                            <tr>
-                                                                <td><input type="text" name="item_name[]" class="form-control" required value="<?php echo htmlspecialchars($item['item_name'] ?? ''); ?>"></td>
-                                                                <td><input type="number" name="item_quantity[]" class="form-control qty" value="<?php echo htmlspecialchars($item['quantity'] ?? ''); ?>" min="1" required></td>
-                                                                <td><input type="number" name="item_length[]" class="form-control length" value="<?php echo htmlspecialchars($item['length'] ?? ''); ?>" min="0" step="0.0001"></td>
-                                                                <td><input type="number" name="item_width[]" class="form-control width" value="<?php echo htmlspecialchars($item['width'] ?? ''); ?>" min="0" step="0.0001"></td>
-                                                                <td><input type="number" name="item_height[]" class="form-control height" value="<?php echo htmlspecialchars($item['height'] ?? ''); ?>" min="0" step="0.0001"></td>
-                                                                <td><input type="number" name="item_weight[]" class="form-control weight" step="0.0001" value="<?php echo htmlspecialchars($item['weight'] ?? ''); ?>" min="0"></td>
-                                                                <td><input type="number" step="0.0001" name="item_volume[]" class="form-control volume" placeholder="manual/otomatis" min="0" value="<?php echo htmlspecialchars($item['volume'] ?? ''); ?>" data-manual="<?php echo htmlspecialchars($item['volume'] ?? ''); ?>"></td>
-                                                                <td><button type="button" class="btn btn-danger remove-row">×</button></td>
-                                                            </tr>
-                                                            <?php endforeach; ?>
-                                                            <?php if (empty($items)): ?>
-                                                            <tr>
-                                                                <td><input type="text" name="item_name[]" class="form-control" required value=""></td>
-                                                                <td><input type="number" name="item_quantity[]" class="form-control qty" value="1" min="1" required></td>
-                                                                <td><input type="number" name="item_length[]" class="form-control length" value="0" min="0" step="0.0001"></td>
-                                                                <td><input type="number" name="item_width[]" class="form-control width" value="0" min="0" step="0.0001"></td>
-                                                                <td><input type="number" name="item_height[]" class="form-control height" value="0" min="0" step="0.0001"></td>
-                                                                <td><input type="number" name="item_weight[]" class="form-control weight" step="0.0001" value="0" min="0"></td>
-                                                                <td><input type="number" step="0.0001" name="item_volume[]" class="form-control volume" placeholder="manual/otomatis" min="0" value="0"></td>
-                                                                <td><button type="button" class="btn btn-danger remove-row">×</button></td>
-                                                            </tr>
-                                                            <?php endif; ?>
-                                                        </tbody>
-                                                    </table>
-                                                    <button type="button" class="btn btn-primary" id="add-row">+ Tambah Barang</button>
-                                                    <div class="row mt-3">
-                                                        <div class="col-sm-4 form-group">
-                                                            <label><strong>Total Jumlah</strong></label>
-                                                            <input type="text" name="qty" id="total-quantity" class="form-control" readonly value="<?php echo $total_quantity; ?>">
-                                                        </div>
-                                                        <div class="col-sm-4 form-group">
-                                                            <label><strong>Total Berat (Kg)</strong></label>
-                                                            <input type="text" name="weight" id="total-weight" class="form-control" readonly value="<?php echo $total_weight; ?>">
-                                                        </div>
-                                                        <div class="col-sm-4 form-group">
-                                                            <label><strong>Total Volume (m³)</strong></label>
-                                                            <input type="text" name="total_volume" id="total-volume" class="form-control" readonly value="<?php echo $total_volume; ?>">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-12 form-group">
-                                                <br>
-                                                <br>
-                                                <input class="btn btn-success" name="Submit" type="submit" id="submit" value="UPDATE TRACKING">
-                                                <input name="cid" id="cid" value="<?php echo $cid; ?>" type="hidden">
-                                            </div>
-                                        </fieldset>
-                                        <fieldset class="col-md-6">
-                                            <legend><strong>Data Recipient:</strong></legend>
-                                            <div class="row">
-                                                <div class="col-sm-11 form-group">
-                                                    <label class="control-label" for="rev_name">RECIPIENT NAME<span class="required-field">*</span></label>
-                                                    <input type="text" class="form-control" name="rev_name" id="rev_name" value="<?php echo htmlspecialchars($rev_name ?? ''); ?>">
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-5 form-group">
-                                                    <label class="control-label" for="receiver_address">ADDRESS <span class="required-field">*</span></label>
-                                                    <input type="text" name="receiver_address" id="receiver_address" class="form-control" required value="<?php echo htmlspecialchars($receiver_address ?? ''); ?>">
-                                                </div>
-                                                <div class="col-sm-3 form-group">
-                                                    <label class="control-label" for="receiver_phone"><i class="fa fa-phone icon text-default-lter"></i> PHONE</label>
-                                                    <input type="text" class="form-control" name="receiver_phone" id="receiver_phone" required value="<?php echo htmlspecialchars($receiver_phone ?? ''); ?>">
-                                                </div>
-                                                <div class="col-sm-3 form-group">
-                                                    <label class="control-label" for="receiver_cc">ID</label>
-                                                    <input type="text" name="receiver_cc" id="receiver_cc" class="form-control" value="<?php echo htmlspecialchars($receiver_cc ?? ''); ?>" required>
-                                                </div>
-                                                <div class="col-sm-11 form-group">
-                                                    <label class="control-label" for="receiver_email">EMAIL <font color="#FF6100">Note: (The email must be real to be notified shipping)</font></label>
-                                                    <input type="text" name="receiver_email" id="receiver_email" class="form-control" value="<?php echo htmlspecialchars($receiver_email ?? ''); ?>" required>
-                                                </div>
-                                            </div>                            
-                                            <br>
-                                            <br>
-                                            <div class="row">
-                                                <div class="col-sm-4 form-group">
-                                                    <label class="control-label" for="spb_no"><strong>NOMOR SPB</strong></label>
-                                                    <input type="number" min="1" class="form-control" name="spb_no" id="spb_no" value="<?php echo htmlspecialchars((string)($spb_no ?? '')); ?>">
-                                                </div>
-                                                <div class="col-sm-4 form-group">
-                                                    <label class="control-label" for="spb_return"><strong>SPB KEMBALI (TANGGAL)</strong></label>
-                                                    <input type="date" class="form-control" name="spb_return" id="spb_return" value="<?php echo htmlspecialchars((string)($spb_return ?? '')); ?>">
-                                                </div>
-                                                <div class="col-sm-3 form-group">
-                                                    <label class="control-label" for="charge_unit"><strong>DIHITUNG PER</strong></label>
-                                                    <select class="form-control" name="charge_unit" id="charge_unit">
-                                                        <option value="kg" <?php echo (($charge_unit ?? 'kg') !== 'm3') ? 'selected' : ''; ?>>Kg (berat)</option>
-                                                        <option value="m3" <?php echo (($charge_unit ?? '') === 'm3') ? 'selected' : ''; ?>>M3 (volume)</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-11 form-group">
-                                                    <label class="control-label" for="partner"><strong>VIA / PARTNER</strong></label>
-                                                    <input type="text" class="form-control" name="partner" id="partner" value="<?php echo htmlspecialchars((string)($partner ?? '')); ?>" placeholder="Ekspedisi / mitra">
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-sm-11 form-group">
-                                                    <label class="control-label" for="cons_no"><strong>TRACKING NUMBER</strong></label>
-                                                    <input type="text" class="form-control" name="cons_no" id="cons_no" value="<?php echo htmlspecialchars($cons_no ?? ''); ?>" placeholder="Masukkan Nomor Tracking" required />
-                                                </div>
-                                            </div>
-                                        </fieldset>
-                                    </div>
-                                </table>
-                            </form>
-                        </tbody>                            
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-12 col-lg-12 col-xl-5">
-                <div class="card-box">
-                    <h4 class="header-title m-t-0 m-b-30">PERBARUI STATUS</h4>
-                    <table class="table table-bordered m-b-0">
-                        <form action="process.php?action=update-status" method="post" name="frmShipment" id="frmShipment">
-                            <div class="row">
-                                <div class="col-md-4 form-group">
-                                    <label for="pick_time" class="control-label">LOKASI BARU:</label>
-                                    <span id="inter_origin" style="display: block;">     
-                                        <textarea id="pick_time" required name="pick_time" class="form-control"><?php echo htmlspecialchars($pickup_time ?? ''); ?></textarea>
-                                    </span>
-                                </div>    
-                                <div class="col-md-4 form-group">
-                                    <label for="status" class="control-label">NEW STATE:</label>
-                                    <select name="status" class="form-control" id="status">
-                                        <option value="Finished" <?php echo ($status == 'Finished') ? 'selected' : ''; ?>>Finished</option>
-                                        <option value="In-Transit" <?php echo ($status == 'In-Transit') ? 'selected' : ''; ?>>On Delivery</option>
-                                        <option value="On-Hold" <?php echo ($status == 'On-Hold') ? 'selected' : ''; ?>>On Hold</option>
-                                        <option value="Landed" <?php echo ($status == 'Landed') ? 'selected' : ''; ?>>Arrived</option>
-                                        <option value="Delayed" <?php echo ($status == 'Delayed') ? 'selected' : ''; ?>>Delayed</option>
-                                    </select>
-                                </div>    
-                                <div class="col-md-4 form-group">
-                                    <label for="bk_time" class="control-label"><i class="fa fa-calendar icon text-default-lter"></i> DATE AND TIME</label>
-                                    <div class="input-group">
-                                        <input type="datetime-local" class="form-control datetime-input" name="bk_time" id="bk_time" required value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($bk_time ?? 'now'))); ?>">
-                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 form-group">
-                                    <label for="comments" class="control-label">COMMENTS:</label>
-                                    <textarea class="form-control" name="comments" id="comments"><?php echo htmlspecialchars($comments ?? ''); ?></textarea>
-                                </div>                            
-                                <div class="col-md-3 form-group">
-                                    <p><font color="#FF6100"><strong>Update if necessary</strong></font></p>
-                                    <input name="submit" type="submit" class="btn btn-success" value="UPDATE STATUS">
-                                    <input name="user" id="user" value="<?php echo htmlspecialchars($_SESSION['user_name'] ?? ''); ?>" type="hidden">
-                                    <input name="cid" id="cid" value="<?php echo $cid; ?>" type="hidden">
-                                    <input name="cons_no" id="cons_no" value="<?php echo htmlspecialchars($cons_no ?? ''); ?>" type="hidden">                            
-                                </div>                        
-                            </div>
-                        </form>                                                
-                        <div class="table-responsive">
-                            <br><br><br>
-                            <h4 class="header-title m-t-0 m-b-30">SHIPPING HISTORY</h4>
-                            <div class="card mt-2">
-                                <div class="card-body">
-                                    <form method="post" action="delete_shipping_history.php" onsubmit="return confirm('Yakin ingin menghapus data terpilih?');">
-                                        <table class="table table-bordered m-b-0">
-                                            <thead>
-                                                <tr>
-                                                    <th><input type="checkbox" id="select-all" /></th>
-                                                    <th># Tracking</th>
-                                                    <th>Location</th>
-                                                    <th>STATUS</th>
-                                                    <th>Date and Time</th>
-                                                    <th>Observation</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                $sql = "SELECT * FROM courier_track WHERE cid = ? AND cons_no = ? ORDER BY bk_time";
-                                                $stmt = dbQuery($sql, [$cid, $cons_no]);
-                                                while ($row = dbFetchAssoc($stmt)) {
-                                                ?>
-                                                <tr>
-                                                    <td><input type="checkbox" name="delete_ids[]" value="<?php echo $row['id']; ?>"></td>
-                                                    <td><?php echo htmlspecialchars($row['cons_no']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['pick_time']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['status']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['bk_time']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['comments']); ?></td>
-                                                </tr>
-                                                <?php } ?>
-                                            </tbody>
-                                        </table>
-                                        <br><br><br>
-                                        <button type="submit" class="btn btn-danger" style="margin-top: 15px;">Hapus yang dipilih</button>
-                                        <script>
-                                            document.getElementById("select-all").onclick = function() {
-                                                const checkboxes = document.getElementsByName("delete_ids[]");
-                                                for (let box of checkboxes) {
-                                                    box.checked = this.checked;
-                                                }
-                                            };
-                                        </script>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <?php include("icon_settings.php"); ?>
+        <?php
+            $pt = (string)($payment_term ?? '');
+            $isLegacyTempo = ($book_mode ?? '') === 'ToPay' && !in_array($pt, ['7', '14', '30'], true);
+            $curTerm = in_array($pt, ['7', '14', '30'], true) ? $pt : (($book_mode ?? '') === 'ToPay' ? 'keep' : 'cash');
+            $shipDate = ali_ship_date(['collection_date' => $collection_date ?? '', 'pick_date' => $pick_date ?? '']);
+        ?>
+        <div class="ac-page">
+        <div class="ac-title">
+            <h3><i class="fa fa-pencil-square-o"></i> Edit pengiriman <small style="color:#6b7280;font-weight:400"><?php echo htmlspecialchars($cons_no ?? ''); ?></small></h3>
+            <span class="ac-who">Login sebagai <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Unknown'); ?></span>
         </div>
+
+        <form action="process.php?action=update-addcourier" name="formulario" id="formulario" method="post" autocomplete="off">
+            <input type="hidden" name="cid" value="<?php echo (int)$cid; ?>">
+            <input type="hidden" name="status" value="<?php echo htmlspecialchars($status ?? ''); ?>">
+            <input type="hidden" name="book_mode" value="<?php echo htmlspecialchars($book_mode ?? ''); ?>">
+            <input type="hidden" name="ship_type" value="<?php echo htmlspecialchars($ship_type ?? ''); ?>">
+            <input type="hidden" name="office" value="<?php echo htmlspecialchars($office ?? ''); ?>">
+            <input type="hidden" name="total_declarate" value="<?php echo htmlspecialchars((string)($total_declarate ?? 0)); ?>">
+            <input type="hidden" name="shipping_subtotal" value="<?php echo htmlspecialchars((string)($shipping_subtotal ?? 0)); ?>">
+
+            <section class="ac-card">
+                <h4><i class="fa fa-user"></i> Data pengirim</h4>
+                <div class="ac-grid">
+                    <div class="ac-f ac-6">
+                        <label for="ship_name">Nama pengirim / PT <em>*</em></label>
+                        <input type="text" name="ship_name" id="ship_name" required value="<?php echo htmlspecialchars($ship_name ?? ''); ?>">
+                    </div>
+                    <div class="ac-f ac-3">
+                        <label for="shipper_phone">Nomor kontak</label>
+                        <input type="text" name="shipper_phone" id="shipper_phone" inputmode="tel" value="<?php echo htmlspecialchars($shipper_phone ?? ''); ?>">
+                    </div>
+                    <div class="ac-f ac-3">
+                        <label for="shipper_cc">Kode customer</label>
+                        <input type="text" name="shipper_cc" id="shipper_cc" value="<?php echo htmlspecialchars($shipper_cc ?? ''); ?>">
+                    </div>
+                    <div class="ac-f ac-12">
+                        <label for="shipper_address">Alamat pengirim</label>
+                        <input type="text" name="shipper_address" id="shipper_address" value="<?php echo htmlspecialchars($shipper_address ?? ''); ?>">
+                    </div>
+                </div>
+            </section>
+
+            <section class="ac-card">
+                <h4><i class="fa fa-map-marker"></i> Data penerima</h4>
+                <div class="ac-grid">
+                    <div class="ac-f ac-6">
+                        <label for="rev_name">Nama penerima <em>*</em></label>
+                        <input type="text" name="rev_name" id="rev_name" required value="<?php echo htmlspecialchars($rev_name ?? ''); ?>">
+                    </div>
+                    <div class="ac-f ac-3">
+                        <label for="receiver_phone">Nomor kontak</label>
+                        <input type="text" name="receiver_phone" id="receiver_phone" inputmode="tel" value="<?php echo htmlspecialchars($receiver_phone ?? ''); ?>">
+                    </div>
+                    <div class="ac-f ac-3">
+                        <label for="receiver_cc">Kode customer</label>
+                        <input type="text" name="receiver_cc" id="receiver_cc" value="<?php echo htmlspecialchars($receiver_cc ?? ''); ?>">
+                    </div>
+                    <div class="ac-f ac-6">
+                        <label for="receiver_email">Email</label>
+                        <input type="text" name="receiver_email" id="receiver_email" value="<?php echo htmlspecialchars($receiver_email ?? ''); ?>">
+                    </div>
+                    <div class="ac-f ac-6">
+                        <label for="receiver_address">Alamat penerima</label>
+                        <input type="text" name="receiver_address" id="receiver_address" value="<?php echo htmlspecialchars($receiver_address ?? ''); ?>">
+                    </div>
+                </div>
+            </section>
+
+            <section class="ac-card">
+                <h4><i class="fa fa-info-circle"></i> Informasi pengiriman</h4>
+                <div class="ac-grid">
+                    <div class="ac-f ac-3">
+                        <label for="book_code">Pembukuan</label>
+                        <select name="book_code" id="book_code">
+                            <option value="ALI" <?php echo (($book_code ?? 'ALI') !== 'ANK') ? 'selected' : ''; ?>>ALI</option>
+                            <option value="ANK" <?php echo (($book_code ?? '') === 'ANK') ? 'selected' : ''; ?>>ANK</option>
+                        </select>
+                    </div>
+                    <div class="ac-f ac-3">
+                        <label for="spb_no">Nomor SPB</label>
+                        <input type="number" min="1" name="spb_no" id="spb_no" value="<?php echo htmlspecialchars((string)($spb_no ?? '')); ?>">
+                    </div>
+                    <div class="ac-f ac-3">
+                        <label for="spb_return">SPB kembali (tanggal)</label>
+                        <input type="date" name="spb_return" id="spb_return" value="<?php echo htmlspecialchars((string)($spb_return ?? '')); ?>">
+                    </div>
+                    <div class="ac-f ac-3">
+                        <label for="cons_no">Nomor tracking</label>
+                        <input type="text" name="cons_no" id="cons_no" readonly value="<?php echo htmlspecialchars($cons_no ?? ''); ?>">
+                        <span class="hint">Ikut pembukuan + nomor SPB.</span>
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="payment_term">Metode pembayaran</label>
+                        <select name="payment_term" id="payment_term">
+                            <option value="cash" <?php echo $curTerm === 'cash' ? 'selected' : ''; ?>>Cash</option>
+                            <option value="7" <?php echo $curTerm === '7' ? 'selected' : ''; ?>>Tempo 7 hari</option>
+                            <option value="14" <?php echo $curTerm === '14' ? 'selected' : ''; ?>>Tempo 14 hari</option>
+                            <option value="30" <?php echo $curTerm === '30' ? 'selected' : ''; ?>>Tempo 30 hari</option>
+                            <?php if ($isLegacyTempo): ?><option value="keep" selected>Tempo (lama belum diatur)</option><?php endif; ?>
+                        </select>
+                        <span class="hint">Tempo diaktifkan dari Daftar Pengiriman yang untuk dibayar.</span>
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="mode">Service (Mode) <em>*</em></label>
+                        <select name="mode" id="mode" required>
+                            <option value="">Pilih</option>
+                            <?php foreach ($modes as $mode_option): ?>
+                                <option value="<?php echo htmlspecialchars($mode_option); ?>" <?php echo (($mode ?? '') === $mode_option) ? 'selected' : ''; ?>><?php echo htmlspecialchars($mode_option); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="pickup_time">Kota tujuan <em>*</em></label>
+                        <input type="text" name="pickup_time" id="pickup_time" required value="<?php echo htmlspecialchars($pickup_time ?? ''); ?>">
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="partner">Via / Partner</label>
+                        <input type="text" name="partner" id="partner" value="<?php echo htmlspecialchars((string)($partner ?? '')); ?>" placeholder="Ekspedisi / mitra">
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="charge_unit">Dihitung per</label>
+                        <select name="charge_unit" id="charge_unit">
+                            <option value="kg" <?php echo (($charge_unit ?? 'kg') !== 'm3') ? 'selected' : ''; ?>>Kg (berat)</option>
+                            <option value="m3" <?php echo (($charge_unit ?? '') === 'm3') ? 'selected' : ''; ?>>M&sup3; (volume)</option>
+                        </select>
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="pick_date">Tanggal barang kami terima</label>
+                        <input type="date" name="pick_date" id="pick_date" value="<?php echo htmlspecialchars($shipDate); ?>">
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="schedule">Jadwal pengiriman</label>
+                        <input type="date" name="schedule" id="schedule" value="<?php echo htmlspecialchars((string)($etd ?? '')); ?>">
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="eta">Perkiraan tiba (ETA)</label>
+                        <input type="date" name="eta" id="eta" value="<?php echo htmlspecialchars((string)($eta ?? '')); ?>">
+                    </div>
+                    <div class="ac-f ac-8">
+                        <label for="tracking_link">Tracking link (opsional)</label>
+                        <input type="text" name="tracking_link" id="tracking_link" value="<?php echo htmlspecialchars($tracking_link ?? ''); ?>" placeholder="https://...">
+                    </div>
+                    <div class="ac-f ac-12">
+                        <label>Progres pengiriman</label>
+                        <div class="ac-prog">
+                            <div id="progress-bar" class="progress-bar" role="progressbar" style="width: <?php echo htmlspecialchars($progress_percentage ?? 0); ?>%;" aria-valuenow="<?php echo htmlspecialchars($progress_percentage ?? 0); ?>" aria-valuemin="0" aria-valuemax="100">
+                                <span class="progress-text"><?php echo htmlspecialchars($progress_percentage ?? 0); ?>%</span>
+                            </div>
+                            <img id="cartoon-box" src="assets/images/cartoon-box.png" alt="" class="cartoon-box">
+                        </div>
+                        <input type="hidden" name="progress_percentage" id="progress_percentage" value="<?php echo htmlspecialchars($progress_percentage ?? 0); ?>">
+                        <span class="hint">Dihitung dari jadwal pengiriman sampai ETA. Kalau dikosongkan, sistem mengisi otomatis.</span>
+                    </div>
+                    <div class="ac-f ac-12">
+                        <label for="comments">Catatan pengiriman</label>
+                        <textarea name="comments" id="comments"><?php echo htmlspecialchars($comments ?? ''); ?></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <section class="ac-card">
+                <h4><i class="fa fa-cubes"></i> Rincian barang</h4>
+                <div class="ac-items">
+                    <table id="items-table">
+                        <thead>
+                            <tr><th>Nama barang</th><th style="width:80px">Qty</th><th style="width:100px">P (cm)</th><th style="width:100px">L (cm)</th><th style="width:100px">T (cm)</th><th style="width:110px">Berat (kg)</th><th style="width:120px">Volume (m&sup3;)</th><th style="width:44px"></th></tr>
+                        </thead>
+                        <tbody id="item-rows">
+                            <?php foreach ($items as $item): ?>
+                            <tr>
+                                <td><input type="text" name="item_name[]" required value="<?php echo htmlspecialchars($item['item_name'] ?? ''); ?>"></td>
+                                <td><input type="number" name="item_quantity[]" class="qty" value="<?php echo htmlspecialchars($item['quantity'] ?? ''); ?>" min="1" required></td>
+                                <td><input type="number" name="item_length[]" class="length" value="<?php echo htmlspecialchars($item['length'] ?? ''); ?>" min="0" step="0.0001"></td>
+                                <td><input type="number" name="item_width[]" class="width" value="<?php echo htmlspecialchars($item['width'] ?? ''); ?>" min="0" step="0.0001"></td>
+                                <td><input type="number" name="item_height[]" class="height" value="<?php echo htmlspecialchars($item['height'] ?? ''); ?>" min="0" step="0.0001"></td>
+                                <td><input type="number" name="item_weight[]" class="weight" step="0.0001" value="<?php echo htmlspecialchars($item['weight'] ?? ''); ?>" min="0"></td>
+                                <td><input type="number" step="0.0001" name="item_volume[]" class="volume" min="0" value="<?php echo htmlspecialchars($item['volume'] ?? ''); ?>"></td>
+                                <td><button type="button" class="remove-row" title="Hapus baris">&times;</button></td>
+                            </tr>
+                            <?php endforeach; ?>
+                            <?php if (empty($items)): ?>
+                            <tr>
+                                <td><input type="text" name="item_name[]" required value=""></td>
+                                <td><input type="number" name="item_quantity[]" class="qty" value="1" min="1" required></td>
+                                <td><input type="number" name="item_length[]" class="length" value="0" min="0" step="0.0001"></td>
+                                <td><input type="number" name="item_width[]" class="width" value="0" min="0" step="0.0001"></td>
+                                <td><input type="number" name="item_height[]" class="height" value="0" min="0" step="0.0001"></td>
+                                <td><input type="number" name="item_weight[]" class="weight" step="0.0001" value="0" min="0"></td>
+                                <td><input type="number" step="0.0001" name="item_volume[]" class="volume" min="0" value="0"></td>
+                                <td><button type="button" class="remove-row" title="Hapus baris">&times;</button></td>
+                            </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="ac-btn sec" id="add-row">+ Tambah barang</button>
+                <div class="ac-totals">
+                    <div class="ac-f"><label>Total jumlah (koli)</label><input type="text" name="qty" id="total-quantity" readonly value="<?php echo $total_quantity; ?>"></div>
+                    <div class="ac-f"><label>Total berat (kg)</label><input type="text" name="weight" id="total-weight" readonly value="<?php echo $total_weight; ?>"></div>
+                    <div class="ac-f"><label>Total volume (m&sup3;)</label><input type="text" name="total_volume" id="total-volume" readonly value="<?php echo $total_volume; ?>"></div>
+                </div>
+            </section>
+
+            <section class="ac-card">
+                <div class="ac-save">
+                    <span class="ac-sub" style="margin:0">Status pengiriman diubah di bagian "Perbarui status" di bawah.</span>
+                    <input type="submit" class="ac-btn" name="Submit" id="submit" value="UPDATE TRACKING">
+                </div>
+            </section>
+        </form>
+
+        <section class="ac-card">
+            <h4><i class="fa fa-flag"></i> Perbarui status</h4>
+            <form action="process.php?action=update-status" method="post" name="frmShipment" id="frmShipment">
+                <div class="ac-grid">
+                    <div class="ac-f ac-4">
+                        <label for="pick_time">Lokasi baru <em>*</em></label>
+                        <textarea id="pick_time" required name="pick_time"><?php echo htmlspecialchars($pickup_time ?? ''); ?></textarea>
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="st_status">Status baru</label>
+                        <select name="status" id="st_status">
+                            <option value="Finished" <?php echo ($status == 'Finished') ? 'selected' : ''; ?>>Finished</option>
+                            <option value="In-Transit" <?php echo ($status == 'In-Transit') ? 'selected' : ''; ?>>On Delivery</option>
+                            <option value="On-Hold" <?php echo ($status == 'On-Hold') ? 'selected' : ''; ?>>On Hold</option>
+                            <option value="Landed" <?php echo ($status == 'Landed') ? 'selected' : ''; ?>>Arrived</option>
+                            <option value="Delayed" <?php echo ($status == 'Delayed') ? 'selected' : ''; ?>>Delayed</option>
+                        </select>
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="bk_time">Tanggal dan jam <em>*</em></label>
+                        <input type="datetime-local" name="bk_time" id="bk_time" required value="<?php echo htmlspecialchars(date('Y-m-d\TH:i')); ?>">
+                    </div>
+                    <div class="ac-f ac-12">
+                        <label for="st_comments">Catatan</label>
+                        <textarea name="comments" id="st_comments"><?php echo htmlspecialchars($comments ?? ''); ?></textarea>
+                    </div>
+                </div>
+                <input type="submit" name="submit" class="ac-btn" value="UPDATE STATUS">
+                <input name="user" value="<?php echo htmlspecialchars($_SESSION['user_name'] ?? ''); ?>" type="hidden">
+                <input name="cid" value="<?php echo (int)$cid; ?>" type="hidden">
+                <input name="cons_no" value="<?php echo htmlspecialchars($cons_no ?? ''); ?>" type="hidden">
+            </form>
+        </section>
+
+        <section class="ac-card">
+            <h4><i class="fa fa-history"></i> Riwayat pengiriman</h4>
+            <form method="post" action="delete_shipping_history.php" onsubmit="return confirm('Yakin ingin menghapus data terpilih?');">
+                <div class="ac-table-wrap">
+                    <table class="ac-table">
+                        <thead>
+                            <tr><th style="width:30px"><input type="checkbox" id="select-all"></th><th>Tracking</th><th>Lokasi</th><th>Status</th><th>Tanggal dan jam</th><th>Catatan</th></tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $stmt = dbQuery("SELECT * FROM courier_track WHERE cid = ? AND cons_no = ? ORDER BY bk_time", [$cid, $cons_no]);
+                            while ($row = dbFetchAssoc($stmt)) {
+                            ?>
+                            <tr>
+                                <td><input type="checkbox" name="delete_ids[]" value="<?php echo (int)$row['id']; ?>"></td>
+                                <td><?php echo htmlspecialchars($row['cons_no']); ?></td>
+                                <td><?php echo htmlspecialchars($row['pick_time']); ?></td>
+                                <td><?php echo htmlspecialchars($row['status']); ?></td>
+                                <td><?php echo htmlspecialchars($row['bk_time']); ?></td>
+                                <td><?php echo htmlspecialchars($row['comments']); ?></td>
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+                <button type="submit" class="ac-btn danger" style="margin:14px 0 8px">Hapus yang dipilih</button>
+            </form>
+            <script>
+                document.getElementById("select-all").onclick = function() {
+                    document.getElementsByName("delete_ids[]").forEach(function(box) { box.checked = this.checked; }, this);
+                };
+            </script>
+        </section>
+        </div>
+        <?php include("footer.php"); ?>
     </div>
-    <?php include("footer.php"); ?>
+</div>
+
     <script>
         $(document).ready(function() {
             console.log("Script loaded at <?php echo date('h:i A T, F d, Y', time()); ?>");
@@ -702,15 +626,13 @@ if ($count > 0) {
 
             function validateForm() {
                 let isValid = true;
-                const requiredFields = ['ship_name', 'shipper_address', 'shipper_phone', 'shipper_cc',
-                    'receiver_address', 'receiver_phone', 'receiver_cc', 'receiver_email',
-                    'rev_name', 'cons_no', 'pick_date', 'schedule', 'mode', 'eta'];
+                const requiredFields = ['ship_name', 'rev_name', 'mode', 'pickup_time'];
                 requiredFields.forEach(field => {
                     const input = document.getElementById(field);
                     if (input && !input.value.trim()) {
                         input.classList.add('error');
                         isValid = false;
-                    } else if (input && ['pick_date', 'schedule', 'eta'].includes(field)) {
+                    } else if (false) {
                         const date = new Date(input.value);
                         if (isNaN(date.getTime())) {
                             input.classList.add('error');
