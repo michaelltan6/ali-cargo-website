@@ -5,19 +5,19 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE);
 session_start();
 require_once('database.php');
 require_once('library.php');
+requireAdmin();
 
-$cons= $_POST['Consignment'];
+$cons = (string)($_POST['Consignment'] ?? '');
 
 $sql = "SELECT *
 		FROM courier
-		WHERE cons_no = '$cons'";
+		WHERE cons_no = ?";
 $sql_1 = "SELECT DISTINCT(off_name)
 		FROM offices";	
-$result = dbQuery($sql);		
+$result = dbQuery($sql, [$cons]);		
 $result_1 = dbQuery($sql_1);
 while($data = dbFetchAssoc($result)) {
 extract($data);
-requireAdmin();
 ?>
 
 <!doctype html>

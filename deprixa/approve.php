@@ -6,6 +6,7 @@ session_start();
 require_once('database.php');
 require_once('library.php');
 require_once('funciones.php');
+requireAdmin();
 
 $posted= (int) $_GET['id'];
 $sql = "SELECT * FROM online_booking WHERE id = $posted "; 	
@@ -13,7 +14,7 @@ $result = dbQuery($sql);
 while($data = dbFetchAssoc($result)) {
 extract($data);
 		
-$company=mysqlI_fetch_array(mysqlI_query($dbConn, "SELECT * FROM company"));
+$company = dbFetchAssoc(dbQuery("SELECT * FROM company"));
 		
 requireAdmin();
 ?>
