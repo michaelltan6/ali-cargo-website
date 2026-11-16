@@ -6,14 +6,45 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once('database.php');
 require_once('library.php');
-
-$company = dbFetchAssoc(dbQuery("SELECT * FROM company")) ?: ['currency' => 'IDR'];
-
+require_once('courier-lib.php');
 try {
     requireAdmin();
 } catch (Exception $e) {
     echo "<p>Error: " . htmlspecialchars($e->getMessage()) . "</p>";
     exit;
+}
+courier_columns_ready();
+
+$isAdmin = isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator';
+$isEmployee = isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Employee';
+// Pegawai hanya melihat pengiriman miliknya
+$scope = $isEmployee ? " AND officename = ?" : "";
+$scopeParams = $isEmployee ? [$_SESSION['user_name']] : [];
+
+function dash_count($where, $params = []) {
+    try {
+        $r = dbFetchAssoc(dbQuery("SELECT COUNT(*) AS c FROM courier WHERE $where", $params));
+        return (int)($r['c'] ?? 0);
+    } catch (Exception $e) {
+        return 0;
+    }
+}
+$cActive   = dash_count("status <> 'Delivered'" . $scope, $scopeParams);
+$cTransit  = dash_count("status = 'In-Transit'" . $scope, $scopeParams);
+$cHold     = dash_count("status = 'On-Hold'" . $scope, $scopeParams);
+$cTempo    = dash_count("payment_term IN ('7','14','30') AND (due_date IS NULL OR due_date = '' OR due_date = '0000-00-00') AND status <> 'Delivered'" . $scope, $scopeParams);
+$cDoneMon  = dash_count("status = 'Delivered' AND last_updated >= ?" . $scope, array_merge([date('Y-m-01')], $scopeParams));
+
+function dash_status($s) {
+    $map = ['In-Transit' => ['On Delivery', 'st-go'], 'On-Hold' => ['On Hold', 'st-hold'], 'Finished' => ['Finished', 'st-fin'],
+            'Landed' => ['Arrived', 'st-arr'], 'Delayed' => ['Delayed', 'st-late'], 'Delivered' => ['Delivered', 'st-fin']];
+    return $map[$s] ?? [$s, 'st-fin'];
+}
+function dash_pay($row) {
+    $t = (string)($row['payment_term'] ?? '');
+    if (in_array($t, ['7', '14', '30'], true)) { return 'Tempo ' . $t . ' hari'; }
+    if (($row['book_mode'] ?? '') === 'ToPay') { return 'Tempo'; }
+    return 'Cash';
 }
 ?>
 <!DOCTYPE html>
@@ -21,377 +52,160 @@ try {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="keywords" content="">
-    <meta name="author" content="">
     <link rel="icon" type="image/png" href="public_html/logoAli.png">
     <title>PT. ANEKA LINTAS INDONESIA</title>
     <link href="assets/plugins/switchery/switchery.min.css" rel="stylesheet">
     <link href="assets/plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css">
-    <link href="assets/plugins/datatables/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css">
     <link href="assets/plugins/datatables/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css">
     <link href="assets/css/style.css" rel="stylesheet" type="text/css">
-    <style>
-        .delivered { background: #363C56; }
-        .Delayed { background: #F76063; }
-        .On-Hold { background: #4ECCDB; }
-        .Landed { background: #FF8A4B; }
-        .Finished { background: #333333; }
-        .label { padding: 5px; }
-        .In-Transit { background: #00D96D; }
-        .OK { background: #00D96D; }
-        .space { background: #F1B53D; }
-        .Paid { background: #675F99; }
-        .ToPay { background: #FF8441; }
-        .Cash-on-Delivery { background: #F6565A; }
-        .Shipment-arrived { background: #FFC734; }
-        .Returned { background: #F76063; }
-        .Pending { background: #FF5D48; }
-        .Bank { background: #999; }
-        .Paypal { background: #4DD2FF; }
-    </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="assets/js/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="text/javascript">
-        function del_list_admin(cid) {
-            if (window.confirm("Aviso:\n Sure you want to delete the selected file?")) {
-                window.location = "delete_list_admin.php?action=del&cid=" + cid;
-            }
-        }
-
-        function updateDeliveryStatus(cid) {
-            if (window.confirm("Sure like to change the status of shipping?")) {
-                $.ajax({
-                    url: 'process.php',
-                    method: 'GET',
-                    data: { action: 'delivered', cid: cid },
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: response.notification,
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                location.reload(); // Refresh the page
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: response.message
-                            });
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'An error occurred: ' + error
-                        });
-                    }
-                });
-            }
-        }
-    </script>
 </head>
 <body>
 <?php include("header.php"); ?>
 <div class="wrapper">
     <div class="container">
         <?php include("icon_settings.php"); ?>
-        <!-- Administrator Dashboard -->
-        <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') { ?>
-            <div class="row">
-                <?php
-                $stmt = dbQuery("SELECT * FROM courier WHERE status = 'In-Transit'");
-                $numero1 = $stmt ? dbNumRows($stmt) : 0;
-                ?>
-                <div class="col-xs-6 col-md-3 col-lg-3 col-xl-2">
-                    <div class="card-box tilebox-one">
-                        <i class="icon-plane pull-xs-right text-muted"></i>
-                        <h6 class="text-muted text-uppercase m-b-20">Pengiriman Sedang Transit</h6>
-                        <h2 class="m-b-20" data-plugin="counterup"><?php echo $numero1; ?></h2>
+        <div class="ac-page ac-wide" style="max-width:1280px">
+            <div class="ac-title">
+                <h3><i class="fa fa-tachometer"></i> Dashboard</h3>
+                <span class="ac-who"><?php echo htmlspecialchars(date('d-m-Y')); ?> &middot; <?php echo htmlspecialchars($_SESSION['user_name'] ?? ''); ?></span>
+            </div>
+
+            <div class="dash-tiles">
+                <a class="dash-tile" href="#" data-filter=""><span>Pengiriman aktif</span><b><?php echo $cActive; ?></b></a>
+                <a class="dash-tile" href="#" data-filter="On Delivery"><span>On Delivery</span><b><?php echo $cTransit; ?></b></a>
+                <a class="dash-tile" href="#" data-filter="On Hold"><span>On Hold</span><b><?php echo $cHold; ?></b></a>
+                <a class="dash-tile warn" href="list-of-shipping-topaid.php"><span>Tempo belum aktif</span><b><?php echo $cTempo; ?></b></a>
+                <div class="dash-tile ok"><span>Selesai bulan ini</span><b><?php echo $cDoneMon; ?></b></div>
+            </div>
+
+            <section class="ac-card">
+                <div class="dash-head">
+                    <h4><i class="fa fa-truck"></i> Pengiriman berjalan</h4>
+                    <div class="dash-actions">
+                        <a class="ac-btn" href="add-courier.php"><i class="fa fa-plus"></i> Tambah pengiriman</a>
+                        <?php if ($isAdmin) { ?><a class="ac-btn sec" href="export-monthly.php"><i class="fa fa-file-excel-o"></i> Export Excel</a><?php } ?>
                     </div>
                 </div>
-            </div>
-        <?php } ?>
-        <!-- Employee Dashboard -->
-        <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Employee') { ?>
-            <div class="row">
-                <?php
-                $stmt = dbQuery("SELECT * FROM courier WHERE status = 'In-Transit' AND officename = :officename", ['officename' => $_SESSION['user_name']]);
-                $numero1 = $stmt ? dbNumRows($stmt) : 0;
-                ?>
-                <div class="col-xs-6 col-md-3 col-lg-3 col-xl-2">
-                    <div class="card-box tilebox-one">
-                        <i class="icon-plane pull-xs-right text-muted"></i>
-                        <h6 class="text-muted text-uppercase m-b-20">Shipping In Transit</h6>
-                        <h2 class="m-b-20" data-plugin="counterup"><?php echo $numero1; ?></h2>
-                        <span class="text-muted">Pengiriman yang Transit</span>
-                    </div>
-                </div>
-            </div>
-        <?php } ?>
-        <div class="row">
-            <div class="col-xs-12 col-lg-12 col-xl-9">
-                <div class="card-box">
-                    <h4 class="header-title m-t-0 m-b-20">Daftar Pengiriman</h4>
-                    <table border="0" align="center">
-                        <tr>
-                            <td><strong>    Rentang Tanggal</strong>    </td>
-                            <td><i class="icon-append fa fa-calendar"></i>  <input type="date" id="bd-desde" class="gentxt1"/></td>
-                            <td>    TO    </td>
-                            <td><i class="icon-append fa fa-calendar"></i>  <input type="date" id="bd-hasta" class="gentxt1"/></td>
-                            <td>            <a target="_blank" href="javascript:reportepaymentPDF();" class="btn btn-primary">Export ke <strong>PDF</strong></a></td>
-                        </tr>
+                <div class="ac-table-wrap">
+                    <table id="dash-table" class="ac-table dash-table" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Tracking</th>
+                                <th>Pengirim</th>
+                                <th>Penerima</th>
+                                <th>Tujuan</th>
+                                <th>Pembayaran</th>
+                                <th>Tgl diterima</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        try {
+                            $stmt = dbQuery("SELECT * FROM courier WHERE status <> 'Delivered'" . $scope . " ORDER BY collection_date DESC, cid DESC", $scopeParams);
+                            while ($row = dbFetchAssoc($stmt)) {
+                                [$stLabel, $stClass] = dash_status($row['status']);
+                                $cid = (int)$row['cid'];
+                        ?>
+                            <tr>
+                                <td><b><?php echo htmlspecialchars($row['cons_no']); ?></b></td>
+                                <td><?php echo htmlspecialchars($row['ship_name']); ?></td>
+                                <td><?php echo htmlspecialchars($row['rev_name']); ?></td>
+                                <td><?php echo htmlspecialchars($row['pickup_time'] ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars(dash_pay($row)); ?></td>
+                                <td><?php echo htmlspecialchars(ali_ship_date($row)); ?></td>
+                                <td><span class="st <?php echo $stClass; ?>"><?php echo htmlspecialchars($stLabel); ?></span></td>
+                                <td class="dash-act">
+                                    <button type="button" class="act-btn finish" data-cid="<?php echo $cid; ?>" data-no="<?php echo htmlspecialchars($row['cons_no']); ?>" title="Tandai pengiriman selesai"><i class="fa fa-check"></i> Selesaikan</button>
+                                    <?php if ($isAdmin) { ?>
+                                        <a class="act-btn" href="edit-courier.php?cid=<?php echo $cid; ?>" title="Edit"><i class="fa fa-pencil"></i> Edit</a>
+                                        <button type="button" class="act-btn del" data-cid="<?php echo $cid; ?>" data-no="<?php echo htmlspecialchars($row['cons_no']); ?>" title="Hapus"><i class="fa fa-trash"></i></button>
+                                    <?php } ?>
+                                </td>
+                            </tr>
+                        <?php
+                            }
+                        } catch (PDOException $e) {
+                            echo "<tr><td colspan='8'>Error: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                        }
+                        ?>
+                        </tbody>
                     </table>
-                    <div class="table-responsive">
-                        <div class="col-xs-12 col-lg-12 col-xl-12">
-                            <ul class="nav nav-tabs m-b-10" id="myTab" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-expanded="true">
-                                        <i class="icon-plane"></i> Daftar Utama Pengiriman</a>
-                                </li>
-                            </ul>
-                            <br><br>
-                            <div class="tab-content" id="myTabContent">
-                                <div role="tabpanel" class="tab-pane fade in active" id="home" aria-labelledby="home-tab">
-                                    <table id="datatable-buttons" class="table table-striped table-bordered" cellspacing="0" width="100%">
-                                        <thead>
-                                            <tr>
-                                                <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') { ?>
-                                                    <th>Edit</th>
-                                                    <th>Delete</th>
-                                                <?php } ?>
-                                                <th>Diterima</th>
-                                                <th>Print</th>
-                                                <th>Barcode</th>
-                                                <th>Tracking</th>
-                                                <th>Metode Pembayaran</th>
-                                                <th>Pengirim</th>
-                                                <th>Penerima</th>
-                                                <th>Tanggal</th>
-                                                <th>Pegawai</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            try {
-                                                $sql = "SELECT * FROM courier WHERE status != :status";
-                                                $params = ['status' => 'delivered'];
-                                                if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Employee') {
-                                                    $sql .= " AND officename = :officename";
-                                                    $params['officename'] = $_SESSION['user_name'];
-                                                }
-                                                $sql .= " ORDER BY collection_date DESC, cid DESC";
-                                                $stmt = dbQuery($sql, $params);
-                                                $rowCount = dbNumRows($stmt);
-                                                if ($rowCount === 0) {
-                                                    echo "<tr><td colspan='12'>No shipments found.</td></tr>";
-                                                }
-                                                while ($row = dbFetchAssoc($stmt)) {
-                                            ?>
-                                                    <tr>
-                                                        <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') { ?>
-                                                            <td align="center">
-                                                                <a href="edit-courier.php?cid=<?php echo htmlspecialchars($row['cid']); ?>">
-                                                                    <img src="images/edit.png" height="20" width="20" alt="Edit">
-                                                                </a>
-                                                            </td>
-                                                            <td align="center">
-                                                                <a href="#" onclick="del_list_admin(<?php echo htmlspecialchars($row['cid']); ?>); return false;">
-                                                                    <img src="images/delete.png" height="20" width="18" alt="Delete">
-                                                                </a>
-                                                            </td>
-                                                        <?php } ?>
-                                                        <td align="center">
-                                                            <a href="#" onclick="updateDeliveryStatus(<?php echo htmlspecialchars($row['cid']); ?>); return false;">
-                                                                <img src="images/delivery.png" height="20" width="20" alt="Confirm">
-                                                            </a>
-                                                        </td>
-                                                        <td align="center">
-                                                            <a target="_blank" href="print-invoice/invoice-print.php?cid=<?php echo htmlspecialchars($row['cid']); ?>">
-                                                                <img src="images/print.png" height="20" width="20" alt="Print">
-                                                            </a>
-                                                        </td>
-                                                        <td align="center">
-                                                            <a href="barcode/html/BCGcode39.php?cons_no=<?php echo htmlspecialchars($row['cons_no']); ?>" target="_blank">
-                                                                <img src="images/barcode.png" height="20" width="20" alt="Barcode">
-                                                            </a>
-                                                        </td>
-                                                        <td><font color="#000"><?php echo htmlspecialchars($row['cons_no']); ?></font></td>
-                                                        <td><span class="label <?php echo htmlspecialchars($row['book_mode']); ?> label-large"><?php echo htmlspecialchars($row['book_mode']); ?></span></td>
-                                                        <td><?php echo htmlspecialchars($row['ship_name']); ?></td>
-                                                        <td><?php echo htmlspecialchars($row['rev_name']); ?></td>
-                                                        <td><?php echo htmlspecialchars(ali_ship_date($row)); ?></td>
-                                                        <td><?php echo htmlspecialchars($row['user']); ?></td>
-                                                        <td><span class="label <?php echo htmlspecialchars($row['status']); ?> label-large"><?php echo htmlspecialchars($row['status']); ?></span></td>
-                                                    </tr>
-                                            <?php
-                                                }
-                                            } catch (PDOException $e) {
-                                                echo "<tr><td colspan='12'>Error: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
-                                            }
-                                            ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-                <div class="col-xs-12 col-lg-12 col-xl-3">
-                    <div class="card-box">
-                        <h4 class="header-title m-t-0 m-b-30">Pengiriman Terakhir</h4>
-                        <div class="table-responsive">
-                            <table id="datatable-recent" class="table table-striped table-bordered" cellspacing="0" width="100%">
-                                <thead>
-                                    <tr>
-                                        <th>Tracking</th>
-                                        <th>Tanggal Dimulai</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    try {
-                                        $sql = "SELECT * FROM courier WHERE LEFT(book_date, 10) = CURDATE()";
-                                        if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Employee') {
-                                            $sql .= " AND officename = :officename";
-                                            $stmt = dbQuery($sql, ['officename' => $_SESSION['user_name']]);
-                                        } else {
-                                            $stmt = dbQuery($sql);
-                                        }
-                                        $rowCount = dbNumRows($stmt);
-                                        if ($rowCount === 0) {
-                                            echo "<tr><td colspan='3'>No recent shipments found.</td></tr>";
-                                        }
-                                        while ($row = dbFetchAssoc($stmt)) {
-                                    ?>
-                                            <tr>
-                                                <td><font color="#000"><?php echo htmlspecialchars($row['cons_no']); ?></font></td>
-                                                <td><?php echo htmlspecialchars($row['book_date']); ?></td>
-                                                <td><span class="label <?php echo htmlspecialchars($row['status']); ?> label-large"><?php echo htmlspecialchars($row['status']); ?></span></td>
-                                            </tr>
-                                    <?php
-                                        }
-                                    } catch (PDOException $e) {
-                                        echo "<tr><td colspan='3'>Error: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php include("footer.php"); ?>
+            </section>
         </div>
+        <?php include("footer.php"); ?>
     </div>
-    <script>
-        var resizefunc = [];
-    </script>
-    <script src="assets/js/tether.min.js"></script>
-    <script src="assets/js/bootstrap.min.js"></script>
-    <script src="assets/js/waves.js"></script>
-    <script src="assets/js/jquery.nicescroll.js"></script>
-    <script src="assets/plugins/switchery/switchery.min.js"></script>
-    <script src="assets/plugins/waypoints/lib/jquery.waypoints.js"></script>
-    <script src="assets/plugins/counterup/jquery.counterup.min.js"></script>
-    <script src="assets/js/jquery.core.js"></script>
-    <script src="assets/js/jquery.app.js"></script>
-    <script src="assets/pages/jquery.dashboard.js"></script>
-    <script src="assets/plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="assets/plugins/datatables/dataTables.bootstrap4.min.js"></script>
-    <script src="assets/plugins/datatables/dataTables.buttons.min.js"></script>
-    <script src="assets/plugins/datatables/buttons.bootstrap4.min.js"></script>
-    <script src="assets/plugins/datatables/jszip.min.js"></script>
-    <script src="assets/plugins/datatables/pdfmake.min.js"></script>
-    <script src="assets/plugins/datatables/vfs_fonts.js"></script>
-    <script src="assets/plugins/datatables/buttons.html5.min.js"></script>
-    <script src="assets/plugins/datatables/buttons.print.min.js"></script>
-    <script src="assets/plugins/datatables/buttons.colVis.min.js"></script>
-    <script src="assets/plugins/datatables/dataTables.responsive.min.js"></script>
-    <script src="assets/plugins/datatables/responsive.bootstrap4.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            if (typeof jQuery === 'undefined') {
-                console.error('jQuery is not loaded');
-                return;
-            }
-            console.log('jQuery version:', jQuery.fn.jquery);
+</div>
+<script>var resizefunc = [];</script>
+<script src="assets/js/tether.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script src="assets/js/waves.js"></script>
+<script src="assets/js/jquery.nicescroll.js"></script>
+<script src="assets/plugins/switchery/switchery.min.js"></script>
+<script src="assets/js/jquery.core.js"></script>
+<script src="assets/js/jquery.app.js"></script>
+<script src="assets/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="assets/plugins/datatables/dataTables.bootstrap4.min.js"></script>
+<script>
+$(document).ready(function() {
+    var table = $('#dash-table').DataTable({
+        pageLength: 20,
+        lengthChange: true,
+        lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'Semua']],
+        order: [[5, 'desc']],
+        columnDefs: [{ targets: 7, orderable: false, searchable: false }],
+        language: { search: 'Cari:', lengthMenu: 'Tampilkan _MENU_ data', info: '_START_–_END_ dari _TOTAL_ pengiriman', infoEmpty: 'Tidak ada pengiriman berjalan', zeroRecords: 'Tidak ada data yang cocok', emptyTable: 'Tidak ada pengiriman berjalan', paginate: { previous: 'Sebelumnya', next: 'Berikutnya' } }
+    });
 
-            var tableMain = $('#datatable-buttons').DataTable({
-                responsive: true,
-                pageLength: 20, lengthChange: true, lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'Semua']], order: [[9, 'desc']],
-                buttons: ['copy', 'excel', 'pdf', 'print', 'colvis'],
-                columnDefs: [
-                    {
-                        targets: [0, 1],
-                        visible: <?php echo isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator' ? 'true' : 'false'; ?>,
-                        searchable: true
-                    },
-                    {
-                        targets: 9, // Tanggal column
-                        type: 'date',
-                        render: function(data) {
-                            return data;
-                        }
+    // Klik kotak ringkasan = filter status
+    $('.dash-tile[data-filter]').on('click', function(e) {
+        e.preventDefault();
+        table.column(6).search($(this).data('filter') || '').draw();
+        $('.dash-tile').removeClass('on'); $(this).addClass('on');
+    });
+
+    function notify(opts) {
+        if (window.Swal) { return Swal.fire(opts); }
+        alert((opts.title ? opts.title + ': ' : '') + (opts.text || ''));
+        return Promise.resolve({ isConfirmed: true });
+    }
+
+    // Selesaikan pengiriman langsung dari dashboard
+    $('#dash-table').on('click', '.act-btn.finish', function() {
+        var btn = $(this), cid = btn.data('cid'), no = btn.data('no');
+        var go = function() {
+            btn.prop('disabled', true);
+            $.ajax({
+                url: 'finish-shipment.php', type: 'POST', dataType: 'json', data: { cid: cid },
+                success: function(res) {
+                    if (res && res.success) {
+                        table.row(btn.closest('tr')).remove().draw(false);
+                        notify({ icon: 'success', title: 'Selesai', text: res.message, timer: 1600, showConfirmButton: false });
+                    } else {
+                        btn.prop('disabled', false);
+                        notify({ icon: 'error', title: 'Gagal', text: res ? res.message : 'Tidak ada respons dari server' });
                     }
-                ]
+                },
+                error: function() { btn.prop('disabled', false); notify({ icon: 'error', title: 'Gagal menghubungi server' }); }
             });
+        };
+        if (window.Swal) {
+            Swal.fire({ title: 'Selesaikan pengiriman?', text: no + ' akan ditandai Delivered.', icon: 'question', showCancelButton: true, confirmButtonText: 'Ya, selesaikan', cancelButtonText: 'Batal' })
+                .then(function(r) { if (r.isConfirmed) { go(); } });
+        } else if (confirm('Selesaikan pengiriman ' + no + '?')) { go(); }
+    });
 
-            var tableRecent = $('#datatable-recent').DataTable({
-                responsive: true,
-                lengthChange: false,
-                buttons: ['copy', 'excel', 'pdf', 'print', 'colvis'],
-                columnDefs: [
-                    {
-                        targets: 1, // Tanggal Dimulai column
-                        type: 'date',
-                        render: function(data) {
-                            return data;
-                        }
-                    }
-                ]
-            });
-
-            tableMain.buttons().container().appendTo('#datatable-buttons_wrapper .col-md-6:eq(0)');
-            tableRecent.buttons().container().appendTo('#datatable-recent_wrapper .col-md-6:eq(0)');
-
-            // Date filter for main table
-            $('#bd-desde, #bd-hasta').on('change', function() {
-                var startDate = $('#bd-desde').val();
-                var endDate = $('#bd-hasta').val();
-                tableMain.column(9).search(function(value) {
-                    if (!startDate && !endDate) return true;
-                    if (!value) return false;
-                    var date = new Date(value);
-                    if (startDate && new Date(startDate) > date) return false;
-                    if (endDate && new Date(endDate) < date) return false;
-                    return true;
-                }).draw();
-                tableRecent.column(1).search(function(value) {
-                    if (!startDate && !endDate) return true;
-                    if (!value) return false;
-                    var date = new Date(value);
-                    if (startDate && new Date(startDate) > date) return false;
-                    if (endDate && new Date(endDate) < date) return false;
-                    return true;
-                }).draw();
-            });
-
-            window.reportepaymentPDF = function() {
-                var startDate = $('#bd-desde').val();
-                var endDate = $('#bd-hasta').val();
-                var url = 'generate_pdf.php?start=' + encodeURIComponent(startDate) + '&end=' + encodeURIComponent(endDate) + '&mode=All';
-                window.open(url, '_blank');
-            };
-        });
-    </script>
+    $('#dash-table').on('click', '.act-btn.del', function() {
+        var cid = $(this).data('cid'), no = $(this).data('no');
+        if (confirm('Hapus pengiriman ' + no + '? Data tidak bisa dikembalikan.')) {
+            window.location = 'delete_list_admin.php?action=del&cid=' + cid;
+        }
+    });
+});
+</script>
 </body>
 </html>
-<?php ob_end_flush(); ?>

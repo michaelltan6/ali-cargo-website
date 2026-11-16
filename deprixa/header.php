@@ -152,7 +152,6 @@ if (!function_exists('isUser') || !isUser()) {
                         <li class="has-submenu">
                             <a href="#"><i class="zmdi zmdi-collection-text"></i> <span> LAPORAN </span></a>
                             <ul class="submenu">
-                                <li><a href="shipping-list.php"><i class="fa fa-file-text-o"></i> Daftar Pengiriman</a></li>
                                 <li><a href="delivered-list.php"><i class="fa fa-truck"></i> Daftar Pengiriman yang telah Sampai Tujuan</a></li>
                                 <li><a href="list-of-shipping-paid.php"><i class="fa fa-money"></i> Daftar Pengiriman yang telah Dibayar</a></li>
                                 <li><a href="list-of-shipping-topaid.php"><i class="fa fa-credit-card"></i> Daftar Pengiriman yang untuk dibayar</a></li>

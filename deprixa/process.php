@@ -74,6 +74,7 @@ try {
     error_log("Received action: {$_GET['action']}, Method: {$_SERVER['REQUEST_METHOD']}");
 
     if ($_GET['action'] === 'delivered' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+        throw new Exception("Gunakan tombol Selesaikan di dashboard.");
         if (!$authenticated) {
             throw new Exception("Authentication required to update delivery status.");
         }
@@ -159,7 +160,7 @@ try {
             $eta = limpiar($_POST['eta'] ?? '');
             $comments = limpiar($_POST['comments'] ?? '');
             $weight = floatval(str_replace(',', '.', $_POST['weight'] ?? 0));
-            $total_volume = floatval(str_replace(',', '.', $_POST['total_volume'] ?? 0));
+            $total_volume = round(floatval(str_replace(',', '.', $_POST['total_volume'] ?? 0)), 3);
             $qty = floatval(str_replace(['.', ','], '', $_POST['qty'] ?? 0));
             $freight = floatval(str_replace(['.', ','], '', $_POST['freight'] ?? 0));
             $variable = floatval(str_replace(['.', ','], '', $_POST['variable'] ?? 0));
@@ -285,7 +286,7 @@ try {
                             floatval($_POST['item_width'][$i] ?? 0),
                             floatval($_POST['item_height'][$i] ?? 0),
                             floatval($_POST['item_weight'][$i] ?? 0),
-                            floatval($_POST['item_volume'][$i] ?? 0)
+                            round(floatval($_POST['item_volume'][$i] ?? 0), 3)
                         ]
                     );
                 }
@@ -361,7 +362,7 @@ try {
                 'eta' => limpiar($_POST['eta'] ?? ''),
                 'comments' => limpiar($_POST['comments'] ?? ''),
                 'weight' => floatval(str_replace(',', '.', $_POST['weight'] ?? 0)),
-                'total_volume' => floatval(str_replace(',', '.', $_POST['total_volume'] ?? 0)),
+                'total_volume' => round(floatval(str_replace(',', '.', $_POST['total_volume'] ?? 0)), 3),
                 'qty' => floatval(str_replace(['.', ','], '', $_POST['qty'] ?? 0)),
                 'tracking_link' => $_POST['tracking_link'] ?? null
             ];
@@ -485,7 +486,7 @@ try {
                     $width = floatval($_POST['item_width'][$i] ?? 0);
                     $height = floatval($_POST['item_height'][$i] ?? 0);
                     $weight = floatval($_POST['item_weight'][$i] ?? 0);
-                    $volume = floatval($_POST['item_volume'][$i] ?? 0);
+                    $volume = round(floatval($_POST['item_volume'][$i] ?? 0), 3);
 
                     if ($volume <= 0 && $length > 0 && $width > 0 && $height > 0) {
                         $volume = ($length * $width * $height) / 1000000; // cm³ to m³

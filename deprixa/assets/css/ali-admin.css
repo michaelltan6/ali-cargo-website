@@ -79,3 +79,28 @@ table.dataTable tbody td { padding-top: 10px; padding-bottom: 10px; vertical-ali
 .dataTables_wrapper .page-item.active .page-link { background: #1f9d55; border-color: #1f9d55; }
 .label.In-Transit { background: #1f9d55; }
 .label { border-radius: 6px; }
+
+/* ---- dashboard ---- */
+.dash-tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+.dash-tile { display: block; background: #fff; border: 1px solid #e3e6ea; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.04); color: #333; text-decoration: none; }
+a.dash-tile:hover, .dash-tile.on { border-color: #1f9d55; color: #333; text-decoration: none; }
+.dash-tile span { display: block; font-size: .8rem; color: #6b7280; margin-bottom: 4px; }
+.dash-tile b { font-size: 1.9rem; font-weight: 600; line-height: 1.1; }
+.dash-tile.warn b { color: #b45309; } .dash-tile.ok b { color: #17824a; }
+.dash-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+.dash-head h4 { margin: 0; font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.dash-head h4 i { color: #1f9d55; }
+.dash-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.dash-actions .ac-btn { text-decoration: none; display: inline-block; padding: 8px 14px; font-size: .9rem; }
+.dash-table td { vertical-align: middle; }
+.dash-act { white-space: nowrap; }
+.act-btn { border: 1px solid #c9ced6; background: #fff; color: #333; border-radius: 8px; padding: 5px 10px; font-size: .82rem; cursor: pointer; text-decoration: none; display: inline-block; margin-right: 4px; }
+.act-btn:hover { background: #f3f4f6; text-decoration: none; color: #333; }
+.act-btn.finish { background: #1f9d55; border-color: #1f9d55; color: #fff; }
+.act-btn.finish:hover { background: #17824a; color: #fff; }
+.act-btn.del { color: #c0392b; border-color: #e6b5af; } .act-btn.del:hover { background: #fdecea; }
+.act-btn:disabled { opacity: .5; cursor: default; }
+.st { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .78rem; font-weight: 600; }
+.st-go { background: #e3f6ea; color: #17824a; } .st-hold { background: #fff1d6; color: #9a6200; } .st-fin { background: #e9ecef; color: #444; }
+.st-arr { background: #e3efff; color: #1b5fb5; } .st-late { background: #fdecea; color: #b0372b; }
+@media (max-width: 900px) { .dash-tiles { grid-template-columns: repeat(2, 1fr); } }

@@ -286,7 +286,7 @@ ob_end_clean();
                                 <td><input type="number" name="item_width[]" class="width" value="0" min="0" step="0.0001"></td>
                                 <td><input type="number" name="item_height[]" class="height" value="0" min="0" step="0.0001"></td>
                                 <td><input type="number" name="item_weight[]" class="weight" step="0.0001" value="0" min="0"></td>
-                                <td><input type="number" step="0.0001" name="item_volume[]" class="volume" placeholder="otomatis" min="0"></td>
+                                <td><input type="number" step="0.001" name="item_volume[]" class="volume" placeholder="otomatis" min="0"></td>
                                 <td><button type="button" class="remove-row" aria-label="Hapus baris">&times;</button></td>
                             </tr>
                         </tbody>
@@ -358,11 +358,11 @@ ob_end_clean();
             const volumeField = row.querySelector(".volume");
             const volumeManual = volumeField.dataset.manual;
             if (volumeManual && volumeManual !== "") {
-                volumeField.value = parseFloat(volumeManual).toFixed(10); // Increased precision to 10 decimals
+                volumeField.value = parseFloat(volumeManual).toFixed(3);
                 return;
             }
             const volume = hitungVolume(p, l, t);
-            volumeField.value = volume.toFixed(10); // Increased precision to 10 decimals
+            volumeField.value = volume.toFixed(3);
         }
         function updateTotals() {
             let totalQuantity = 0;
@@ -378,11 +378,11 @@ ob_end_clean();
                 totalVolume += qty * volume; // Aggregate even small volumes
             });
             document.getElementById("total-quantity").value = totalQuantity.toFixed(0);
-            document.getElementById("total-weight").value = totalWeight.toFixed(6);
-            document.getElementById("total-volume").value = totalVolume.toFixed(10); // Increased precision to 10 decimals
+            document.getElementById("total-weight").value = totalWeight.toFixed(3);
+            document.getElementById("total-volume").value = totalVolume.toFixed(3);
             document.formulario.qty.value = totalQuantity;
-            document.formulario.weight.value = totalWeight.toFixed(6);
-            document.formulario.total_volume.value = totalVolume.toFixed(10);
+            document.formulario.weight.value = totalWeight.toFixed(3);
+            document.formulario.total_volume.value = totalVolume.toFixed(3);
         }
         document.addEventListener("input", function (e) {
             const row = e.target.closest("tr");

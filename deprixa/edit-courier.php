@@ -324,7 +324,7 @@ if ($count > 0) {
                                 <td><input type="number" name="item_width[]" class="width" value="<?php echo htmlspecialchars($item['width'] ?? ''); ?>" min="0" step="0.0001"></td>
                                 <td><input type="number" name="item_height[]" class="height" value="<?php echo htmlspecialchars($item['height'] ?? ''); ?>" min="0" step="0.0001"></td>
                                 <td><input type="number" name="item_weight[]" class="weight" step="0.0001" value="<?php echo htmlspecialchars($item['weight'] ?? ''); ?>" min="0"></td>
-                                <td><input type="number" step="0.0001" name="item_volume[]" class="volume" min="0" value="<?php echo htmlspecialchars($item['volume'] ?? ''); ?>"></td>
+                                <td><input type="number" step="0.001" name="item_volume[]" class="volume" min="0" value="<?php echo ($item['volume'] ?? '') === '' ? '' : number_format((float)$item['volume'], 3, '.', ''); ?>"></td>
                                 <td><button type="button" class="remove-row" title="Hapus baris">&times;</button></td>
                             </tr>
                             <?php endforeach; ?>
@@ -336,7 +336,7 @@ if ($count > 0) {
                                 <td><input type="number" name="item_width[]" class="width" value="0" min="0" step="0.0001"></td>
                                 <td><input type="number" name="item_height[]" class="height" value="0" min="0" step="0.0001"></td>
                                 <td><input type="number" name="item_weight[]" class="weight" step="0.0001" value="0" min="0"></td>
-                                <td><input type="number" step="0.0001" name="item_volume[]" class="volume" min="0" value="0"></td>
+                                <td><input type="number" step="0.001" name="item_volume[]" class="volume" min="0" value="0"></td>
                                 <td><button type="button" class="remove-row" title="Hapus baris">&times;</button></td>
                             </tr>
                             <?php endif; ?>
@@ -346,8 +346,8 @@ if ($count > 0) {
                 <button type="button" class="ac-btn sec" id="add-row">+ Tambah barang</button>
                 <div class="ac-totals">
                     <div class="ac-f"><label>Total jumlah (koli)</label><input type="text" name="qty" id="total-quantity" readonly value="<?php echo $total_quantity; ?>"></div>
-                    <div class="ac-f"><label>Total berat (kg)</label><input type="text" name="weight" id="total-weight" readonly value="<?php echo $total_weight; ?>"></div>
-                    <div class="ac-f"><label>Total volume (m&sup3;)</label><input type="text" name="total_volume" id="total-volume" readonly value="<?php echo $total_volume; ?>"></div>
+                    <div class="ac-f"><label>Total berat (kg)</label><input type="text" name="weight" id="total-weight" readonly value="<?php echo number_format((float)$total_weight, 3, '.', ''); ?>"></div>
+                    <div class="ac-f"><label>Total volume (m&sup3;)</label><input type="text" name="total_volume" id="total-volume" readonly value="<?php echo number_format((float)$total_volume, 3, '.', ''); ?>"></div>
                 </div>
             </section>
 
@@ -479,11 +479,11 @@ if ($count > 0) {
                 const volumeField = row.find(".volume");
                 const volumeManual = volumeField.data("manual");
                 if (volumeManual && volumeManual !== "") {
-                    volumeField.val(parseFloat(volumeManual).toFixed(10));
+                    volumeField.val(parseFloat(volumeManual).toFixed(3));
                     return;
                 }
                 const volume = hitungVolume(p, l, t);
-                volumeField.val(volume.toFixed(10));
+                volumeField.val(volume.toFixed(3));
             }
 
             function updateTotals() {
@@ -499,11 +499,11 @@ if ($count > 0) {
                     totalVolume += qty * volume;
                 });
                 $("#total-quantity").val(totalQuantity.toFixed(0));
-                $("#total-weight").val(totalWeight.toFixed(6));
-                $("#total-volume").val(totalVolume.toFixed(10));
+                $("#total-weight").val(totalWeight.toFixed(3));
+                $("#total-volume").val(totalVolume.toFixed(3));
                 $("#formulario input[name='qty']").val(totalQuantity.toFixed(0));
-                $("#formulario input[name='weight']").val(totalWeight.toFixed(6));
-                $("#formulario input[name='total_volume']").val(totalVolume.toFixed(10));
+                $("#formulario input[name='weight']").val(totalWeight.toFixed(3));
+                $("#formulario input[name='total_volume']").val(totalVolume.toFixed(3));
             }
 
             // Add row button
