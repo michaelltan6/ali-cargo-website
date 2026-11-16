@@ -1,25 +1,11 @@
 <?php
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+require_once __DIR__ . '/library.php';
+requireAdmin();
+if (!sameOriginOk()) { http_response_code(403); exit('Permintaan ditolak. Buka dari halaman admin.'); }
 
-session_start();
-require_once('database.php');
-
-if (isset($_GET['action']) && $_GET['action'] === 'del' && isset($_GET['cid'])) {
-    $cid = intval($_GET['cid']);
-
-    try {
-        $stmt = $dbConn->prepare("DELETE FROM courier WHERE cid = :cid");
-        $stmt->bindParam(':cid', $cid, PDO::PARAM_INT);
-        $stmt->execute();
-
-        header("Location: " . $_SERVER['HTTP_REFERER']);
-        exit;
-    } catch (PDOException $e) {
-        echo "❌ Gagal menghapus data. Error: " . $e->getMessage();
-    }
-} else {
-    echo "❌ Parameter tidak lengkap.";
+$id = (int)($_GET['cid'] ?? 0);
+if (($_GET['action'] ?? '') === 'del' && $id > 0) {
+    dbQuery("DELETE FROM courier WHERE cid = ?", [$id]);
 }
-?>
+header('Location: admin.php');
+exit;

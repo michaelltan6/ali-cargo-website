@@ -21,7 +21,7 @@ if (!empty($included_output)) {
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-    isUser();
+    requireAdmin();
     error_log("Session data in update_bookmode.php: " . print_r($_SESSION, true));
     if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['action']) || $_POST['action'] !== 'update_bookmode') {
         throw new Exception("Invalid request.");

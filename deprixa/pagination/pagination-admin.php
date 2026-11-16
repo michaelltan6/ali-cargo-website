@@ -5,8 +5,8 @@ function generatePagination(){
 	$per_page = 100;
 	//Calculating no of pages
 	$sql = "SELECT * FROM courier";
-	$result = mysql_query($sql);
-	$count = mysql_num_rows($result);
+	$result = dbQuery($sql);
+	$count = dbNumRows($result);
 	$pages = ceil($count/$per_page);
 	$pageno = "<ul id=\"pagination\">";
 	for($i=1; $i<=$pages; $i++)	{
@@ -18,13 +18,12 @@ function generatePagination(){
 
 function getPageData(){
 	$per_page = 100;
-	if($_GET) { $page=$_GET['page'];}
-	else {$page = 1;}
+	$page = max(1, (int)($_GET['page'] ?? 1));
 	$start = ($page-1)*$per_page;
 	$sql = "SELECT * FROM courier WHERE status != 'Delivered' and officename='".$_SESSION["user_type"]."' ORDER BY cid DESC LIMIT $start, $per_page";
-	$result = mysql_query($sql);
+	$result = dbQuery($sql);
 	$records = array();
-	while($row = mysql_fetch_array($result)){
+	while($row = dbFetchAssoc($result)){
 		extract($row);
 		$records[] = array("cid" => $cid,
 			"cons_no" => $cons_no,

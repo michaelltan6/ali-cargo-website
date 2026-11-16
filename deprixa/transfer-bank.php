@@ -5,7 +5,7 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE);
 session_start();
 require_once('database.php');
 require_once('library.php');
-isUser();
+requireAdmin();
 
 ?>
 <!DOCTYPE html>
@@ -78,8 +78,8 @@ isUser();
 								<tbody>
 								
 									<?php  					
-										$result3 = mysqli_query($dbConn, "SELECT * FROM upload_image_bank  ORDER BY cid");
-										while($row = mysqli_fetch_array($result3)) {					
+										$result3 = dbQuery("SELECT * FROM upload_image_bank  ORDER BY cid");
+										while($row = dbFetchAssoc($result3)) {					
 									?> 
 								  <tr>											  					  
 									  <td><font color="#000"><?php echo $row['cons_no']; ?></font></td>						 

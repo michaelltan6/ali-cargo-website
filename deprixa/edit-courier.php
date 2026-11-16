@@ -36,7 +36,7 @@ if (!empty($funcionesOutput)) {
 
 // Authenticate user
 ob_start();
-isUser();
+requireAdmin();
 $userOutput = ob_get_clean();
 if (!empty($userOutput)) {
     error_log("Unexpected output from isUser(): " . $userOutput);

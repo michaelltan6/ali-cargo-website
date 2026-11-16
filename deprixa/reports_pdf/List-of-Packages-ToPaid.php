@@ -1,8 +1,11 @@
 <?php
+require_once __DIR__ . '/../library.php'; requireAdmin();
 
 if(strlen($_GET['desde'])>0 and strlen($_GET['hasta'])>0){
 	$desde = $_GET['desde'];
+	if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $desde)) { $desde = '1111-01-01'; }
 	$hasta = $_GET['hasta'];
+	if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $hasta)) { $hasta = '9999-12-30'; }
 
 	$verDesde = date('d/m/Y', strtotime($desde));
 	$verHasta = date('d/m/Y', strtotime($hasta));
@@ -51,8 +54,8 @@ $pdf->Ln(8);
 $pdf->SetFont('Arial', '', 8);
 
 //CONSULTA
-$result = mysql_query("SELECT * FROM courier WHERE  book_mode = 'ToPay'  AND officename='".$_SESSION["user_type"]."' AND book_date   BETWEEN '$desde' AND '$hasta' ");
-while($row = mysql_fetch_array($result)){
+$result = dbQuery("SELECT * FROM courier WHERE  book_mode = 'ToPay'  AND officename='".$_SESSION["user_type"]."' AND book_date   BETWEEN '$desde' AND '$hasta' ");
+while($row = dbFetchAssoc($result)){
 	
 	$pdf->Cell(23, 8, $row['cons_no'], 0);
 	$pdf->Cell(25, 8, $row['invice_no'], 0);

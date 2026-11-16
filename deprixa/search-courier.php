@@ -17,7 +17,7 @@ $result = dbQuery($sql);
 $result_1 = dbQuery($sql_1);
 while($data = dbFetchAssoc($result)) {
 extract($data);
-isUser();
+requireAdmin();
 ?>
 
 <!doctype html>
@@ -161,7 +161,7 @@ include("header.php");
 								
 														//EJECUTAMOS LA CONSULTA DE BUSQUEDA
 
-														$result = mysqli_query($dbConn, "SELECT * FROM courier_track WHERE cid = $cid	AND cons_no = '$cons_no' ORDER BY bk_time");
+														$result = dbQuery("SELECT * FROM courier_track WHERE cid = ? AND cons_no = ? ORDER BY bk_time", [(int)$cid, (string)$cons_no]);
 
 														//CREAMOS NUESTRA VISTA Y LA DEVOLVEMOS AL AJAX
 
@@ -174,8 +174,8 @@ include("header.php");
 																				<th class="newtext"><strong><font color="white">Observations</font></strong></th>
 																				
 																	</tr>';
-														if(mysqli_num_rows($result)>0){
-															while($row = mysqli_fetch_array($result)){
+														if(dbNumRows($result)>0){
+															while($row = dbFetchAssoc($result)){
 																echo '<tr>
 																		<td>'.$row['cons_no'].'</td>
 																		<td>'.$row['current_city'].'</td>

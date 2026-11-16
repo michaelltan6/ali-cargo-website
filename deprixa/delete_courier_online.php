@@ -7,7 +7,7 @@ ini_set('error_log', __DIR__ . '/php_error.log');
 session_start();
 require_once('database.php');
 require_once('library.php');
-isUser();
+requireAdmin();
 
 header('Content-Type: application/json');
 

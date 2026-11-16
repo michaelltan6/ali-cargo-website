@@ -6,17 +6,17 @@ session_start();
 require_once('database.php');
 require_once('library.php');
 
-isUser();
+requireAdmin();
 
 if ($_POST['cons']=="") {	
-    $cid = $_GET['cid'];
-	$sql = "SELECT * FROM courier_online WHERE cid ='$cid'";
+    $sql = "SELECT * FROM courier_online WHERE cid = ?";
+	$sqlParam = [(int)($_GET['cid'] ?? 0)];
 } else {	
-	$posted = $_POST['cons'];
-	$sql = "SELECT * FROM courier_online WHERE cons_no ='$posted'";
+	$sql = "SELECT * FROM courier_online WHERE cons_no = ?";
+	$sqlParam = [(string)$_POST['cons']];
 }	
-	$result = dbQuery($sql);
-	$count=mysqli_num_rows($result );
+	$result = dbQuery($sql, $sqlParam);
+	$count=dbNumRows($result );
 if ($count > 0){
 while($data = dbFetchAssoc($result)) {
 	extract($data);

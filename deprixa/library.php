@@ -53,4 +53,32 @@ function verify_users($user, $password) {
         return "Login error: " . htmlspecialchars($e->getMessage());
     }
 }
+
+// Hentikan halaman kalau pengunjung belum login sebagai admin.
+// $json = true untuk endpoint AJAX: balas JSON 401, bukan redirect.
+function requireAdmin($json = false) {
+    if (isUser()) { return; }
+    if ($json) {
+        http_response_code(401);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Silakan login dulu.']);
+        exit;
+    }
+    header('Location: /login.php');
+    exit;
+}
+
+// Untuk aksi yang mengubah/menghapus data: permintaan harus datang dari halaman website sendiri.
+function sameOriginOk() {
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    foreach (['HTTP_ORIGIN', 'HTTP_REFERER'] as $k) {
+        if (!empty($_SERVER[$k])) {
+            $u = parse_url($_SERVER[$k]);
+            if (empty($u['host'])) { return false; }
+            $h = $u['host'] . (isset($u['port']) ? ':' . $u['port'] : '');
+            return strcasecmp($h, $host) === 0;
+        }
+    }
+    return false;
+}
 ?>

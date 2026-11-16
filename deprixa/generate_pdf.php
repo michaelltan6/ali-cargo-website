@@ -1,7 +1,7 @@
 <?php
 require_once('deprixa/database/database.php');
 require_once('library.php');
-isUser();
+requireAdmin();
 
 $start = $_GET['start'] ?? '';
 $end = $_GET['end'] ?? '';

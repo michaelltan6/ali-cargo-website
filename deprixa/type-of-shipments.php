@@ -6,7 +6,7 @@ session_start();
 require_once('database-settings.php');
 require_once('database.php');
 require_once('library.php');
-isUser();	
+requireAdmin();
 ?>
 
 <!DOCTYPE html>

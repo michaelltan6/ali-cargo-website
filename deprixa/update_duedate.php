@@ -1,6 +1,9 @@
 <?php
 header('Content-Type: application/json');
 require_once('database.php');
+require_once('library.php');
+requireAdmin(true);
+if (!sameOriginOk()) { http_response_code(403); echo json_encode(['success' => false, 'message' => 'Permintaan ditolak.']); exit; }
 
 try {
     error_log("update_duedate.php started, POST data: " . print_r($_POST, true));

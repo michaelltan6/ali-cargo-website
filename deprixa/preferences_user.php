@@ -7,7 +7,7 @@ require_once('database.php');
 require_once('library.php');
 
 $qname = $_SESSION['user_name'];
-isUser();
+requireAdmin();
 											 
 ?>
 <!DOCTYPE html>

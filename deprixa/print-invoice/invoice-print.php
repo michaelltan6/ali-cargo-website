@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../library.php'; requireAdmin();
 
  
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
@@ -13,7 +14,7 @@ $result = dbQuery($sql);
 while($row = dbFetchAssoc($result)) {
 extract($row);
 }
-$company=mysqli_fetch_array(mysqli_query($dbConn, "SELECT * FROM company"));
+$company=dbFetchAssoc(dbQuery("SELECT * FROM company"));
 $fecha=date('Y-m-d');
 ?>
 

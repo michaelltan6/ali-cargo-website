@@ -15,7 +15,7 @@ extract($data);
 		
 $company=mysqlI_fetch_array(mysqlI_query($dbConn, "SELECT * FROM company"));
 		
-isUser();															 
+requireAdmin();
 ?>
 <!DOCTYPE html>
 <html>

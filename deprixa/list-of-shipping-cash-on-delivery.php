@@ -5,7 +5,7 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE);
 session_start();
 require_once('database.php');
 require_once('library.php');
-isUser();
+requireAdmin();
 
 ?>
 <!DOCTYPE html>
@@ -104,8 +104,8 @@ isUser();
 							?>
 							<tbody>
 							<?php  					
-								$result3 = mysqli_query($dbConn, "SELECT * FROM courier WHERE book_mode = 'Cash-on-Delivery'  ORDER BY cid");
-								while($row = mysqli_fetch_array($result3)) {					
+								$result3 = dbQuery("SELECT * FROM courier WHERE book_mode = 'Cash-on-Delivery'  ORDER BY cid");
+								while($row = dbFetchAssoc($result3)) {					
 							?> 
 							  <tr>							  
 										  <td align="center">
@@ -126,8 +126,8 @@ isUser();
 							?>
 							<tbody>
 							<?php  					
-								$result3 = mysqli_query($dbConn, "SELECT * FROM courier WHERE book_mode = 'Cash-on-Delivery' and officename='".$_SESSION["user_type"]."' ORDER BY cid");
-								while($row = mysqli_fetch_array($result3)) {					
+								$result3 = dbQuery("SELECT * FROM courier WHERE book_mode = 'Cash-on-Delivery' and officename='".$_SESSION["user_type"]."' ORDER BY cid");
+								while($row = dbFetchAssoc($result3)) {					
 							?> 
 							  <tr>							  
 										  <td align="center">

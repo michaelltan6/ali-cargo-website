@@ -12,7 +12,7 @@ require_once('database.php');
 require_once('library.php');
 require_once('funciones.php');
 
-isUser();
+requireAdmin();
 
 error_log("Session data in add-courier.php: " . print_r($_SESSION, true));
 

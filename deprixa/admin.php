@@ -10,7 +10,7 @@ require_once('library.php');
 $company = dbFetchAssoc(dbQuery("SELECT * FROM company")) ?: ['currency' => 'IDR'];
 
 try {
-    isUser();
+    requireAdmin();
 } catch (Exception $e) {
     echo "<p>Error: " . htmlspecialchars($e->getMessage()) . "</p>";
     exit;

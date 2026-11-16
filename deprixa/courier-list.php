@@ -6,7 +6,7 @@ session_start();
 require_once('database.php');
 require_once('library.php');
 require_once('pagination/pagination-courier-list.php');
-isUser();	
+requireAdmin();
 ?>
 <!doctype html>
 <!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->

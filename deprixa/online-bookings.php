@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/library.php'; requireAdmin();
 
  
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
@@ -78,8 +79,8 @@ require_once('library.php');
 								  
                                 <tbody>
 								<?php  					
-									$result3 = mysqli_query($dbConn, "SELECT * FROM online_booking order by status");
-									while($row = mysqli_fetch_array($result3)) {					
+									$result3 = dbQuery("SELECT * FROM online_booking order by status");
+									while($row = dbFetchAssoc($result3)) {					
 								?>
                                     <tr>
 									 <td><?php echo $row ["tracking"]; ?></td>

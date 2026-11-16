@@ -11,7 +11,7 @@ require_once('database.php');
 require_once('library.php');
 
 try {
-    isUser();
+    requireAdmin();
     error_log("Session data in delivered-list.php: " . print_r($_SESSION, true));
 } catch (Exception $e) {
     echo "<p>Error: " . htmlspecialchars($e->getMessage()) . "</p>";

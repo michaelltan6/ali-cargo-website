@@ -9,7 +9,7 @@ require_once('library.php');
 $sql = "SELECT *
 		FROM offices";
 $result = dbQuery($sql);
-isUser();		
+requireAdmin();
 ?>
 
 <!DOCTYPE html>
