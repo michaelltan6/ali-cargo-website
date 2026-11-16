@@ -219,11 +219,17 @@ try {
             if (empty($_POST['item_name']) || !is_array($_POST['item_name'])) {
                 throw new Exception("At least one item is required.");
             }
-            if (empty($shipper_phone) || empty($shipper_address) || empty($shipper_cc) || 
-                empty($receiver_phone) || empty($receiver_address) || empty($receiver_cc) || 
-                empty($receiver_email) || empty($ship_type) || empty($mode) || empty($office) || 
-                empty($pickup_time)) {
-                throw new Exception("All NOT NULL fields must be provided.");
+            // Kode/ID customer (shipper_cc, receiver_cc) boleh kosong. Sisanya wajib.
+            $wajib = [
+                'Nomor kontak pengirim' => $shipper_phone, 'Alamat pengirim' => $shipper_address,
+                'Nomor kontak penerima' => $receiver_phone, 'Alamat penerima' => $receiver_address,
+                'Email penerima' => $receiver_email, 'Produk / tipe barang' => $ship_type,
+                'Service (Mode)' => $mode, 'Kantor asal' => $office, 'Kota tujuan' => $pickup_time,
+            ];
+            $kurang = [];
+            foreach ($wajib as $label => $nilai) { if (trim((string)$nilai) === '' || $nilai === '0') { $kurang[] = $label; } }
+            if ($kurang) {
+                throw new Exception("Lengkapi dulu: " . implode(', ', $kurang) . ".");
             }
 
             $stmt = dbQuery("SELECT COUNT(*) AS count FROM courier WHERE cons_no = ?", [$cons_no]);
@@ -274,6 +280,27 @@ try {
 
                 $dbConn->commit();
                 error_log("Transaction committed for cons_no: $cons_no");
+
+                // Tautkan ke Customer Profile. Kalau bagian ini gagal, pengiriman tetap tersimpan.
+                try {
+                    require_once __DIR__ . '/customer-lib.php';
+                    $linkId = (int)($_POST['customer_id'] ?? 0);
+                    if ($linkId <= 0 && !empty($_POST['save_customer']) && trim($_POST['ship_name'] ?? '') !== '') {
+                        $cpf = cp_fields([
+                            'company_name' => $_POST['ship_name'] ?? '',
+                            'pic_name'     => $_POST['shipper_pic'] ?? '',
+                            'pic_phone'    => $_POST['shipper_phone'] ?? '',
+                            'address'      => $_POST['shipper_address'] ?? '',
+                            'code'         => $_POST['shipper_cc'] ?? '',
+                        ]);
+                        if (cp_validate($cpf) === '') { $linkId = cp_create($cpf); }
+                    }
+                    if ($linkId > 0 && cp_get($linkId) && cp_courier_has_customer_col()) {
+                        dbQuery("UPDATE courier SET customer_id = ? WHERE cid = ?", [$linkId, $courier_id]);
+                    }
+                } catch (Exception $e) {
+                    error_log("Tautan customer gagal: " . $e->getMessage());
+                }
                 $response = [
                     'success' => true,
                     'message' => 'Pengiriman berhasil ditambahkan.',

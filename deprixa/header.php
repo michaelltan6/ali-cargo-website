@@ -43,6 +43,12 @@ if (!function_exists('isUser') || !isUser()) {
         ga('create', 'UA-79190402-1', 'auto');
         ga('send', 'pageview');
     </script>
+    <style>
+        /* Menu bertambah (CUSTOMER), rapatkan jarak antar menu supaya tidak turun ke baris kedua */
+        @media (min-width: 992px) {
+            #topnav .navigation-menu > li > a { padding-left: 13px !important; padding-right: 13px !important; }
+        }
+    </style>
 </head>
 <body>
     <header id="topnav">
@@ -123,6 +129,9 @@ if (!function_exists('isUser') || !isUser()) {
                         <?php } ?>
                         <li class="has-submenu">
                             <a href="add-courier.php"><i class="fa fa-cubes"></i> <span> TAMBAH PENGIRIMAN </span></a>
+                        </li>
+                        <li class="has-submenu">
+                            <a href="customer-profile.php"><i class="fa fa-users"></i> <span> CUSTOMER </span></a>
                         </li>
                         <?php
                         try {
