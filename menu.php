@@ -3,7 +3,7 @@
 // Markup-nya sama dengan header di beranda, tampilannya diatur di
 // deprixa_components/styles/ali-site.css
 ?>
-<link rel="stylesheet" href="deprixa_components/styles/ali-site.css?v=20261114" />
+<link rel="stylesheet" href="deprixa_components/styles/ali-site.css?v=<?php echo @filemtime(__DIR__ . '/deprixa_components/styles/ali-site.css'); ?>" />
 <header class="header-wrap">
   <div class="white-part"></div>
   <div class="red-part"></div>

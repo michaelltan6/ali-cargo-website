@@ -162,7 +162,7 @@
     ]
   }
   </script>
-  <link rel="stylesheet" href="deprixa_components/styles/ali-site.css?v=20261114" />
+  <link rel="stylesheet" href="deprixa_components/styles/ali-site.css?v=<?php echo @filemtime(__DIR__ . '/deprixa_components/styles/ali-site.css'); ?>" />
 </head>
 
 <body>

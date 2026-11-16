@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/layanan-lib.php';
+require_once __DIR__ . '/gallery-lib.php';
 $d = ls_data();
+$aboutPhoto = null;
+foreach (gallery_load_albums() as $al) { $im = gallery_images($al['id']); if ($im) { $aboutPhoto = 'gallery/' . $al['id'] . '/' . rawurlencode($im[0]); break; } }
 $total = 0; foreach ($d['data'] as $rows) { $total += count($rows); }
 
 ls_head('Tentang Kami - Aneka Lintas Indonesia Cargo',
@@ -54,6 +57,9 @@ ls_head('Tentang Kami - Aneka Lintas Indonesia Cargo',
       </dl>
     </aside>
   </div>
+  <?php if ($aboutPhoto): ?>
+  <figure class="pg-photo"><img src="<?php echo ls_h($aboutPhoto); ?>" alt="Barang kiriman yang ditangani ALI Cargo" loading="lazy"><figcaption>Barang kiriman yang kami tangani. <a href="gallery.php">Lihat gallery</a></figcaption></figure>
+  <?php endif; ?>
 </section>
 
 <section class="pg-section-alt">

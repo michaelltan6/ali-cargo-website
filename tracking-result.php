@@ -184,7 +184,7 @@ if ($cons) {
         .whatsapp-btn, #back-top { background-color: #333; color: #fff; padding: 6px 12px; border-radius: 5px; text-decoration: none; transition: background-color 0.3s ease; }
         .whatsapp-btn:hover, #back-top:hover { background-color: #444; }
     </style>
-  <link rel="stylesheet" href="deprixa_components/styles/ali-site.css?v=20261114" />
+  <link rel="stylesheet" href="deprixa_components/styles/ali-site.css?v=<?php echo @filemtime(__DIR__ . '/deprixa_components/styles/ali-site.css'); ?>" />
 </head>
 
 <body>
@@ -498,7 +498,7 @@ if ($cons) {
         .whatsapp-btn, #back-top { background-color: #333; color: #fff; padding: 6px 12px; border-radius: 5px; text-decoration: none; transition: background-color 0.3s ease; }
         .whatsapp-btn:hover, #back-top:hover { background-color: #444; }
     </style>
-  <link rel="stylesheet" href="deprixa_components/styles/ali-site.css?v=20261114" />
+  <link rel="stylesheet" href="deprixa_components/styles/ali-site.css?v=<?php echo @filemtime(__DIR__ . '/deprixa_components/styles/ali-site.css'); ?>" />
 </head>
 
 <body>
