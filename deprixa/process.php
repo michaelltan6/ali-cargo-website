@@ -310,7 +310,7 @@ try {
                     }
                     if (courier_columns_ready()) {
                         $custVal = ($linkId > 0 && cp_get($linkId)) ? $linkId : null;
-                        dbQuery("UPDATE courier SET customer_id = ?, payment_term = ?, spb_no = ?, partner = ?, charge_unit = ?, book_code = ? WHERE cid = ?", [$custVal, $payment_term, $spb_no, $partner, $charge_unit, $book_code, $courier_id]);
+                        dbQuery("UPDATE courier SET customer_id = ?, payment_term = ?, spb_no = ?, partner = ?, charge_unit = ?, book_code = ?, origin_city = ? WHERE cid = ?", [$custVal, $payment_term, $spb_no, $partner, $charge_unit, $book_code, mb_substr(trim(limpiar($_POST['origin_city'] ?? '')), 0, 100), $courier_id]);
                     }
                 } catch (Exception $e) {
                     error_log("Tautan customer gagal: " . $e->getMessage());
@@ -452,8 +452,8 @@ try {
                 $rtd = DateTime::createFromFormat('Y-m-d', $rt);
                 $spb_return = ($rtd && $rtd->format('Y-m-d') === $rt) ? $rt : null;
                 $book_code = courier_book_code($_POST['book_code'] ?? 'ALI');
-                dbQuery("UPDATE courier SET spb_no = ?, spb_return = ?, partner = ?, charge_unit = ?, book_code = ? WHERE cid = ?",
-                    [$spb_no > 0 ? $spb_no : null, $spb_return, mb_substr(trim(limpiar($_POST['partner'] ?? '')), 0, 100), (($_POST['charge_unit'] ?? 'kg') === 'm3') ? 'm3' : 'kg', $book_code, $cid]);
+                dbQuery("UPDATE courier SET spb_no = ?, spb_return = ?, partner = ?, charge_unit = ?, book_code = ?, origin_city = ? WHERE cid = ?",
+                    [$spb_no > 0 ? $spb_no : null, $spb_return, mb_substr(trim(limpiar($_POST['partner'] ?? '')), 0, 100), (($_POST['charge_unit'] ?? 'kg') === 'm3') ? 'm3' : 'kg', $book_code, mb_substr(trim(limpiar($_POST['origin_city'] ?? '')), 0, 100), $cid]);
                 // Metode pembayaran dari halaman edit: cash -> Paid, tempo -> ToPay. 'keep' = biarkan seperti sekarang.
                 $pt = (string)($_POST['payment_term'] ?? 'keep');
                 if (in_array($pt, ['cash', '7', '14', '30'], true)) {

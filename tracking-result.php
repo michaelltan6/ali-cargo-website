@@ -48,24 +48,33 @@ if ($cons) {
             $total_volume_m3 += $quantity * $volume_m3;
         }
 
-        // Determine progress percentage using etd and eta, tied to ETA
-        $progress_percentage = 0;
-        $eta_display = !empty($eta) ? date('Y-m-d', strtotime($eta)) : 'Not set';
-        if (!empty($etd) && !empty($eta)) {
-            $etdDate = new DateTime($etd, new DateTimeZone('Asia/Jakarta'));
-            $etaDate = new DateTime($eta, new DateTimeZone('Asia/Jakarta'));
-            $now = new DateTime('now', new DateTimeZone('Asia/Jakarta')); // 04:11 PM WIB, August 05, 2025
-            $totalDuration = $etaDate->getTimestamp() - $etdDate->getTimestamp();
-            $elapsed = $now->getTimestamp() - $etdDate->getTimestamp();
-            if ($elapsed < 0) $elapsed = 0; // Progress starts at 0% before ETD
-            if ($elapsed >= $totalDuration) $elapsed = $totalDuration; // 100% at or after ETA
-            $progress_percentage = $totalDuration > 0 ? ($elapsed / $totalDuration) * 100 : 0;
-            $progress_percentage = min(100, max(0, $progress_percentage));
-            if ($status === 'Delivered') $progress_percentage = 100; // Override for Delivered status
-        } else {
-            $progress_percentage = 0; // Default to 0% if dates are incomplete
-        }
-        $progress_percentage = number_format($progress_percentage, 2);
+        // Tampilan: status mengikuti yang diatur admin
+        $bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        $hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        $fmt_date = function ($v, $withDay = false) use ($bulan, $hari) {
+            $v = trim((string)$v);
+            if ($v === '' || strpos($v, '0000') === 0) { return ''; }
+            $t = strtotime($v);
+            if (!$t) { return ''; }
+            return ($withDay ? $hari[(int)date('w', $t)] . ', ' : '') . (int)date('j', $t) . ' ' . $bulan[(int)date('n', $t) - 1] . ' ' . date('Y', $t);
+        };
+        $status_raw = trim((string)($status ?? ''));
+        $status_key = strtolower(str_replace(['-', '_'], ' ', $status_raw));
+        if ($status_key === 'delivered') { $status_label = 'Delivered'; $status_class = 'done'; $step = 3; }
+        elseif ($status_key === 'on hold') { $status_label = 'On Hold'; $status_class = 'hold'; $step = 2; }
+        elseif ($status_key === 'in transit' || $status_key === 'on delivery') { $status_label = 'On Delivery'; $status_class = 'go'; $step = 2; }
+        else { $status_label = $status_raw !== '' ? $status_raw : '-'; $status_class = 'go'; $step = 1; }
+        $pay_term = (string)($payment_term ?? '');
+        if (in_array($pay_term, ['7', '14', '30'], true)) { $pay_label = 'Credit'; }
+        elseif ($pay_term === 'cash') { $pay_label = 'Cash'; }
+        else { $pay_label = (($book_mode ?? '') === 'ToPay') ? 'Credit' : 'Cash'; }
+        $eta_text = $fmt_date($eta ?? '', true);
+        $etd_text = $fmt_date($etd ?? '');
+        $recv_date = '';
+        foreach (['collection_date', 'pick_date'] as $k) { if (trim((string)($courier_data[$k] ?? '')) !== '' && strpos((string)$courier_data[$k], '0000') !== 0) { $recv_date = substr((string)$courier_data[$k], 0, 10); break; } }
+        $e = function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); };
+        $origin = trim((string)($origin_city ?? ''));
+        $dest = trim((string)($pickup_time ?? ''));
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -84,7 +93,7 @@ if ($cons) {
     <link rel="stylesheet" href="deprixa/css/tracking.css" type="text/css" />   
     <link href="deprixa_components/styles/track-order.css" rel="stylesheet" />
     <link href="deprixa/css/style.css" rel="stylesheet" media="all">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
     <style>
         .header-wrap { position: relative; height: 100px; overflow: hidden; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45); z-index: 10; }
         .white-part, .red-part { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
@@ -183,6 +192,49 @@ if ($cons) {
         footer a, .footer-links a, .whatsapp-btn, #back-top { font-size: 1rem !important; color: #333; }
         .whatsapp-btn, #back-top { background-color: #333; color: #fff; padding: 6px 12px; border-radius: 5px; text-decoration: none; transition: background-color 0.3s ease; }
         .whatsapp-btn:hover, #back-top:hover { background-color: #444; }
+
+        /* Halaman tracking - ringkas */
+        .trk-wrap { max-width: 1040px; margin: 0 auto; padding: 18px 12px 40px; font-family: "Open Sans", Arial, sans-serif; color: #263238; }
+        .trk-wrap * { box-sizing: border-box; }
+        .trk-card { margin-left: 0 !important; margin-right: 0 !important; width: auto !important; float: none !important; background: #fff; border: 1px solid #e3e7ea; border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+        .trk-card h3 { text-align: left !important; font-size: 1.3rem; margin: 0 0 12px; font-weight: 700; color: #263238; text-transform: uppercase; letter-spacing: .04em; }
+        .trk-top { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; width: 100%; }
+        .trk-top > .trk-card { flex: 1 1 340px; margin-bottom: 0; }
+        .trk-no { font-size: 2.6rem; font-weight: 800; color: #e53935; line-height: 1.1; margin: 4px 0 10px; }
+        .trk-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .trk-pill { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 1.2rem; font-weight: 700; color: #fff; }
+        .trk-pill.go { background: #00a65a; } .trk-pill.hold { background: #f39c12; } .trk-pill.done { background: #1565c0; }
+        .trk-pill.pay { background: #eef1f3; color: #37474f; }
+        .trk-lbl { font-size: 1.1rem; text-transform: uppercase; letter-spacing: .06em; color: #78909c; font-weight: 700; }
+        .trk-eta { background: #fff8e1; border-color: #ffe08a; text-align: center; }
+        .trk-eta .big { font-size: 2.1rem; font-weight: 800; color: #263238; margin: 6px 0 4px; line-height: 1.2; }
+        .trk-eta .sub { font-size: 1.2rem; color: #607d8b; }
+        .trk-steps { display: flex; align-items: center; margin: 4px 0 0; }
+        .trk-step { flex: 1; text-align: center; position: relative; font-size: 1.15rem; color: #90a4ae; }
+        .trk-step:before { content: ""; display: block; width: 14px; height: 14px; border-radius: 50%; background: #cfd8dc; margin: 0 auto 6px; position: relative; z-index: 1; }
+        .trk-step:after { content: ""; position: absolute; top: 6px; left: 50%; width: 100%; height: 2px; background: #cfd8dc; }
+        .trk-step:last-child:after { display: none; }
+        .trk-step.on { color: #263238; font-weight: 700; }
+        .trk-step.on:before { background: #00a65a; }
+        .trk-step.on:after { background: #00a65a; }
+        .trk-step.cur:before { box-shadow: 0 0 0 4px rgba(0,166,90,.2); }
+        .trk-step.hold:before { background: #f39c12; box-shadow: 0 0 0 4px rgba(243,156,18,.25); }
+        .trk-info { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 18px; }
+        .trk-info b { display: block; font-size: 1.3rem; font-weight: 600; margin-top: 2px; word-break: break-word; }
+        .trk-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; padding-top: 14px; border-top: 1px dashed #dfe4e7; }
+        .trk-parties b { display: block; font-size: 1.4rem; margin-top: 2px; }
+        .trk-note { margin-top: 12px; padding: 8px 12px; background: #f5f7f8; border-radius: 6px; font-size: 1.2rem; color: #455a64; }
+        .trk-table { width: 100%; border-collapse: collapse; }
+        .trk-table th { text-align: left; font-size: 1.05rem; text-transform: uppercase; letter-spacing: .05em; color: #78909c; font-weight: 700; padding: 6px 8px; border-bottom: 2px solid #e3e7ea; }
+        .trk-table td { padding: 8px; border-bottom: 1px solid #eef1f3; font-size: 1.25rem; vertical-align: top; }
+        .trk-table .num { text-align: right; white-space: nowrap; }
+        .trk-table tfoot td { font-weight: 700; background: #f5f7f8; border-bottom: 0; }
+        .trk-scroll { overflow-x: auto; }
+        @media (max-width: 760px) {
+            .trk-top, .trk-parties { grid-template-columns: 1fr; }
+            .trk-info { grid-template-columns: 1fr 1fr; }
+            .trk-no { font-size: 2.2rem; } .trk-eta .big { font-size: 2rem; }
+        }
     </style>
   <link rel="stylesheet" href="deprixa_components/styles/ali-site.css?v=<?php echo @filemtime(__DIR__ . '/deprixa_components/styles/ali-site.css'); ?>" />
 </head>
@@ -222,181 +274,107 @@ if ($cons) {
             </section>
         </div>  
 
-        <div class="container">
-            <div>
-                <table border="0" align="center" width="100%">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h3><i class="fa fa-barcode" style="width: 25px; font-size: 24px; float: left;"></i> <span style="color:#FF4000"><strong><?php echo htmlspecialchars($cons_no); ?></strong></span></h3>
-                        </div>
-                        <div class="col-md-6">
-                            <h3 class="status-booking">
-                                <span><strong>Current Status</strong>: <span class="label <?php echo htmlspecialchars(str_replace(' ', '-', $status)); ?> label-large"><span style="font-size:1rem; color:white"><?php echo htmlspecialchars($status); ?></span></span></span>   
-                                <span><strong>Booking Mode</strong>: <span class="label label-danger"><i class="fa fa-money"></i><span style="font-size:1rem; color:white"> <?php echo htmlspecialchars($book_mode); ?></span></span></span>
-                            </h3>
-                        </div>
+        <div class="trk-wrap">
+            <div class="trk-top">
+                <section class="trk-card">
+                    <div class="trk-lbl">Nomor tracking</div>
+                    <div class="trk-no"><?php echo $e($cons_no); ?></div>
+                    <div class="trk-tags">
+                        <span class="trk-pill <?php echo $status_class; ?>"><?php echo $e($status_label); ?></span>
+                        <span class="trk-pill pay">Payment Terms: <?php echo $e($pay_label); ?></span>
                     </div>
-                    <div class="col-md-6">
-                        <table class="table table-striped">
-                            <tr></tr>
-                        </table>
+                    <div class="trk-steps" style="margin-top:18px">
+                        <div class="trk-step on<?php echo $step === 1 ? ' cur' : ''; ?>">Barang diterima</div>
+                        <div class="trk-step<?php echo $step >= 2 ? ' on' : ''; ?><?php echo $step === 2 ? ($status_class === 'hold' ? ' hold' : ' cur') : ''; ?>"><?php echo $status_class === 'hold' ? 'On Hold' : 'On Delivery'; ?></div>
+                        <div class="trk-step<?php echo $step >= 3 ? ' on cur' : ''; ?>">Delivered</div>
                     </div>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-4"> 
-                            <strong>Estimated Time of Arrival (ETA)</strong><br />
-                            <?php echo htmlspecialchars($eta_display); ?>, By End Of Day 
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h2>Additional Information</h2>
-                        </div>
-                        <br/>
-                        <div class="col-md-4"> 
-                            <strong>Origin:</strong> <?php echo htmlspecialchars($invice_no ?? 'N/A'); ?><br />
-                            <strong>Destination:</strong> <?php echo htmlspecialchars($pickup_time ?? 'N/A'); ?><br />
-                            <strong>Services:</strong> <?php echo htmlspecialchars($mode ?? 'N/A'); ?><br />
-                            <strong>Type:</strong> <?php echo htmlspecialchars($ship_type ?? 'N/A'); ?><br />
-                            <strong>Pickup Date/Time:</strong> <?php echo htmlspecialchars($collection_date ?? 'N/A'); ?><br/>   
-                            <strong>Description:</strong> <?php echo htmlspecialchars($comments ?? 'N/A'); ?>
-                        </div>
-                        <div class="col-md-4"> 
-                            <strong>Shipper Info</strong><br />
-                            <strong>Name:</strong> <?php echo htmlspecialchars($ship_name ?? 'N/A'); ?><br />
-                            <strong>Phone:</strong> <?php echo htmlspecialchars($shipper_phone ?? 'N/A'); ?><br />
-                            <strong>Address:</strong> <?php echo htmlspecialchars($shipper_address ?? 'N/A'); ?> 
-                        </div>
-                        <div class="col-md-4"> 
-                            <strong>Consignee Information</strong><br />
-                            <strong>Name:</strong> <?php echo htmlspecialchars($rev_name ?? 'N/A'); ?><br />
-                            <strong>Phone:</strong> <?php echo htmlspecialchars($receiver_phone ?? 'N/A'); ?><br />
-                            <strong>Address:</strong> <?php echo htmlspecialchars($receiver_address ?? 'N/A'); ?>
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h2>Cargo Details</h2>
-                        </div>
-                        <br/>
-                        <div class="col-md-12">
-                            <table class="table table-bordered table-striped table-hover">
-                                <tr class="car_bold col_dark_bold" align="center">
-                                    <td><strong>Quantity</strong></td>
-                                    <td><strong>Nama Barang</strong></td>
-                                    <td><strong>Length (cm)</strong></td>
-                                    <td><strong>Width (cm)</strong></td>
-                                    <td><strong>Height (cm)</strong></td>
-                                    <td><strong>Weight (kg)</strong></td>
-                                </tr>
-                                <?php
-                                foreach ($items as $item) {
-                                    $quantity = is_numeric($item['quantity']) ? number_format((int)$item['quantity'], 0, '.', '') : ($item['quantity'] ?? 'N/A');
-                                    $item_name = htmlspecialchars($item['item_name'] ?? 'N/A');
-                                    $length = is_numeric($item['length']) ? number_format((float)$item['length'], 3, '.', '') : ($item['length'] ?? 'N/A');
-                                    $width = is_numeric($item['width']) ? number_format((float)$item['width'], 3, '.', '') : ($item['width'] ?? 'N/A');
-                                    $height = is_numeric($item['height']) ? number_format((float)$item['height'], 3, '.', '') : ($item['height'] ?? 'N/A');
-                                    $item_weight = is_numeric($item['item_weight']) ? number_format((float)$item['item_weight'], 3, '.', '') : ($item['item_weight'] ?? 'N/A');
-                                    echo '<tr align="center">
-                                            <td>' . $quantity . '</td>
-                                            <td>' . $item_name . '</td>
-                                            <td>' . $length . '</td>
-                                            <td>' . $width . '</td>
-                                            <td>' . $height . '</td>
-                                            <td>' . $item_weight . '</td>
-                                          </tr>';
-                                }
-                                ?>
-                            </table>
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h2>Summary</h2>
-                        </div>
-                        <br/>
-                        <div class="col-md-12">
-                            <table class="table table-bordered table-striped table-hover">
-                                <tr class="car_bold col_dark_bold" align="center">
-                                    <td><strong>Total Quantity</strong></td>
-                                    <td><strong>Total Weight (kg)</strong></td>
-                                    <td><strong>Total Volume (m³)</strong></td>
-                                </tr>
-                                <tr align="center">
-                                    <td><?php echo number_format($total_quantity, 0, '.', ''); ?></td>
-                                    <td><?php echo number_format($total_weight_kg, 3, '.', ''); ?></td>
-                                    <td><?php echo number_format($total_volume_m3, 3, '.', ''); ?></td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-12 travel-history">
-                            <h3>Progress Tracker</h3>
-                            <div class="progress-container">
-                                <div class="progress">
-                                    <div id="progress-bar" class="progress-bar" role="progressbar" style="width: <?php echo htmlspecialchars($progress_percentage); ?>%;">
-                                        <span class="progress-text"><?php echo htmlspecialchars($progress_percentage); ?>%</span>
-                                    </div>
-                                </div>
-                                <img id="cartoon-box" src="deprixa/assets/images/cartoon-box.png" alt="Cartoon Box" class="cartoon-box">
-                            </div>
-                            <small>Estimated completion by <?php echo htmlspecialchars($eta_display); ?>.</small>
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-12 travel-history">
-                            <h2>Travel History</h2>
-                            <br/>
-                            <?php
-                            $result = dbQuery("SELECT * FROM courier_track WHERE cid = :cid AND cons_no = :cons_no ORDER BY bk_time", [
-                                ':cid' => $cid,
-                                ':cons_no' => $cons_no
-                            ]);
+                </section>
+                <section class="trk-card trk-eta">
+                    <div class="trk-lbl">Estimasi tiba (ETA)</div>
+                    <div class="big"><?php echo $eta_text !== '' ? $e($eta_text) : 'Belum ditentukan'; ?></div>
+                    <div class="sub"><?php echo $eta_text !== '' ? 'Estimasi dapat berubah mengikuti kondisi di lapangan' : 'Jadwal akan diperbarui oleh tim kami'; ?></div>
+                </section>
+            </div>
 
-                            if (dbNumRows($result) > 0) {
-                                echo '<table class="table table-bordered table-striped table-hover" >
-                                        <tr class="car_bold col_dark_bold" align="center">
-                                            <td><strong>Tracking No</strong></td>
-                                            <td><strong>Last Location </strong></td>
-                                            <td><strong>Status</strong></td>
-                                            <td><strong>Date / Time</strong></td>
-                                            <td><strong>Information</strong></td>                                                                                          
-                                        </tr>';
-                                while ($row = dbFetchAssoc($result)) {
-                                    echo '<tr align="center">
-                                            <td>' . htmlspecialchars($row['cons_no']) . '</td>
-                                            <td>' . htmlspecialchars($row['pick_time']) . '</td>
-                                            <td>' . htmlspecialchars($row['status']) . '</td>
-                                            <td>' . htmlspecialchars($row['bk_time']) . '</td>                
-                                            <td>' . htmlspecialchars($row['comments']) . '</td>
-                                          </tr>';
-                                }
-                                echo '</table>';
-                            } else {
-                                echo '<tr>
-                                        <td colspan="5" >No results found</td>
-                                      </tr>';
-                            }
-                            ?>
-                            <?php if (!empty($tracking_link)): ?>
-                                <div>
-                                    <h3>Live Tracking</h3>
-                                    <div class="iframe-container">
-                                        <iframe src="<?php echo htmlspecialchars($tracking_link); ?>" allowfullscreen></iframe>
-                                    </div>
-                                    <p>Tracking data provided by the linked service. Refresh to update.</p>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+            <section class="trk-card">
+                <h3>Additional Information</h3>
+                <div class="trk-info">
+                    <div><span class="trk-lbl">Origin</span><b><?php echo $origin !== '' ? $e($origin) : '-'; ?></b></div>
+                    <div><span class="trk-lbl">Destination</span><b><?php echo $dest !== '' ? $e($dest) : '-'; ?></b></div>
+                    <div><span class="trk-lbl">Services</span><b><?php echo !empty($mode) ? $e($mode) : '-'; ?></b></div>
+                    <div><span class="trk-lbl">Tanggal diterima</span><b><?php echo $recv_date !== '' ? $e($fmt_date($recv_date)) : '-'; ?></b></div>
+                    <?php if ($etd_text !== ''): ?><div><span class="trk-lbl">Jadwal pengiriman</span><b><?php echo $e($etd_text); ?></b></div><?php endif; ?>
+                </div>
+                <div class="trk-parties">
+                    <div><span class="trk-lbl">Shipper</span><b><?php echo $e($ship_name ?? '-'); ?></b></div>
+                    <div><span class="trk-lbl">Consignee</span><b><?php echo $e($rev_name ?? '-'); ?></b></div>
+                </div>
+                <?php if (trim((string)($comments ?? '')) !== ''): ?>
+                    <div class="trk-note"><b>Catatan:</b> <?php echo $e($comments); ?></div>
+                <?php endif; ?>
+            </section>
+
+            <section class="trk-card">
+                <h3>Cargo Details</h3>
+                <div class="trk-scroll">
+                <table class="trk-table">
+                    <thead><tr><th>Nama barang</th><th class="num">Qty</th><th class="num">P (cm)</th><th class="num">L (cm)</th><th class="num">T (cm)</th><th class="num">Berat (kg)</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($items as $item):
+                        $n = function ($v, $d) { return is_numeric($v) ? number_format((float)$v, $d, '.', '') : '-'; }; ?>
+                        <tr>
+                            <td><?php echo $e($item['item_name'] ?? '-'); ?></td>
+                            <td class="num"><?php echo $n($item['quantity'], 0); ?></td>
+                            <td class="num"><?php echo $n($item['length'], 0); ?></td>
+                            <td class="num"><?php echo $n($item['width'], 0); ?></td>
+                            <td class="num"><?php echo $n($item['height'], 0); ?></td>
+                            <td class="num"><?php echo $n($item['item_weight'], 3); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                    <tfoot><tr>
+                        <td>Total</td>
+                        <td class="num"><?php echo number_format($total_quantity, 0, '.', ''); ?></td>
+                        <td class="num" colspan="3">Volume: <?php echo number_format($total_volume_m3, 3, '.', ''); ?> m³</td>
+                        <td class="num"><?php echo number_format($total_weight_kg, 3, '.', ''); ?></td>
+                    </tr></tfoot>
                 </table>
-            </div> 
+                </div>
+            </section>
+
+            <section class="trk-card">
+                <h3>Travel History</h3>
+                <?php
+                $hist = dbQuery("SELECT * FROM courier_track WHERE cid = :cid ORDER BY bk_time DESC", [':cid' => $cid]);
+                $rows = [];
+                while ($row = dbFetchAssoc($hist)) { $rows[] = $row; }
+                if ($rows): ?>
+                    <div class="trk-scroll">
+                    <table class="trk-table">
+                        <thead><tr><th>Tanggal / waktu</th><th>Lokasi terakhir</th><th>Status</th><th>Keterangan</th></tr></thead>
+                        <tbody>
+                        <?php foreach ($rows as $row): ?>
+                            <tr>
+                                <td style="white-space:nowrap"><?php echo $e($row['bk_time']); ?></td>
+                                <td><?php echo $e($row['pick_time']); ?></td>
+                                <td><?php echo $e($row['status']); ?></td>
+                                <td><?php echo $e($row['comments']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    </div>
+                <?php else: ?>
+                    <p style="margin:0;color:#78909c">Belum ada riwayat perjalanan.</p>
+                <?php endif; ?>
+                <?php if (!empty($tracking_link)): ?>
+                    <h3 style="margin-top:18px">Live Tracking</h3>
+                    <div class="iframe-container">
+                        <iframe src="<?php echo $e($tracking_link); ?>" allowfullscreen></iframe>
+                    </div>
+                <?php endif; ?>
+            </section>
+        </div>
         </main>
 
         <?php include_once "footer.php"; ?>
@@ -410,39 +388,7 @@ if ($cons) {
 <script src="deprixa_components/Scripts/MPD/Common/ga-events.js"></script>   
 <script src="deprixa_components/bundles/jqueryval"></script>
 <script src="deprixa_components/scripts/tracking.js"></script>
-<script>
-    function myFunction() {
-        window.print();
-    }
 
-    function updateProgress() {
-        const etd = new Date('<?php echo htmlspecialchars(date('Y-m-d H:i:s', strtotime($etd ?? 'now + 1 day'))); ?>').getTime();
-        const eta = new Date('<?php echo htmlspecialchars(date('Y-m-d H:i:s', strtotime($eta ?? 'now + 2 days'))); ?>').getTime();
-        const now = new Date().getTime();
-        const totalDuration = eta - etd;
-        let elapsed = now - etd;
-        if (elapsed < 0) elapsed = 0; // Progress starts at 0% before ETD
-        if (elapsed >= totalDuration) elapsed = totalDuration; // 100% at or after ETA
-        let progress = totalDuration > 0 ? (elapsed / totalDuration) * 100 : 0;
-        progress = Math.min(100, Math.max(0, progress));
-        if ('<?php echo htmlspecialchars($status); ?>' === 'Delivered') progress = 100;
-        if ('<?php echo htmlspecialchars($eta ?? ''); ?>' === '') progress = 0;
-        const progressBar = document.getElementById('progress-bar');
-        const cartoonBox = document.getElementById('cartoon-box');
-        if (progressBar && cartoonBox) {
-            progressBar.style.width = Math.round(progress) + '%';
-            progressBar.querySelector('.progress-text').textContent = Math.round(progress) + '%';
-            const progressWidth = progressBar.offsetWidth;
-            const containerWidth = progressBar.parentElement.parentElement.offsetWidth;
-            const boxPosition = (progress / 100) * containerWidth - (cartoonBox.offsetWidth / 2);
-            cartoonBox.style.left = boxPosition + 'px';
-        }
-    }
-
-    // Run immediately on page load and then every minute
-    document.addEventListener('DOMContentLoaded', updateProgress);
-    setInterval(updateProgress, 60000); // Update every minute
-</script>
 </body>
 </html>
 <?php

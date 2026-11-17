@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/courier-lib.php';
+require_once __DIR__ . '/city-lib.php';
 
 ob_start();
 if (session_status() === PHP_SESSION_NONE) {
@@ -241,9 +242,14 @@ ob_end_clean();
                         </select>
                     </div>
                     <div class="ac-f ac-4">
-                        <label for="pickup_time">Kota tujuan <em>*</em></label>
-                        <input type="text" name="pickup_time" id="pickup_time" required placeholder="mis. Surabaya">
+                        <label for="origin_city">Kota asal</label>
+                        <input type="text" name="origin_city" id="origin_city" list="kota-list" autocomplete="off" value="Jakarta" placeholder="Pilih atau ketik kota">
                     </div>
+                    <div class="ac-f ac-4">
+                        <label for="pickup_time">Kota tujuan <em>*</em></label>
+                        <input type="text" name="pickup_time" id="pickup_time" list="kota-list" autocomplete="off" required placeholder="Pilih atau ketik kota">
+                    </div>
+                    <?php echo ali_city_datalist('kota-list'); ?>
                     <div class="ac-f ac-4">
                         <label for="pick_date">Tanggal barang kami terima</label>
                         <input type="date" name="pick_date" id="pick_date" value="<?php echo date('Y-m-d'); ?>">

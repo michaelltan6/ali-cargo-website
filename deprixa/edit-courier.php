@@ -47,6 +47,7 @@ ob_clean();
 
 // Main logic
 require_once __DIR__ . '/courier-lib.php';
+require_once __DIR__ . '/city-lib.php';
 courier_columns_ready();
 $cid = isset($_GET['cid']) ? (int)$_GET['cid'] : 0;
 if ($cid <= 0 && !empty($_POST['cons'])) {
@@ -260,9 +261,14 @@ if ($count > 0) {
                         </select>
                     </div>
                     <div class="ac-f ac-4">
-                        <label for="pickup_time">Kota tujuan <em>*</em></label>
-                        <input type="text" name="pickup_time" id="pickup_time" required value="<?php echo htmlspecialchars($pickup_time ?? ''); ?>">
+                        <label for="origin_city">Kota asal</label>
+                        <input type="text" name="origin_city" id="origin_city" list="kota-list" autocomplete="off" value="<?php echo htmlspecialchars((string)($origin_city ?? '')); ?>" placeholder="Pilih atau ketik kota">
                     </div>
+                    <div class="ac-f ac-4">
+                        <label for="pickup_time">Kota tujuan <em>*</em></label>
+                        <input type="text" name="pickup_time" id="pickup_time" list="kota-list" autocomplete="off" required value="<?php echo htmlspecialchars($pickup_time ?? ''); ?>" placeholder="Pilih atau ketik kota">
+                    </div>
+                    <?php echo ali_city_datalist('kota-list'); ?>
                     <div class="ac-f ac-4">
                         <label for="partner">Via / Partner</label>
                         <input type="text" name="partner" id="partner" value="<?php echo htmlspecialchars((string)($partner ?? '')); ?>" placeholder="Ekspedisi / mitra">
