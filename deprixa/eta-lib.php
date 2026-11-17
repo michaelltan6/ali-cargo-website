@@ -226,8 +226,8 @@ function ali_eta_script() {
         var e = lookup(city.value), d = dep.value;
         return { e: e, eta: (e && d) ? addDays(d, e[1]) : '' };
     }
+    // ETA ikut terhitung ulang tiap kota / tanggal berangkat berubah, kecuali ETA baru saja diketik sendiri di halaman ini
     var manual = false;
-    (function init() { var a = auto(); manual = eta.value !== '' && eta.value !== a.eta; })();
     eta.addEventListener('input', function () { manual = eta.value !== ''; refreshHint(); });
     function refreshHint() {
         var a = auto();
