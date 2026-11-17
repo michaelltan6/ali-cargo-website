@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
     if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); }
 }
 require_once('database.php');
-require_once(__DIR__ . '/funciones.php');
+require_once(__DIR__ . '/pwd-lib.php');
 
 // Tolak permintaan POST yang datang dari situs lain (perlindungan CSRF untuk semua halaman yang memuat library ini).
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && !empty($_SERVER['HTTP_ORIGIN'])) {
@@ -109,7 +109,7 @@ function verify_users($user, $password) {
             header("Location: deprixa/admin.php");
             exit;
         }
-        if (!$row) { claves($password); } // waktu respon relatif sama walau akun tidak ada
+        if (!$row) { ali_legacy_hash($password); } // waktu respon relatif sama walau akun tidak ada
         ali_login_fail($user);
         error_log("Login failed for user: " . $user);
         return "Invalid email or password.";
