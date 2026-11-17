@@ -57,6 +57,19 @@ if (isset($_SESSION['user_name']) && isset($_SESSION['user_type'])) {
     error_log("Session variables user_name or user_type not set.");
 }
 
+// Keluar (logout): link biasa (GET), langsung kembali ke halaman login
+if (isset($_GET['action']) && $_GET['action'] === 'logOut') {
+    $_SESSION = array();
+    if (ini_get('session.use_cookies')) {
+        $cp = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000, $cp['path'], $cp['domain'], !empty($_SERVER['HTTPS']), true);
+    }
+    session_destroy();
+    ob_end_clean();
+    header('Location: /login.php');
+    exit;
+}
+
 // Set JSON header
 header('Content-Type: application/json; charset=utf-8');
 
