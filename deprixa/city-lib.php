@@ -1,12 +1,21 @@
 <?php
 // Daftar kota untuk isian Kota asal / Kota tujuan. Boleh juga mengetik kota lain.
 // Kota yang pernah dipakai di data pengiriman ikut muncul otomatis (ali_city_options).
-$ali_city_base = array("Jakarta", "Jakarta Barat", "Jakarta Utara", "Jakarta Timur", "Jakarta Selatan", "Jakarta Pusat", "Tangerang", "Tangerang Selatan", "Serang", "Cilegon", "Bekasi", "Bogor", "Depok", "Cikarang", "Karawang", "Purwakarta", "Subang", "Cirebon", "Bandung", "Cimahi", "Sukabumi", "Cianjur", "Garut", "Tasikmalaya", "Indramayu", "Majalengka", "Kuningan", "Semarang", "Solo", "Surakarta", "Yogyakarta", "Magelang", "Pekalongan", "Tegal", "Brebes", "Purwokerto", "Cilacap", "Kudus", "Jepara", "Pati", "Salatiga", "Klaten", "Boyolali", "Kebumen", "Surabaya", "Sidoarjo", "Gresik", "Malang", "Pasuruan", "Probolinggo", "Mojokerto", "Jombang", "Kediri", "Blitar", "Madiun", "Jember", "Banyuwangi", "Lamongan", "Tuban", "Bojonegoro", "Banda Aceh", "Lhokseumawe", "Medan", "Binjai", "Pematangsiantar", "Tebing Tinggi", "Kisaran", "Sibolga", "Padang", "Bukittinggi", "Pekanbaru", "Dumai", "Batam", "Tanjungpinang", "Jambi", "Palembang", "Lubuklinggau", "Bengkulu", "Bandar Lampung", "Metro Lampung", "Pangkalpinang", "Pontianak", "Singkawang", "Palangkaraya", "Sampit", "Banjarmasin", "Banjarbaru", "Balikpapan", "Samarinda", "Bontang", "Tarakan", "Denpasar", "Mataram", "Kupang", "Labuan Bajo", "Makassar", "Parepare", "Palopo", "Manado", "Palu", "Kendari", "Gorontalo", "Mamuju", "Ambon", "Ternate", "Sorong", "Manokwari", "Jayapura", "Merauke", "Timika", "Biak");
+$GLOBALS['ali_city_base'] = array("Jakarta", "Jakarta Barat", "Jakarta Utara", "Jakarta Timur", "Jakarta Selatan", "Jakarta Pusat", "Tangerang", "Tangerang Selatan", "Serang", "Cilegon", "Bekasi", "Bogor", "Depok", "Cikarang", "Karawang", "Purwakarta", "Subang", "Cirebon", "Bandung", "Cimahi", "Sukabumi", "Cianjur", "Garut", "Tasikmalaya", "Indramayu", "Majalengka", "Kuningan", "Semarang", "Solo", "Surakarta", "Yogyakarta", "Magelang", "Pekalongan", "Tegal", "Brebes", "Purwokerto", "Cilacap", "Kudus", "Jepara", "Pati", "Salatiga", "Klaten", "Boyolali", "Kebumen", "Surabaya", "Sidoarjo", "Gresik", "Malang", "Pasuruan", "Probolinggo", "Mojokerto", "Jombang", "Kediri", "Blitar", "Madiun", "Jember", "Banyuwangi", "Lamongan", "Tuban", "Bojonegoro", "Banda Aceh", "Lhokseumawe", "Medan", "Binjai", "Pematangsiantar", "Tebing Tinggi", "Kisaran", "Sibolga", "Padang", "Bukittinggi", "Pekanbaru", "Dumai", "Batam", "Tanjungpinang", "Jambi", "Palembang", "Lubuklinggau", "Bengkulu", "Bandar Lampung", "Metro Lampung", "Pangkalpinang", "Pontianak", "Singkawang", "Palangkaraya", "Sampit", "Banjarmasin", "Banjarbaru", "Balikpapan", "Samarinda", "Bontang", "Tarakan", "Denpasar", "Mataram", "Kupang", "Labuan Bajo", "Makassar", "Parepare", "Palopo", "Manado", "Palu", "Kendari", "Gorontalo", "Mamuju", "Ambon", "Ternate", "Sorong", "Manokwari", "Jayapura", "Merauke", "Timika", "Biak");
 
 function ali_city_options() {
     global $ali_city_base;
     $set = array();
     foreach ($ali_city_base as $c) { $set[mb_strtolower($c)] = $c; }
+    // kota di file PL (nama sudah dirapikan)
+    if (!function_exists('ali_eta_index')) { require_once __DIR__ . '/eta-lib.php'; }
+    foreach (ali_eta_rows() as $r) {
+        $nm = mb_convert_case(mb_strtolower($r[0]), MB_CASE_TITLE, 'UTF-8');
+        $sq = preg_replace('/[^a-z0-9]/', '', mb_strtolower($nm));
+        $dup = false;
+        foreach ($set as $k => $v) { if (preg_replace('/[^a-z0-9]/', '', $k) === $sq) { $dup = true; break; } }
+        if (!$dup) { $set[mb_strtolower($nm)] = $nm; }
+    }
     try {
         foreach (array('pickup_time', 'origin_city') as $col) {
             try {

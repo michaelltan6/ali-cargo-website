@@ -70,6 +70,7 @@ if ($cons) {
         else { $pay_label = (($book_mode ?? '') === 'ToPay') ? 'Credit' : 'Cash'; }
         $eta_text = $fmt_date($eta ?? '', true);
         $etd_text = $fmt_date($etd ?? '');
+        $deliv_text = ($step === 3) ? $fmt_date($delivered_date ?? '', true) : '';
         $recv_date = '';
         foreach (['collection_date', 'pick_date'] as $k) { if (trim((string)($courier_data[$k] ?? '')) !== '' && strpos((string)$courier_data[$k], '0000') !== 0) { $recv_date = substr((string)$courier_data[$k], 0, 10); break; } }
         $e = function ($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); };
@@ -290,9 +291,15 @@ if ($cons) {
                     </div>
                 </section>
                 <section class="trk-card trk-eta">
-                    <div class="trk-lbl">Estimasi tiba (ETA)</div>
-                    <div class="big"><?php echo $eta_text !== '' ? $e($eta_text) : 'Belum ditentukan'; ?></div>
-                    <div class="sub"><?php echo $eta_text !== '' ? 'Estimasi dapat berubah mengikuti kondisi di lapangan' : 'Jadwal akan diperbarui oleh tim kami'; ?></div>
+                    <?php if ($step === 3): ?>
+                        <div class="trk-lbl">Pengiriman selesai</div>
+                        <div class="big"><?php echo $deliv_text !== '' ? $e($deliv_text) : 'Sudah diterima'; ?></div>
+                        <div class="sub"><?php echo $eta_text !== '' ? 'Estimasi awal: ' . $e($eta_text) : 'Terima kasih telah menggunakan ALI Cargo'; ?></div>
+                    <?php else: ?>
+                        <div class="trk-lbl">Estimasi tiba (ETA)</div>
+                        <div class="big"><?php echo $eta_text !== '' ? $e($eta_text) : 'Belum ditentukan'; ?></div>
+                        <div class="sub"><?php echo $eta_text !== '' ? 'Estimasi dapat berubah mengikuti kondisi di lapangan' : 'Jadwal akan diperbarui oleh tim kami'; ?></div>
+                    <?php endif; ?>
                 </section>
             </div>
 
@@ -303,7 +310,7 @@ if ($cons) {
                     <div><span class="trk-lbl">Destination</span><b><?php echo $dest !== '' ? $e($dest) : '-'; ?></b></div>
                     <div><span class="trk-lbl">Services</span><b><?php echo !empty($mode) ? $e($mode) : '-'; ?></b></div>
                     <div><span class="trk-lbl">Tanggal diterima</span><b><?php echo $recv_date !== '' ? $e($fmt_date($recv_date)) : '-'; ?></b></div>
-                    <?php if ($etd_text !== ''): ?><div><span class="trk-lbl">Jadwal pengiriman</span><b><?php echo $e($etd_text); ?></b></div><?php endif; ?>
+                    <?php if ($etd_text !== ''): ?><div><span class="trk-lbl">Tanggal berangkat</span><b><?php echo $e($etd_text); ?></b></div><?php endif; ?>
                 </div>
                 <div class="trk-parties">
                     <div><span class="trk-lbl">Shipper</span><b><?php echo $e($ship_name ?? '-'); ?></b></div>

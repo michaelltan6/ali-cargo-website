@@ -27,7 +27,7 @@ rp_start('Pengiriman selesai', 'check-circle', $month !== '' ? 'Bulan ' . date('
     <?php rp_month_bar('laporan-selesai.php', $month); ?>
     <div class="ac-table-wrap">
     <table id="rp-table" class="ac-table dash-table" width="100%">
-        <thead><tr><th>Tracking</th><th>No. SPB</th><th>Pengirim</th><th>Penerima</th><th>Tujuan</th><th>Tgl diterima</th><th>Pembayaran</th><th>SPB kembali</th></tr></thead>
+        <thead><tr><th>Tracking</th><th>No. SPB</th><th>Pengirim</th><th>Penerima</th><th>Tujuan</th><th>Tgl diterima</th><th>Tgl selesai</th><th>Pembayaran</th><th>SPB kembali</th></tr></thead>
         <tbody>
         <?php foreach ($rows as $r): $ret = trim((string)($r['spb_return'] ?? '')); $has = rp_d($ret) !== ''; ?>
             <tr>
@@ -37,6 +37,7 @@ rp_start('Pengiriman selesai', 'check-circle', $month !== '' ? 'Bulan ' . date('
                 <td><?php echo rp_e($r['rev_name']); ?></td>
                 <td><?php echo rp_e($r['pickup_time'] ?? ''); ?></td>
                 <td data-order="<?php echo rp_e(ali_ship_date($r)); ?>"><?php echo rp_e(rp_d(ali_ship_date($r))); ?></td>
+                <td data-order="<?php echo rp_e(substr((string)($r['delivered_date'] ?? ''), 0, 10)); ?>"><?php echo rp_e(rp_d(substr((string)($r['delivered_date'] ?? ''), 0, 10))); ?></td>
                 <td>
                     <?php echo rp_e(rp_pay_label($r)); ?>
                     <?php if ($isAdmin): $pt = (string)($r['payment_term'] ?? ''); if (!in_array($pt, ['7','14','30'], true)) { $pt = 'cash'; } ?>
@@ -68,7 +69,7 @@ rp_start('Pengiriman selesai', 'check-circle', $month !== '' ? 'Bulan ' . date('
 <?php
 rp_end(<<<'JS'
 var table = $('#rp-table').DataTable({ pageLength: 20, lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'Semua']], order: [[5, 'desc']], language: RP_LANG });
-$('.dash-tile[data-filter]').on('click', function(e) { e.preventDefault(); table.column(7).search($(this).data('filter') || '').draw(); $('.dash-tile').removeClass('on'); $(this).addClass('on'); });
+$('.dash-tile[data-filter]').on('click', function(e) { e.preventDefault(); table.column(8).search($(this).data('filter') || '').draw(); $('.dash-tile').removeClass('on'); $(this).addClass('on'); });
 $('#rp-table').on('click', '.pay-save', function() {
     var btn = $(this), sel = btn.siblings('.pay-term');
     if (sel.val() === String(sel.data('cur'))) { rpNotify({ icon: 'info', title: 'Metode pembayaran belum diubah.' }); return; }

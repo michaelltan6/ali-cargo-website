@@ -178,45 +178,20 @@ try {
                 $collection_date = $collectionDate->format('Y-m-d');
             }
 
-            $etdDate = DateTime::createFromFormat('Y-m-d', $etd, new DateTimeZone('Asia/Jakarta'));
-            if (!$etdDate) {
-                $etdDate = clone $collectionDate;
-                $etdDate->modify('+1 day');
-                $etd = $etdDate->format('Y-m-d');
-                error_log("Invalid ETD, defaulted to: $etd");
-            } else {
-                $etd = $etdDate->format('Y-m-d');
+            // Tanggal keberangkatan opsional. ETA: pakai isian admin, kalau kosong dihitung dari PL (keberangkatan + hari maksimal).
+            require_once __DIR__ . '/eta-lib.php';
+            $okYmd = function ($v) { $d = DateTime::createFromFormat('Y-m-d', (string)$v); return $d && $d->format('Y-m-d') === (string)$v; };
+            $etd = $okYmd($etd) ? $etd : null;
+            if (!$okYmd($eta)) { $eta = $etd !== null ? ali_eta_compute($etd, $pickup_time) : null; }
+            $progress_percentage = 0;
+            if ($etd !== null && $eta !== null) {
+                $etdDate = new DateTime($etd, new DateTimeZone('Asia/Jakarta'));
+                $etaDate = new DateTime($eta, new DateTimeZone('Asia/Jakarta'));
+                $totalDuration = $etaDate->getTimestamp() - $etdDate->getTimestamp();
+                $elapsed = (new DateTime('now', new DateTimeZone('Asia/Jakarta')))->getTimestamp() - $etdDate->getTimestamp();
+                $elapsed = max(0, min($totalDuration, $elapsed));
+                $progress_percentage = $totalDuration > 0 ? min(100, max(0, ($elapsed / $totalDuration) * 100)) : 0;
             }
-
-            $etaDate = DateTime::createFromFormat('Y-m-d', $eta, new DateTimeZone('Asia/Jakarta'));
-            if (!$etaDate) {
-                $etaDate = clone $etdDate;
-                $etaDate->modify('+2 days');
-                $eta = $etaDate->format('Y-m-d');
-                error_log("Invalid ETA, defaulted to: $eta");
-            } else {
-                $eta = $etaDate->format('Y-m-d');
-            }
-            if ($etaDate <= $etdDate || $etdDate <= $collectionDate) {
-                if ($etdDate <= $collectionDate) {
-                    $etdDate->modify('+1 day');
-                    $etd = $etdDate->format('Y-m-d');
-                    error_log("ETD adjusted to be after collection_date: $etd");
-                }
-                if ($etaDate <= $etdDate) {
-                    $etaDate->modify('+1 day');
-                    $eta = $etaDate->format('Y-m-d');
-                    error_log("ETA adjusted to be after ETD: $eta");
-                }
-            }
-
-            // Initial progress percentage
-            $currentDateTime = new DateTime('now', new DateTimeZone('Asia/Jakarta')); // 09:38 AM WIB, August 06, 2025
-            $totalDuration = $etaDate->getTimestamp() - $etdDate->getTimestamp();
-            $elapsed = $currentDateTime->getTimestamp() - $etdDate->getTimestamp();
-            if ($elapsed < 0) $elapsed = 0;
-            if ($elapsed > $totalDuration) $elapsed = $totalDuration;
-            $progress_percentage = ($totalDuration > 0) ? min(100, max(0, ($elapsed / $totalDuration) * 100)) : 0;
 
             if (empty($ship_name) || empty($rev_name)) { // nomor tracking dibuat otomatis dari pembukuan + nomor SPB
                 throw new Exception("Consignment No, Shipper Name, and Receiver Name are required.");
@@ -377,48 +352,23 @@ try {
                 $data['collection_date'] = $collectionDate->format('Y-m-d');
             }
 
-            $etdDate = DateTime::createFromFormat('Y-m-d', $data['etd'], new DateTimeZone('Asia/Jakarta'));
-            if (!$etdDate) {
-                $etdDate = clone $collectionDate;
-                $etdDate->modify('+1 day');
-                $data['etd'] = $etdDate->format('Y-m-d');
-                error_log("Invalid ETD for cid $cid, defaulted to: " . $data['etd']);
-            } else {
-                $data['etd'] = $etdDate->format('Y-m-d');
+            // Tanggal keberangkatan opsional; ETA dihitung dari PL kalau kosong
+            courier_columns_ready(); // memastikan etd/eta boleh kosong
+            require_once __DIR__ . '/eta-lib.php';
+            $okYmd = function ($v) { $d = DateTime::createFromFormat('Y-m-d', (string)$v); return $d && $d->format('Y-m-d') === (string)$v; };
+            $data['etd'] = $okYmd($data['etd']) ? $data['etd'] : null;
+            if (!$okYmd($data['eta'])) { $data['eta'] = $data['etd'] !== null ? ali_eta_compute($data['etd'], $data['pickup_time']) : null; }
+            $data['progress_percentage'] = 0;
+            if ($data['etd'] !== null && $data['eta'] !== null) {
+                $etdDate = new DateTime($data['etd'], new DateTimeZone('Asia/Jakarta'));
+                $etaDate = new DateTime($data['eta'], new DateTimeZone('Asia/Jakarta'));
+                $totalDuration = $etaDate->getTimestamp() - $etdDate->getTimestamp();
+                $elapsed = (new DateTime('now', new DateTimeZone('Asia/Jakarta')))->getTimestamp() - $etdDate->getTimestamp();
+                $elapsed = max(0, min($totalDuration, $elapsed));
+                if ($data['status'] === 'Delivered') { $elapsed = $totalDuration; }
+                $data['progress_percentage'] = $totalDuration > 0 ? (int)round(min(100, max(0, ($elapsed / $totalDuration) * 100))) : 0;
             }
-
-            $etaDate = DateTime::createFromFormat('Y-m-d', $data['eta'], new DateTimeZone('Asia/Jakarta'));
-            if (!$etaDate) {
-                $etaDate = clone $etdDate;
-                $etaDate->modify('+2 days');
-                $data['eta'] = $etaDate->format('Y-m-d');
-                error_log("Invalid ETA for cid $cid, defaulted to: " . $data['eta']);
-            } else {
-                $data['eta'] = $etaDate->format('Y-m-d');
-            }
-            if ($etaDate <= $etdDate || $etdDate <= $collectionDate) {
-                if ($etdDate <= $collectionDate) {
-                    $etdDate->modify('+1 day');
-                    $data['etd'] = $etdDate->format('Y-m-d');
-                    error_log("ETD adjusted to be after collection_date for cid $cid: " . $data['etd']);
-                }
-                if ($etaDate <= $etdDate) {
-                    $etaDate->modify('+1 day');
-                    $data['eta'] = $etaDate->format('Y-m-d');
-                    error_log("ETA adjusted to be after ETD for cid $cid: " . $data['eta']);
-                }
-            }
-
-            // Recalculate progress_percentage server-side
-            $currentDateTime = new DateTime('now', new DateTimeZone('Asia/Jakarta')); // 09:38 AM WIB, August 06, 2025
-            $totalDuration = $etaDate->getTimestamp() - $etdDate->getTimestamp();
-            $elapsed = $currentDateTime->getTimestamp() - $etdDate->getTimestamp();
-            if ($elapsed < 0) $elapsed = 0;
-            if ($elapsed > $totalDuration) $elapsed = $totalDuration;
-            if ($data['status'] === 'Delivered') $elapsed = $totalDuration;
-            $progress_percentage = ($totalDuration > 0) ? min(100, max(0, ($elapsed / $totalDuration) * 100)) : 0;
-            $data['progress_percentage'] = round($progress_percentage);
-            error_log("Recalculated progress_percentage: {$data['progress_percentage']} for cid: $cid, collection_date: {$data['collection_date']}, etd: {$data['etd']}, eta: {$data['eta']}");
+            if ($data['status'] === 'Delivered') { $data['progress_percentage'] = 100; }
 
             $stmt = dbQuery("SELECT COUNT(*) AS count FROM courier WHERE cons_no = ? AND cid != ?", [$data['cons_no'], $cid]);
             if (dbFetchAssoc($stmt)['count'] > 0) {

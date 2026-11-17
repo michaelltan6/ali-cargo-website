@@ -48,6 +48,7 @@ ob_clean();
 // Main logic
 require_once __DIR__ . '/courier-lib.php';
 require_once __DIR__ . '/city-lib.php';
+require_once __DIR__ . '/eta-lib.php';
 courier_columns_ready();
 $cid = isset($_GET['cid']) ? (int)$_GET['cid'] : 0;
 if ($cid <= 0 && !empty($_POST['cons'])) {
@@ -285,12 +286,13 @@ if ($count > 0) {
                         <input type="date" name="pick_date" id="pick_date" value="<?php echo htmlspecialchars($shipDate); ?>">
                     </div>
                     <div class="ac-f ac-4">
-                        <label for="schedule">Jadwal pengiriman</label>
+                        <label for="schedule">Tanggal keberangkatan <span class="ac-opt">(opsional)</span></label>
                         <input type="date" name="schedule" id="schedule" value="<?php echo htmlspecialchars((string)($etd ?? '')); ?>">
                     </div>
                     <div class="ac-f ac-4">
                         <label for="eta">Perkiraan tiba (ETA)</label>
                         <input type="date" name="eta" id="eta" value="<?php echo htmlspecialchars((string)($eta ?? '')); ?>">
+                        <small id="eta-hint" class="ac-hint"></small>
                     </div>
                     <div class="ac-f ac-8">
                         <label for="tracking_link">Tracking link (opsional)</label>
@@ -436,7 +438,8 @@ if ($count > 0) {
                 </div>
                 <button type="submit" class="ac-btn danger" style="margin:14px 0 8px">Hapus yang dipilih</button>
             </form>
-            <script>
+            <?php echo ali_eta_script(); ?>
+    <script>
                 document.getElementById("select-all").onclick = function() {
                     document.getElementsByName("delete_ids[]").forEach(function(box) { box.checked = this.checked; }, this);
                 };
@@ -686,12 +689,15 @@ if ($count > 0) {
     <script>
     $(document).on('click', '#btn-finish', function() {
         var btn = $(this), cid = btn.data('cid');
-        var go = function() {
+        var d = new Date(), pad = function(n) { return (n < 10 ? '0' : '') + n; };
+        var todayYmd = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        var todayLbl = pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+        var send = function(dateYmd) {
             btn.prop('disabled', true);
-            $.ajax({ url: 'finish-shipment.php', type: 'POST', dataType: 'json', data: { cid: cid },
+            $.ajax({ url: 'finish-shipment.php', type: 'POST', dataType: 'json', data: { cid: cid, finish_date: dateYmd },
                 success: function(res) {
                     if (res && res.success) {
-                        (window.Swal ? Swal.fire({ icon: 'success', title: 'Selesai', text: res.message, timer: 1600, showConfirmButton: false }) : Promise.resolve()).then(function() { location.href = 'admin.php'; });
+                        (window.Swal ? Swal.fire({ icon: 'success', title: 'Selesai', text: res.message, timer: 1800, showConfirmButton: false }) : Promise.resolve()).then(function() { location.href = 'admin.php'; });
                     } else {
                         btn.prop('disabled', false);
                         window.Swal ? Swal.fire({ icon: 'error', title: 'Gagal', text: res ? res.message : 'Tidak ada respons' }) : alert(res ? res.message : 'Gagal');
@@ -700,8 +706,23 @@ if ($count > 0) {
                 error: function() { btn.prop('disabled', false); alert('Gagal menghubungi server'); } });
         };
         if (window.Swal) {
-            Swal.fire({ title: 'Selesaikan pengiriman?', icon: 'question', showCancelButton: true, confirmButtonText: 'Ya, selesaikan', cancelButtonText: 'Batal' }).then(function(r) { if (r.isConfirmed) { go(); } });
-        } else if (confirm('Selesaikan pengiriman ini?')) { go(); }
+            Swal.fire({
+                title: 'Pengiriman selesai hari ini?',
+                html: 'Tanggal hari ini: <b>' + todayLbl + '</b>',
+                icon: 'question', showDenyButton: true, showCancelButton: true,
+                confirmButtonText: 'Ya, hari ini', denyButtonText: 'Tidak, pilih tanggal', cancelButtonText: 'Batal'
+            }).then(function(r) {
+                if (r.isConfirmed) { send(todayYmd); }
+                else if (r.isDenied) {
+                    Swal.fire({
+                        title: 'Tanggal pengiriman selesai', input: 'date', inputValue: todayYmd,
+                        inputAttributes: { max: todayYmd }, showCancelButton: true, confirmButtonText: 'Selesaikan', cancelButtonText: 'Batal',
+                        inputValidator: function(v) { if (!v) { return 'Pilih tanggal dulu.'; } if (v > todayYmd) { return 'Tanggal tidak boleh di masa depan.'; } }
+                    }).then(function(r2) { if (r2.isConfirmed && r2.value) { send(r2.value); } });
+                }
+            });
+        } else if (confirm('Pengiriman selesai hari ini (' + todayLbl + ')?\nOK = ya, Batal = pilih tanggal lain')) { send(todayYmd); }
+        else { var v = prompt('Tanggal selesai (format YYYY-MM-DD):', todayYmd); if (v) { send(v); } }
     });
     </script>
 </body>

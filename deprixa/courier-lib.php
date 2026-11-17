@@ -10,6 +10,7 @@
 //   book_code     : pembukuan, 'ALI' atau 'ANK' (awalan nomor tracking)
 //   paid_date     : tanggal pembayaran diterima (tempo ditandai lunas)
 //   origin_city   : kota asal barang
+//   delivered_date: tanggal pengiriman diselesaikan (Delivered)
 require_once __DIR__ . '/database.php';
 
 function courier_columns_ready() {
@@ -26,7 +27,8 @@ function courier_columns_ready() {
                  'charge_unit' => ['VARCHAR(5) NULL', 'TEXT NULL'],
                  'book_code' => ['VARCHAR(5) NULL', 'TEXT NULL'],
                  'paid_date' => ['DATE NULL', 'TEXT NULL'],
-                 'origin_city' => ['VARCHAR(100) NULL', 'TEXT NULL']];
+                 'origin_city' => ['VARCHAR(100) NULL', 'TEXT NULL'],
+                 'delivered_date' => ['DATE NULL', 'TEXT NULL']];
         $sqlite = $dbConn->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
         $have = [];
         if ($sqlite) { foreach ($dbConn->query("PRAGMA table_info(courier)") as $c) { $have[$c['name']] = true; } }
@@ -34,6 +36,19 @@ function courier_columns_ready() {
         foreach ($want as $col => $types) {
             if (!empty($have[$col])) { continue; }
             $dbConn->exec("ALTER TABLE courier ADD COLUMN $col " . ($sqlite ? $types[1] : $types[0]));
+        }
+        // etd / eta boleh kosong (tanggal keberangkatan opsional)
+        if (!$sqlite) {
+            foreach (['etd', 'eta'] as $col) {
+                try {
+                    $stmt = $dbConn->prepare("SELECT COLUMN_TYPE, IS_NULLABLE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'courier' AND COLUMN_NAME = ?");
+                    $stmt->execute([$col]);
+                    $c = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($c && $c['IS_NULLABLE'] === 'NO' && preg_match('/^[a-z]+(\(\d+\))?$/i', $c['COLUMN_TYPE'])) {
+                        $dbConn->exec("ALTER TABLE courier MODIFY `$col` " . $c['COLUMN_TYPE'] . " NULL DEFAULT NULL");
+                    }
+                } catch (Exception $e) { error_log('courier etd/eta null: ' . $e->getMessage()); }
+            }
         }
         $ready = true;
     } catch (Exception $e) {
@@ -66,6 +81,10 @@ function courier_spb_taken($spb, $exceptCid = 0) {
 
 // Wilayah untuk pengelompokan laporan, ditentukan dari kota tujuan. Selain Sumatera dan Timur dianggap Jawa.
 function courier_region($dest) {
+    // kota yang ada di PL: wilayah mengikuti PL
+    if (!function_exists('ali_eta_lookup')) { require_once __DIR__ . '/eta-lib.php'; }
+    $pl = ali_eta_lookup($dest);
+    if ($pl && !empty($pl[4])) { return $pl[4]; }
     $d = strtolower(trim((string)$dest));
     $sumatera = ['aceh','medan','sumatera','sumut','sumbar','sumsel','binjai','stabat','pematang','siantar','tebing','padang','bukittinggi','pekanbaru','riau','dumai','batam','tanjung pinang','tanjungpinang','kepri','jambi','bungo','palembang','lubuk','bengkulu','lampung','bangka','belitung','pangkal','kerinci','sibolga','rantau','kisaran','lhokseumawe','tanjung balai','tanjungbalai','metro'];
     $timur = ['kalimantan','banjarmasin','banjarbaru','pontianak','balikpapan','samarinda','palangkaraya','palangka','tarakan','sampit','singkawang','bontang','bali','denpasar','nusa','lombok','mataram','ntb','ntt','kupang','sulawesi','makassar','manado','kendari','palu','gorontalo','ambon','maluku','ternate','papua','sorong','jayapura','merauke','timika','mamuju','bau-bau','flores','labuan bajo','sumbawa','bima','biak','manokwari','halmahera','kolaka','morowali','luwuk','palopo','parepare','toraja'];

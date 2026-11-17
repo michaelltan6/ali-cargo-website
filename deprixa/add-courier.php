@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/courier-lib.php';
 require_once __DIR__ . '/city-lib.php';
+require_once __DIR__ . '/eta-lib.php';
 
 ob_start();
 if (session_status() === PHP_SESSION_NONE) {
@@ -255,8 +256,13 @@ ob_end_clean();
                         <input type="date" name="pick_date" id="pick_date" value="<?php echo date('Y-m-d'); ?>">
                     </div>
                     <div class="ac-f ac-4">
-                        <label for="schedule">Jadwal pengiriman</label>
+                        <label for="schedule">Tanggal keberangkatan <span class="ac-opt">(opsional)</span></label>
                         <input type="date" name="schedule" id="schedule">
+                    </div>
+                    <div class="ac-f ac-4">
+                        <label for="eta">Perkiraan tiba (ETA)</label>
+                        <input type="date" name="eta" id="eta">
+                        <small id="eta-hint" class="ac-hint"></small>
                     </div>
                     <div class="ac-f ac-4">
                         <label for="status">Status</label>
@@ -353,6 +359,7 @@ ob_end_clean();
             }
         }            
     </script>
+    <?php echo ali_eta_script(); ?>
     <script>
         function hitungVolume(p, l, t) {
             return (p * l * t) / 1000000; // cm³ to m³

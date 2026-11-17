@@ -4,6 +4,8 @@ ob_start();
 if (session_status() === PHP_SESSION_NONE) { if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']),'httponly'=>true,'samesite'=>'Lax']); ini_set('session.use_strict_mode','1'); session_start(); } }
 require_once('database.php');
 require_once('library.php');
+require_once __DIR__ . '/courier-lib.php';
+date_default_timezone_set('Asia/Jakarta');
 requireAdmin(true);
 header('Content-Type: application/json; charset=utf-8');
 ob_clean();
@@ -21,12 +23,26 @@ if (($_SESSION['user_type'] ?? '') === 'Employee' && ($row['officename'] ?? '') 
 }
 if (($row['status'] ?? '') === 'Delivered') { fs_fail('Pengiriman ini sudah selesai.'); }
 
+// Tanggal selesai: default hari ini, boleh dipilih admin. Tidak boleh di masa depan atau sebelum barang diterima.
+$today = date('Y-m-d');
+$fd = trim((string)($_POST['finish_date'] ?? ''));
+if ($fd === '') { $fd = $today; }
+$dt = DateTime::createFromFormat('Y-m-d', $fd);
+if (!$dt || $dt->format('Y-m-d') !== $fd) { fs_fail('Tanggal selesai tidak valid.'); }
+if ($fd > $today) { fs_fail('Tanggal selesai tidak boleh di masa depan.'); }
+foreach (['collection_date', 'pick_date'] as $k) {
+    $recv = substr(trim((string)($row[$k] ?? '')), 0, 10);
+    if ($recv !== '' && strpos($recv, '0000') !== 0) { if ($fd < $recv) { fs_fail('Tanggal selesai tidak boleh sebelum tanggal barang diterima (' . date('d/m/Y', strtotime($recv)) . ').'); } break; }
+}
+$when = $fd . ' ' . ($fd === $today ? date('H:i:s') : '12:00:00');
+
 try {
     $user = $_SESSION['user_name'] ?? 'Unknown';
-    dbQuery("UPDATE courier SET status = 'Delivered', progress_percentage = 100, last_updated = NOW() WHERE cid = ?", [$cid]);
-    dbQuery("INSERT INTO courier_track (cid, cons_no, status, pick_time, comments, user, bk_time) VALUES (?, ?, 'Delivered', ?, ?, ?, NOW())",
-        [$cid, $row['cons_no'], $row['pickup_time'] ?? '', 'Diselesaikan dari dashboard', $user]);
-    echo json_encode(['success' => true, 'message' => 'Pengiriman ' . $row['cons_no'] . ' ditandai selesai.']);
+    courier_columns_ready();
+    dbQuery("UPDATE courier SET status = 'Delivered', progress_percentage = 100, delivered_date = ?, last_updated = NOW() WHERE cid = ?", [$fd, $cid]);
+    dbQuery("INSERT INTO courier_track (cid, cons_no, status, pick_time, comments, user, bk_time) VALUES (?, ?, 'Delivered', ?, ?, ?, ?)",
+        [$cid, $row['cons_no'], $row['pickup_time'] ?? '', 'Pengiriman selesai tanggal ' . date('d/m/Y', strtotime($fd)), $user, $when]);
+    echo json_encode(['success' => true, 'message' => 'Pengiriman ' . $row['cons_no'] . ' selesai tanggal ' . date('d/m/Y', strtotime($fd)) . '.']);
 } catch (Exception $e) {
     error_log('finish-shipment: ' . $e->getMessage());
     fs_fail('Gagal menyimpan. Coba lagi.');
