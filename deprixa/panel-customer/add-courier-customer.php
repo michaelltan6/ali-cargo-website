@@ -16,9 +16,9 @@ isUser();
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- Page Description and Author -->
-	<meta name="description" content="Courier Deprixa V2.5 "/>
+	<meta name="description" content="ALI Cargo"/>
 	<meta name="keywords" content="Courier DEPRIXA-Integral Web System" />
-	<meta name="author" content="Jaomweb">
+	<meta name="author" content="PT. Aneka Lintas Indonesia">
 
 	<!-- App Favicon -->
 	<link rel="shortcut icon" href="assets/images/favicon.ico">

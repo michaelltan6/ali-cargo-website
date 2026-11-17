@@ -142,7 +142,7 @@ $fecha=date('Y-m-d');
             <p class="lead">Payment Methods:</p>
             <img src="../images/credit/securepayment.png" alt="Methods payments" />           
             <p class="text-muted well well-sm no-shadow" style="margin-top: 10px;">
-              For your convenience we have DEPRIXA several payment reliable, fast, secure.
+              For your convenience we have several payment reliable, fast, secure.
             </p>
           </div><!-- /.col -->
           <div class="col-xs-6">

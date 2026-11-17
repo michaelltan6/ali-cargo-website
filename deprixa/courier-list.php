@@ -142,7 +142,7 @@ echo generatePagination();
 
 			<p class="footer-company-motto"></p>
 
-			<p class="footer-company-name">Copyright © robialakbar Kuris & Logistik.  All rights reserved.</p>
+			<p class="footer-company-name">Copyright © PT. ANEKA LINTAS INDONESIA.  All rights reserved.</p>
 
 		</footer>	
 </body>

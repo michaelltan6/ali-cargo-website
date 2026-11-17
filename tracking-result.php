@@ -82,7 +82,7 @@ if ($cons) {
 <head>
     <meta charset="utf-8" />	    
     <title>Tracking Result | ALI Cargo</title>
-    <meta name="description" content="Courier Deprixa V2.5"/>
+    <meta name="description" content="ALI Cargo - Tracking pengiriman"/>
     <meta name="keywords" content="" />
     <meta name="author" content="">	
     <meta name="viewport" content="width=device-width, initial-scale=1" />

@@ -22,7 +22,7 @@ isUser();
         <link rel="shortcut icon" href="assets/images/favicon.ico">
 
         <!-- App title -->
-        <title>robialakbar Kuris & Logistik</title>
+        <title>PT. Aneka Lintas Indonesia</title>
 
         <!--Morris Chart CSS -->
 		<link rel="stylesheet" href="assets/plugins/morris/morris.css">

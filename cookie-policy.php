@@ -44,7 +44,7 @@
 <p>Cookies digunakan dalam merekam data history transaksi anda pada sistem kami dengan begitu anda tidak menghabikan waktu dan dengan mudah bisa membuka website kami dengan cepat dan lancar.</span></strong></span></p>
 <p><strong>Cookies yang kami gunakan. </strong></p>
 <p><em>Tracking cookies -</em> - tracking Cookies digunakan sebagai riwayat Tracking yang kami rekam dalam sistem agar mempermudah kami melakukan tracking pada paket anda.</p>
-<p><em>Deprixa cookies</em> - Digunakan sebagai riwayat penyimpanan data transaksi costumer pada sistem kami yang kami gunakan untuk merberikan feedback pada anda sesuai dengan minat anda.</p>
+<p><em>Cookies sistem</em> - Digunakan sebagai riwayat penyimpanan data transaksi costumer pada sistem kami yang kami gunakan untuk merberikan feedback pada anda sesuai dengan minat anda.</p>
 <p><em>Booking session cookies</em> - Digunakan sebagai penyimpanan riwayat booking yang disimpan dengan rapi bersama sistem kami dalam menjaga performa sistem kami.</p>
 <p>pengaturan privasy Policy dijelaskan dengan lebih lengkap anda bisa menghubungi kami dengan contack person di halaman about us.</p>
 <p><strong><span>Bagaimana Mengontrol dan menghapus cookies</span></strong></p>
