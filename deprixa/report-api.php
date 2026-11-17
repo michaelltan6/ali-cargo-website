@@ -34,6 +34,23 @@ try {
             dbQuery("UPDATE courier SET spb_return = ? WHERE cid = ?", [$d, $cid]);
             echo json_encode(['success' => true, 'message' => $d ? 'SPB kembali dicatat.' : 'Tanggal SPB kembali dikosongkan.']);
             break;
+        case 'set_payment_term':
+            $t = (string)($_POST['payment_term'] ?? '');
+            if (!in_array($t, ['cash', '7', '14', '30'], true)) { api_fail('Metode pembayaran tidak valid.'); }
+            if ($t === 'cash') {
+                // cash = sudah dibayar; tanggal lunas diisi hari ini kalau belum ada
+                dbQuery("UPDATE courier SET payment_term = 'cash', book_mode = 'Paid', paid_date = COALESCE(paid_date, ?), tempo_start = NULL, due_date = NULL WHERE cid = ?", [date('Y-m-d'), $cid]);
+            } else {
+                $start = trim((string)($row['tempo_start'] ?? ''));
+                $due = null;
+                if ($start !== '' && strpos($start, '0000') !== 0) {
+                    $dt = DateTime::createFromFormat('Y-m-d', substr($start, 0, 10));
+                    if ($dt) { $due = $dt->modify('+' . $t . ' days')->format('Y-m-d'); }
+                }
+                dbQuery("UPDATE courier SET payment_term = ?, book_mode = 'ToPay', paid_date = NULL, due_date = ? WHERE cid = ?", [$t, $due, $cid]);
+            }
+            echo json_encode(['success' => true, 'message' => 'Metode pembayaran diubah.']);
+            break;
         case 'mark_paid':
             $d = api_date($_POST['date'] ?? '');
             dbQuery("UPDATE courier SET book_mode = 'Paid', paid_date = ? WHERE cid = ?", [$d, $cid]);
