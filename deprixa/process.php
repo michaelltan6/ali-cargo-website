@@ -182,7 +182,7 @@ try {
             require_once __DIR__ . '/eta-lib.php';
             $okYmd = function ($v) { $d = DateTime::createFromFormat('Y-m-d', (string)$v); return $d && $d->format('Y-m-d') === (string)$v; };
             $etd = $okYmd($etd) ? $etd : null;
-            if (!$okYmd($eta)) { $eta = $etd !== null ? ali_eta_compute($etd, $pickup_time) : null; }
+            if (!$okYmd($eta)) { $eta = $etd !== null ? ali_eta_compute($etd, $pickup_time, $mode) : null; }
             $progress_percentage = 0;
             if ($etd !== null && $eta !== null) {
                 $etdDate = new DateTime($etd, new DateTimeZone('Asia/Jakarta'));
@@ -358,7 +358,7 @@ try {
             require_once __DIR__ . '/eta-lib.php';
             $okYmd = function ($v) { $d = DateTime::createFromFormat('Y-m-d', (string)$v); return $d && $d->format('Y-m-d') === (string)$v; };
             $data['etd'] = $okYmd($data['etd']) ? $data['etd'] : null;
-            if (!$okYmd($data['eta'])) { $data['eta'] = $data['etd'] !== null ? ali_eta_compute($data['etd'], $data['pickup_time']) : null; }
+            if (!$okYmd($data['eta'])) { $data['eta'] = $data['etd'] !== null ? ali_eta_compute($data['etd'], $data['pickup_time'], $data['mode'] ?? '') : null; }
             $data['progress_percentage'] = 0;
             if ($data['etd'] !== null && $data['eta'] !== null) {
                 $etdDate = new DateTime($data['etd'], new DateTimeZone('Asia/Jakarta'));

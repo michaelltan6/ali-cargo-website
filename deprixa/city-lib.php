@@ -9,7 +9,7 @@ function ali_city_options() {
     foreach ($ali_city_base as $c) { $set[mb_strtolower($c)] = $c; }
     // kota di file PL (nama sudah dirapikan)
     if (!function_exists('ali_eta_index')) { require_once __DIR__ . '/eta-lib.php'; }
-    foreach (ali_eta_rows() as $r) {
+    foreach (array_merge(ali_eta_rows('reg'), ali_eta_rows('exp')) as $r) {
         $nm = mb_convert_case(mb_strtolower($r[0]), MB_CASE_TITLE, 'UTF-8');
         $sq = preg_replace('/[^a-z0-9]/', '', mb_strtolower($nm));
         $dup = false;
