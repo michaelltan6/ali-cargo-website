@@ -29,6 +29,13 @@ function cp_ensure_table() {
             KEY idx_company (company_name), KEY idx_code (code)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     }
+    // kolom email penagihan (untuk pengingat jatuh tempo)
+    try {
+        $have = [];
+        if ($driver === 'sqlite') { foreach ($dbConn->query("PRAGMA table_info(customer_profile)") as $c) { $have[$c['name']] = true; } }
+        else { foreach ($dbConn->query("SHOW COLUMNS FROM customer_profile") as $c) { $have[$c['Field']] = true; } }
+        if (empty($have['email'])) { $dbConn->exec("ALTER TABLE customer_profile ADD COLUMN email " . ($driver === 'sqlite' ? "TEXT NOT NULL DEFAULT ''" : "VARCHAR(255) NOT NULL DEFAULT ''")); }
+    } catch (Exception $e) { error_log('customer_profile.email: ' . $e->getMessage()); }
     $done = true;
 }
 
@@ -48,6 +55,7 @@ function cp_fields($src) {
         'company_name' => cp_clean($src['company_name'] ?? '', 190),
         'pic_name'     => cp_clean($src['pic_name'] ?? '', 120),
         'pic_phone'    => cp_clean($src['pic_phone'] ?? '', 40),
+        'email'        => cp_clean($src['email'] ?? '', 255),
         'address'      => cp_clean($src['address'] ?? '', 500),
     ];
 }
@@ -55,6 +63,11 @@ function cp_fields($src) {
 function cp_validate($f) {
     if ($f['company_name'] === '') { return 'Nama PT wajib diisi.'; }
     if ($f['pic_phone'] !== '' && !preg_match('/^[0-9+()\-.\/ ]{5,40}$/', $f['pic_phone'])) { return 'Nomor kontak hanya boleh angka, spasi, dan tanda + - ( ).'; }
+    if ($f['email'] !== '') {
+        $list = preg_split('/[,;\s]+/', $f['email'], -1, PREG_SPLIT_NO_EMPTY);
+        if (count($list) > 4) { return 'Email penagihan maksimal 4 alamat.'; }
+        foreach ($list as $a) { if (!filter_var($a, FILTER_VALIDATE_EMAIL)) { return 'Email penagihan tidak valid: ' . $a; } }
+    }
     return '';
 }
 
@@ -85,15 +98,15 @@ function cp_create($f) {
     global $dbConn;
     cp_ensure_table();
     $now = date('Y-m-d H:i:s');
-    dbQuery("INSERT INTO customer_profile (code, company_name, pic_name, pic_phone, address, created_at, updated_at) VALUES (?,?,?,?,?,?,?)",
-        [$f['code'], $f['company_name'], $f['pic_name'], $f['pic_phone'], $f['address'], $now, $now]);
+    dbQuery("INSERT INTO customer_profile (code, company_name, pic_name, pic_phone, email, address, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)",
+        [$f['code'], $f['company_name'], $f['pic_name'], $f['pic_phone'], $f['email'], $f['address'], $now, $now]);
     return (int)$dbConn->lastInsertId();
 }
 
 function cp_update($id, $f) {
     cp_ensure_table();
-    dbQuery("UPDATE customer_profile SET code=?, company_name=?, pic_name=?, pic_phone=?, address=?, updated_at=? WHERE id=?",
-        [$f['code'], $f['company_name'], $f['pic_name'], $f['pic_phone'], $f['address'], date('Y-m-d H:i:s'), (int)$id]);
+    dbQuery("UPDATE customer_profile SET code=?, company_name=?, pic_name=?, pic_phone=?, email=?, address=?, updated_at=? WHERE id=?",
+        [$f['code'], $f['company_name'], $f['pic_name'], $f['pic_phone'], $f['email'], $f['address'], date('Y-m-d H:i:s'), (int)$id]);
 }
 
 function cp_delete($id) {

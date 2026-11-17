@@ -98,7 +98,7 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
                 <?php foreach ($rows as $r): ?>
                     <tr data-id="<?php echo (int)$r['id']; ?>" data-row="<?php echo h(json_encode($r, JSON_UNESCAPED_UNICODE)); ?>">
                         <td><span class="cp-name"><?php echo h($r['company_name']); ?></span><?php if ($r['code'] !== ''): ?><span class="cp-code"><?php echo h($r['code']); ?></span><?php endif; ?></td>
-                        <td><?php echo h($r['pic_name']); ?><?php if ($r['pic_phone'] !== ''): ?><div class="cp-muted"><?php echo h($r['pic_phone']); ?></div><?php endif; ?></td>
+                        <td><?php echo h($r['pic_name']); ?><?php if ($r['pic_phone'] !== ''): ?><div class="cp-muted"><?php echo h($r['pic_phone']); ?></div><?php endif; ?><?php if (!empty($r['email'])): ?><div class="cp-muted"><?php echo h($r['email']); ?></div><?php endif; ?></td>
                         <td class="cp-muted"><?php echo nl2br(h($r['address'])); ?></td>
                         <td class="cp-actions">
                             <button type="button" class="cp-btn sec sm cp-edit">Ubah</button>
@@ -123,6 +123,7 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
             <div class="full"><label for="cp-company">Nama PT / Perusahaan *</label><input type="text" name="company_name" id="cp-company" maxlength="190" required></div>
             <div><label for="cp-pic">Nama PIC / Sales</label><input type="text" name="pic_name" id="cp-pic" maxlength="120"></div>
             <div><label for="cp-phone">Nomor kontak PIC</label><input type="text" name="pic_phone" id="cp-phone" maxlength="40" inputmode="tel" placeholder="0812xxxxxxx"></div>
+            <div class="full"><label for="cp-email">Email penagihan (untuk pengingat jatuh tempo)</label><input type="text" name="email" id="cp-email" maxlength="255" placeholder="finance@perusahaan.com (boleh beberapa, pisah koma)"></div>
             <div class="full"><label for="cp-address">Alamat PT</label><textarea name="address" id="cp-address" maxlength="500"></textarea></div>
             <div><label for="cp-code">Kode customer (opsional)</label><input type="text" name="code" id="cp-code" maxlength="30" placeholder="mis. KPM1" style="text-transform:uppercase"></div>
         </div>
@@ -153,6 +154,7 @@ function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
     document.getElementById('cp-company').value = row ? row.company_name : '';
     document.getElementById('cp-pic').value = row ? row.pic_name : '';
     document.getElementById('cp-phone').value = row ? row.pic_phone : '';
+    document.getElementById('cp-email').value = row ? (row.email || '') : '';
     document.getElementById('cp-address').value = row ? row.address : '';
     document.getElementById('cp-code').value = row ? row.code : '';
     modal.classList.add('open');

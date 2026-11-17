@@ -11,6 +11,7 @@
 //   paid_date     : tanggal pembayaran diterima (tempo ditandai lunas)
 //   origin_city   : kota asal barang
 //   delivered_date: tanggal pengiriman diselesaikan (Delivered)
+//   invoice_no    : nomor invoice dari finance (terpisah dari SPB; satu invoice bisa untuk beberapa SPB)
 require_once __DIR__ . '/database.php';
 
 function courier_columns_ready() {
@@ -28,7 +29,8 @@ function courier_columns_ready() {
                  'book_code' => ['VARCHAR(5) NULL', 'TEXT NULL'],
                  'paid_date' => ['DATE NULL', 'TEXT NULL'],
                  'origin_city' => ['VARCHAR(100) NULL', 'TEXT NULL'],
-                 'delivered_date' => ['DATE NULL', 'TEXT NULL']];
+                 'delivered_date' => ['DATE NULL', 'TEXT NULL'],
+                 'invoice_no' => ['VARCHAR(60) NULL', 'TEXT NULL']];
         $sqlite = $dbConn->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
         $have = [];
         if ($sqlite) { foreach ($dbConn->query("PRAGMA table_info(courier)") as $c) { $have[$c['name']] = true; } }

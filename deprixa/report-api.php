@@ -23,6 +23,38 @@ if (!sameOriginOk()) { api_fail('Permintaan ditolak.', 403); }
 if (($_SESSION['user_type'] ?? '') !== 'Administrator') { api_fail('Hanya admin yang boleh mengubah data ini.', 403); }
 if (!courier_columns_ready()) { api_fail('Kolom data belum siap. Muat ulang halaman.'); }
 
+// Aksi yang tidak memakai satu cid: nomor invoice dan email pengingat
+$act = $_POST['action'] ?? '';
+if (in_array($act, ['set_invoice', 'send_reminder', 'test_mail'], true)) {
+    require_once('reminder-lib.php');
+    try {
+        if ($act === 'set_invoice') {
+            $cids = array_filter(array_map('intval', explode(',', (string)($_POST['cids'] ?? ''))));
+            if (!$cids) { api_fail('Pilih pengiriman dulu.'); }
+            $inv = rem_clean_invoice($_POST['invoice_no'] ?? '');
+            $n = rem_set_invoice($cids, $inv);
+            echo json_encode(['success' => true, 'message' => $inv === '' ? "Nomor invoice dihapus dari $n pengiriman." : "Invoice $inv dipasang ke $n pengiriman."]);
+        } elseif ($act === 'send_reminder') {
+            $inv = rem_clean_invoice($_POST['invoice_no'] ?? '');
+            $all = rem_collect();
+            if (!isset($all[$inv])) { api_fail('Invoice tidak ditemukan atau semua SPB-nya sudah lunas.'); }
+            if (!ali_mail_ready()) { api_fail('Pengaturan email belum diisi di server (config.local.php).'); }
+            [$ok, $msg] = rem_send($all[$inv], true);
+            echo json_encode(['success' => $ok, 'message' => $msg]);
+        } else {
+            if (!ali_mail_ready()) { api_fail('Pengaturan email belum diisi di server (config.local.php).'); }
+            $to = ali_mail_split(ali_mail_config()['cc'] ?: ali_mail_config()['reply_to']);
+            if (!$to) { api_fail('Isi alamat "cc" atau "reply_to" di pengaturan email untuk tujuan tes.'); }
+            ali_mail_send($to, [], 'Tes email ALI Cargo', '<p>Ini email tes dari sistem ALI Cargo. Kalau ini masuk inbox, pengaturan email sudah benar.</p>', "Ini email tes dari sistem ALI Cargo. Kalau ini masuk inbox, pengaturan email sudah benar.\n");
+            echo json_encode(['success' => true, 'message' => 'Email tes terkirim ke ' . implode(', ', $to)]);
+        }
+    } catch (Exception $e) {
+        error_log('report-api mail: ' . $e->getMessage());
+        api_fail('Gagal: ' . $e->getMessage());
+    }
+    exit;
+}
+
 $cid = (int)($_POST['cid'] ?? 0);
 $row = $cid > 0 ? dbFetchAssoc(dbQuery("SELECT * FROM courier WHERE cid = ?", [$cid])) : null;
 if (!$row) { api_fail('Pengiriman tidak ditemukan.'); }
