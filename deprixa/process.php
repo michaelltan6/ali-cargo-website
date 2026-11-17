@@ -353,6 +353,7 @@ try {
             }
 
             // Tanggal keberangkatan opsional; ETA dihitung dari PL kalau kosong
+            require_once __DIR__ . '/courier-lib.php';
             courier_columns_ready(); // memastikan etd/eta boleh kosong
             require_once __DIR__ . '/eta-lib.php';
             $okYmd = function ($v) { $d = DateTime::createFromFormat('Y-m-d', (string)$v); return $d && $d->format('Y-m-d') === (string)$v; };
