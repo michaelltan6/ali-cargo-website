@@ -24,7 +24,7 @@ rp_start('Sudah dibayar', 'money', $month !== '' ? 'Bulan ' . date('m-Y', strtot
     <?php rp_month_bar('laporan-lunas.php', $month); ?>
     <div class="ac-table-wrap">
     <table id="rp-table" class="ac-table dash-table" width="100%">
-        <thead><tr><th>Tracking</th><th>Customer</th><th>Tujuan</th><th>Tgl diterima</th><th>Pembayaran</th><th>Tgl lunas</th><th>Aksi</th></tr></thead>
+        <thead><tr><th>Tracking</th><th>Invoice</th><th>Customer</th><th>Tujuan</th><th>Tgl diterima</th><th>Pembayaran</th><th>Tgl lunas</th><th>Aksi</th></tr></thead>
         <tbody>
         <?php foreach ($rows as $r):
             $isTempo = in_array((string)($r['payment_term'] ?? ''), ['7', '14', '30'], true);
@@ -33,6 +33,7 @@ rp_start('Sudah dibayar', 'money', $month !== '' ? 'Bulan ' . date('m-Y', strtot
         ?>
             <tr>
                 <td><b><?php echo rp_e($r['cons_no']); ?></b></td>
+                <td><?php echo rp_e($r['invoice_no'] ?? ''); ?></td>
                 <td><?php echo rp_e($r['ship_name']); ?></td>
                 <td><?php echo rp_e($r['pickup_time'] ?? ''); ?></td>
                 <td data-order="<?php echo rp_e(ali_ship_date($r)); ?>"><?php echo rp_e(rp_d(ali_ship_date($r))); ?></td>
@@ -47,7 +48,7 @@ rp_start('Sudah dibayar', 'money', $month !== '' ? 'Bulan ' . date('m-Y', strtot
 </section>
 <?php
 rp_end(<<<'JS'
-$('#rp-table').DataTable({ pageLength: 20, lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'Semua']], order: [[5, 'desc']], columnDefs: [{ targets: 6, orderable: false, searchable: false }], language: RP_LANG });
+$('#rp-table').DataTable({ pageLength: 20, lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'Semua']], order: [[6, 'desc']], columnDefs: [{ targets: 7, orderable: false, searchable: false }], language: RP_LANG });
 $('#rp-table').on('click', '.un-paid', function() {
     var cid = $(this).data('cid');
     var go = function() { rpApi({ action: 'unmark_paid', cid: cid }, function() { location.reload(); }); };
