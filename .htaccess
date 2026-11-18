@@ -11,8 +11,11 @@ Options -Indexes
   RewriteCond %{THE_REQUEST} ^(GET|HEAD)\s/index\.php[?\s]
   RewriteRule ^index\.php$ / [R=301,L]
   # alamat lama dengan .php -> alamat bersih (hanya GET, supaya form POST tidak terganggu)
-  RewriteCond %{THE_REQUEST} ^(GET|HEAD)\s/(about-us|awards|contact-us|cookie-policy|faq|layanan|privacy-policy|refund-policy|rute-pengiriman|terms-and-conditions|tracking|tracking-result|ekspedisi-jakarta-[a-z0-9-]+)\.php[?\s]
-  RewriteRule ^(about-us|awards|contact-us|cookie-policy|faq|layanan|privacy-policy|refund-policy|rute-pengiriman|terms-and-conditions|tracking|tracking-result|ekspedisi-jakarta-[a-z0-9-]+)\.php$ /$1 [R=301,L]
+  RewriteCond %{THE_REQUEST} ^(GET|HEAD)\s/(about-us|awards|contact-us|cookie-policy|faq|gallery|layanan|privacy-policy|refund-policy|rute-pengiriman|terms-and-conditions|tracking|tracking-result|ekspedisi-jakarta-[a-z0-9-]+)\.php[?\s]
+  RewriteRule ^(about-us|awards|contact-us|cookie-policy|faq|gallery|layanan|privacy-policy|refund-policy|rute-pengiriman|terms-and-conditions|tracking|tracking-result|ekspedisi-jakarta-[a-z0-9-]+)\.php$ /$1 [R=301,L]
+  # gallery: ada folder bernama gallery, jadi dipetakan langsung ke gallery.php
+  RewriteRule ^gallery/$ /gallery [R=301,L]
+  RewriteRule ^gallery$ gallery.php [L]
   # alamat bersih -> file .php
   RewriteCond %{REQUEST_FILENAME}.php -f
   RewriteRule ^(about-us|awards|contact-us|cookie-policy|faq|layanan|privacy-policy|refund-policy|rute-pengiriman|terms-and-conditions|tracking|tracking-result|ekspedisi-jakarta-[a-z0-9-]+)$ $1.php [L]

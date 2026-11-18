@@ -215,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="layanan">Layanan</a>
                 <a href="tracking">Tracking Kiriman</a>
                 <a href="about-us">Tentang Kami</a>
-                <a href="gallery.php">Gallery</a>
+                <a href="gallery">Gallery</a>
                 <a href="contact-us">Hubungi Kami</a>
                 <a href="login.php">LOGIN</a>
             </nav>

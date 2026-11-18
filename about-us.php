@@ -58,7 +58,7 @@ ls_head('Tentang Kami - Aneka Lintas Indonesia Cargo',
     </aside>
   </div>
   <?php if ($aboutPhoto): ?>
-  <figure class="pg-photo"><img src="<?php echo ls_h($aboutPhoto); ?>" alt="Barang kiriman yang ditangani ALI Cargo" loading="lazy"><figcaption>Barang kiriman yang kami tangani. <a href="gallery.php">Lihat gallery</a></figcaption></figure>
+  <figure class="pg-photo"><img src="<?php echo ls_h($aboutPhoto); ?>" alt="Barang kiriman yang ditangani ALI Cargo" loading="lazy"><figcaption>Barang kiriman yang kami tangani. <a href="gallery">Lihat gallery</a></figcaption></figure>
   <?php endif; ?>
 </section>
 
