@@ -10,13 +10,13 @@ require_once('deprixa/library.php');
   <meta charset="utf-8" />
   <title>Tracking Kiriman | ALI Cargo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="canonical" href="https://www.anekalintasindcargo.com/tracking.php" />
+  <link rel="canonical" href="https://www.anekalintasindcargo.com/tracking" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Aneka Lintas Indonesia Cargo" />
   <meta property="og:locale" content="id_ID" />
   <meta property="og:title" content="Tracking Kiriman | ALI Cargo" />
   <meta property="og:description" content="Lacak kiriman Anda dengan nomor resi ALI Cargo" />
-  <meta property="og:url" content="https://www.anekalintasindcargo.com/tracking.php" />
+  <meta property="og:url" content="https://www.anekalintasindcargo.com/tracking" />
   <meta property="og:image" content="https://www.anekalintasindcargo.com/deprixa_components/images/slider/img1.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="description" content="Lacak kiriman Anda dengan nomor resi ALI Cargo">
@@ -153,7 +153,7 @@ require_once('deprixa/library.php');
   <div class="white-part"></div>
   <div class="red-part"></div>
   <div class="header-content">
-    <a href="index.php" class="logo-link">
+    <a href="/" class="logo-link">
       <img src="logoAli.png" alt="Logo" class="logo-image">
       <div class="company-name">
         <span>ANEKA LINTAS</span>
@@ -162,11 +162,11 @@ require_once('deprixa/library.php');
       </div>
     </a>
     <nav class="menu-nav">
-      <a href="layanan.php">Layanan</a>
-      <a href="tracking.php">Tracking Kiriman</a>
-      <a href="about-us.php">Tentang Kami</a>
+      <a href="layanan">Layanan</a>
+      <a href="tracking">Tracking Kiriman</a>
+      <a href="about-us">Tentang Kami</a>
       <a href="gallery.php">Gallery</a>
-      <a href="contact-us.php">Hubungi Kami</a>
+      <a href="contact-us">Hubungi Kami</a>
       <a href="login.php">LOGIN</a>
     </nav>
   </div>
@@ -214,7 +214,7 @@ require_once('deprixa/library.php');
             <span class="track-icon-back3 mpdRed"></span>
             <h3>BUTUH BANTUAN?</h3>
             <p>Jika Anda memiliki pertanyaan tentang pengiriman, silakan hubungi kami langsung.</p>
-            <a href="contact-us.php" class="btn btn-primary">Hubungi Kami</a>
+            <a href="contact-us" class="btn btn-primary">Hubungi Kami</a>
           </div>
         </div>
       </div>

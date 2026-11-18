@@ -179,7 +179,7 @@
 								<div class="form-group">
 								   
 									<div class="col-md-12 terms-check">
-										<p>By continuing your are accepting our <a href="terms-and-conditions.php" target="_blank">terms &amp; conditions.</a></p>     
+										<p>By continuing your are accepting our <a href="terms-and-conditions" target="_blank">terms &amp; conditions.</a></p>     
 									</div>
 								</div>
 

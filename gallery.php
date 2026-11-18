@@ -18,11 +18,11 @@ foreach (gallery_load_albums() as $album) {
 
 ls_head('Gallery - Aneka Lintas Indonesia Cargo',
     'Dokumentasi kegiatan dan layanan pengiriman PT. Aneka Lintas Indonesia Cargo.',
-    'gallery.php');
+    'gallery');
 ?>
 <section class="ls-hero">
   <div class="ls-wrap">
-    <nav class="ls-crumb" aria-label="Navigasi"><a href="index.php">Beranda</a> &rsaquo; Gallery</nav>
+    <nav class="ls-crumb" aria-label="Navigasi"><a href="/">Beranda</a> &rsaquo; Gallery</nav>
     <h1>Gallery</h1>
     <p class="ls-lead">Dokumentasi kegiatan dan layanan pengiriman kami. Klik sebuah album untuk melihat semua fotonya.</p>
   </div>

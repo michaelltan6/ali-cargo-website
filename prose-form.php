@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) { session_set_cookie_params(['lifetim
 require_once __DIR__ . '/deprixa/database.php';
 
 function pf_back($status) {
-    header('Location: contact-us.php?status=' . $status . '#kirim-pesan');
+    header('Location: contact-us?status=' . $status . '#kirim-pesan');
     exit;
 }
 function pf_line($s, $max) {                 // satu baris, tanpa karakter kontrol (mencegah header injection)

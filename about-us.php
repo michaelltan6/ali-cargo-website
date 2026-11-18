@@ -8,7 +8,7 @@ $total = 0; foreach ($d['data'] as $rows) { $total += count($rows); }
 
 ls_head('Tentang Kami - Aneka Lintas Indonesia Cargo',
     'PT. Aneka Lintas Indonesia Cargo, ekspedisi cargo sejak 2020. Melayani pengiriman darat dan laut dari Jakarta ke ' . $total . ' kota di seluruh Indonesia.',
-    'about-us.php', [
+    'about-us', [
         '@context' => 'https://schema.org',
         '@type' => 'Organization',
         'name' => 'PT. Aneka Lintas Indonesia Cargo',
@@ -21,12 +21,12 @@ ls_head('Tentang Kami - Aneka Lintas Indonesia Cargo',
 ?>
 <section class="ls-hero">
   <div class="ls-wrap">
-    <nav class="ls-crumb" aria-label="Navigasi"><a href="index.php">Beranda</a> &rsaquo; Tentang Kami</nav>
+    <nav class="ls-crumb" aria-label="Navigasi"><a href="/">Beranda</a> &rsaquo; Tentang Kami</nav>
     <h1>Tentang Aneka Lintas Indonesia Cargo</h1>
     <p class="ls-lead">Kami menyediakan layanan pengiriman ke seluruh penjuru Indonesia, dengan komitmen agar setiap kiriman tiba di tujuan dengan cepat dan aman.</p>
     <div class="ls-hero-actions">
       <a class="ls-btn" href="<?php echo ls_h(ls_wa('Halo ALI Cargo, saya mau tanya soal layanan pengiriman.')); ?>" target="_blank" rel="noopener">Hubungi kami lewat WhatsApp</a>
-      <a class="ls-btn-ghost" href="layanan.php">Lihat layanan</a>
+      <a class="ls-btn-ghost" href="layanan">Lihat layanan</a>
     </div>
   </div>
 </section>
@@ -78,7 +78,7 @@ ls_head('Tentang Kami - Aneka Lintas Indonesia Cargo',
   <h2>Jangkauan pengiriman</h2>
   <p>Pilih wilayah untuk melihat kota tujuan dan estimasi waktunya.</p>
   <?php ls_region_links(); ?>
-  <p><a href="rute-pengiriman.php">Lihat semua <?php echo $total; ?> rute</a></p>
+  <p><a href="rute-pengiriman">Lihat semua <?php echo $total; ?> rute</a></p>
   <?php ls_cta('Halo ALI Cargo, saya mau tanya soal pengiriman.', 'Hubungi lewat WhatsApp'); ?>
 </section>
 <?php ls_foot();

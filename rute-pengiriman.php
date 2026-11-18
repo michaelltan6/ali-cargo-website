@@ -5,11 +5,11 @@ $total = 0; $all = [];
 foreach ($d['order'] as $k) { $total += count($d['data'][$k]); }
 ls_head('Rute dan Estimasi Pengiriman dari Jakarta | ALI Cargo',
     'Daftar ' . $total . ' kota tujuan pengiriman dari Jakarta ke seluruh Indonesia beserta estimasi waktu dan jenis pengiriman, darat atau kapal reguler.',
-    'rute-pengiriman.php');
+    'rute-pengiriman');
 ?>
 <section class="ls-hero">
   <div class="ls-wrap">
-    <nav class="ls-crumb" aria-label="Navigasi"><a href="index.php">Beranda</a> &rsaquo; <a href="layanan.php">Layanan</a> &rsaquo; Rute</nav>
+    <nav class="ls-crumb" aria-label="Navigasi"><a href="/">Beranda</a> &rsaquo; <a href="layanan">Layanan</a> &rsaquo; Rute</nav>
     <h1>Rute dan Estimasi Pengiriman dari Jakarta</h1>
     <p class="ls-lead">Kami melayani <?php echo $total; ?> kota tujuan di Sumatera, Jawa, Bali, NTT dan NTB, Kalimantan, Sulawesi, Maluku, dan Papua. Cari kotamu di bawah untuk lihat jenis pengiriman dan estimasi harinya.</p>
   </div>

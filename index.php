@@ -179,7 +179,7 @@ $hm_wa = function ($t) { return ls_h(ls_wa($t)); };
     <div class="white-part"></div>
     <div class="red-part"></div>
     <div class="header-content">
-      <a href="index.php" class="logo-link">
+      <a href="/" class="logo-link">
         <img src="logoAli.png" alt="Logo Aneka Lintas Indonesia Cargo" class="logo-image">
         <div class="company-name">
           <span>ANEKA LINTAS</span>
@@ -188,11 +188,11 @@ $hm_wa = function ($t) { return ls_h(ls_wa($t)); };
         </div>
       </a>
       <nav class="menu-nav">
-        <a href="layanan.php">Layanan</a>
-        <a href="tracking.php">Tracking Kiriman</a>
-        <a href="about-us.php">Tentang Kami</a>
+        <a href="layanan">Layanan</a>
+        <a href="tracking">Tracking Kiriman</a>
+        <a href="about-us">Tentang Kami</a>
         <a href="gallery.php">Gallery</a>
-        <a href="contact-us.php">Hubungi Kami</a>
+        <a href="contact-us">Hubungi Kami</a>
         <a href="login.php">LOGIN</a>
       </nav>
     </div>
@@ -211,7 +211,7 @@ $hm_wa = function ($t) { return ls_h(ls_wa($t)); };
         <p>Darat, laut, dan udara. Estimasi waktu jelas per kota tujuan, dan kamu bisa memantau kiriman kapan saja lewat nomor resi.</p>
         <div class="hm-hero-btns">
           <a class="hm-btn hm-btn-red" href="<?php echo $hm_wa('Halo ALI Cargo, saya mau tanya ongkos kirim.'); ?>" target="_blank" rel="noopener">Minta penawaran via WhatsApp</a>
-          <a class="hm-btn hm-btn-ghost" href="rute-pengiriman.php">Lihat rute dan estimasi</a>
+          <a class="hm-btn hm-btn-ghost" href="rute-pengiriman">Lihat rute dan estimasi</a>
         </div>
       </div>
       <form class="hm-track" action="tracking-result.php" method="post" id="form">
@@ -268,13 +268,13 @@ $hm_wa = function ($t) { return ls_h(ls_wa($t)); };
           <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 14h26v18H4zM30 20h8l6 7v5H30z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><circle cx="14" cy="35" r="4" fill="#fff" stroke="currentColor" stroke-width="2.5"/><circle cx="37" cy="35" r="4" fill="#fff" stroke="currentColor" stroke-width="2.5"/></svg>
           <h3>Cargo darat</h3>
           <p>Truk ke kota-kota di Jawa, Bali, dan sebagian besar Sumatera. Cocok untuk barang yang perlu cepat sampai.</p>
-          <a href="layanan.php">Lihat tujuan dan estimasi &rarr;</a>
+          <a href="layanan">Lihat tujuan dan estimasi &rarr;</a>
         </article>
         <article class="hm-card">
           <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 28h36l-5 10H11zM14 28V18h14v10M28 22h6v6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M4 43c4 0 4-2 8-2s4 2 8 2 4-2 8-2 4 2 8 2 4-2 8-2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
           <h3>Cargo laut</h3>
           <p>Kapal reguler ke Kalimantan, Sulawesi, NTT-NTB, Maluku, Papua, dan beberapa kota di Sumatera. Hemat untuk barang besar dan berat.</p>
-          <a href="layanan.php">Lihat tujuan dan estimasi &rarr;</a>
+          <a href="layanan">Lihat tujuan dan estimasi &rarr;</a>
         </article>
         <article class="hm-card">
           <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M44 8L4 22l14 5 5 14zM18 27L44 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>
@@ -319,14 +319,14 @@ $hm_wa = function ($t) { return ls_h(ls_wa($t)); };
       <p class="hm-lead">Dari Jakarta. Daftar lengkap ada di halaman rute.</p>
       <div class="hm-routes">
         <?php foreach (['Bandung', 'Surabaya', 'Medan', 'Makassar', 'Balikpapan', 'Denpasar'] as $hm_n) { $hm_r = hm_find($hm_n); if (!$hm_r) { continue; } ?>
-        <a class="hm-route" href="rute-pengiriman.php">
+        <a class="hm-route" href="rute-pengiriman">
           <span class="hm-route-to">Jakarta &rarr; <b><?php echo ls_h($hm_r['kota']); ?></b></span>
           <span class="hm-route-meta"><?php echo ls_h(ls_jenis($hm_r['jenis'])); ?></span>
           <span class="hm-route-days"><?php echo ls_h($hm_r['hari']); ?> hari</span>
         </a>
         <?php } ?>
       </div>
-      <p class="hm-more"><a href="rute-pengiriman.php">Lihat semua rute pengiriman &rarr;</a></p>
+      <p class="hm-more"><a href="rute-pengiriman">Lihat semua rute pengiriman &rarr;</a></p>
     </div>
   </section>
 
@@ -338,7 +338,7 @@ $hm_wa = function ($t) { return ls_h(ls_wa($t)); };
       <details class="hm-faq"><summary>Bagaimana cara hitung ongkos kirim?</summary><p>Tarif per kg dan per m³ (kubikasi), dan tiap tujuan punya minimum pengiriman sendiri. Kirim kota tujuan, berat, dan ukuran barang, nanti kami hitungkan.</p></details>
       <details class="hm-faq"><summary>Bisakah saya melacak kiriman?</summary><p>Bisa. Masukkan nomor resi di kotak "Lacak kiriman" di atas atau di halaman Tracking Kiriman.</p></details>
       <details class="hm-faq"><summary>Bagaimana kalau barang rusak atau hilang?</summary><p>Kami bertanggung jawab atas kekurangan, kerusakan, atau kehilangan barang yang disebabkan oleh kelalaian kami.</p></details>
-      <p class="hm-more"><a href="faq.php">Lihat semua pertanyaan &rarr;</a></p>
+      <p class="hm-more"><a href="faq">Lihat semua pertanyaan &rarr;</a></p>
     </div>
   </section>
 
@@ -348,7 +348,7 @@ $hm_wa = function ($t) { return ls_h(ls_wa($t)); };
       <div><h2>Siap kirim barang?</h2><p>Kirim kota tujuan dan jenis barangmu. Tim kami balas dengan penawaran.</p></div>
       <div class="hm-hero-btns">
         <a class="hm-btn hm-btn-white" href="<?php echo $hm_wa('Halo ALI Cargo, saya mau minta penawaran pengiriman.'); ?>" target="_blank" rel="noopener">Chat WhatsApp</a>
-        <a class="hm-btn hm-btn-ghost" href="contact-us.php">Hubungi kami</a>
+        <a class="hm-btn hm-btn-ghost" href="contact-us">Hubungi kami</a>
       </div>
     </div>
   </section>

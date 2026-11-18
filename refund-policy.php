@@ -11,7 +11,7 @@
 	<meta name="keywords" content="" />
 	<meta name="author" content="">	
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="canonical" href="https://www.anekalintasindcargo.com/refund-policy.php" />
+  <link rel="canonical" href="https://www.anekalintasindcargo.com/refund-policy" />
  
 	<link href="deprixa_components/content/cssefe4.css" rel="stylesheet"/>  
     <link href="deprixa_components/styles/track-order.css" rel="stylesheet" />

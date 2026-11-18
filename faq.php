@@ -14,11 +14,11 @@ $ld = ['@context'=>'https://schema.org','@type'=>'FAQPage','mainEntity'=>[]];
 foreach ($faq as $f) { $ld['mainEntity'][] = ['@type'=>'Question','name'=>$f['q'],'acceptedAnswer'=>['@type'=>'Answer','text'=>$f['a']]]; }
 ls_head('FAQ Pengiriman Cargo dan Cara Hitung Ongkos | ALI Cargo',
     'Jawaban pertanyaan yang sering diajukan: estimasi waktu, cara hitung ongkos per kg dan m³, biaya yang tidak termasuk, dan tanggung jawab atas barang.',
-    'faq.php', $ld);
+    'faq', $ld);
 ?>
 <section class="ls-hero">
   <div class="ls-wrap">
-    <nav class="ls-crumb" aria-label="Navigasi"><a href="index.php">Beranda</a> &rsaquo; <a href="layanan.php">Layanan</a> &rsaquo; FAQ</nav>
+    <nav class="ls-crumb" aria-label="Navigasi"><a href="/">Beranda</a> &rsaquo; <a href="layanan">Layanan</a> &rsaquo; FAQ</nav>
     <h1>Pertanyaan yang Sering Diajukan</h1>
     <p class="ls-lead">Soal waktu, cara hitung ongkos, dan ketentuan pengiriman.</p>
   </div>
@@ -31,7 +31,7 @@ ls_head('FAQ Pengiriman Cargo dan Cara Hitung Ongkos | ALI Cargo',
   </details>
   <?php endforeach; ?>
   <?php ls_cta('Halo ALI Cargo, saya punya pertanyaan soal pengiriman.', 'Tanya lewat WhatsApp'); ?>
-  <p><a href="rute-pengiriman.php">Lihat semua rute</a> &middot; <a href="layanan.php">Kembali ke Layanan</a></p>
+  <p><a href="rute-pengiriman">Lihat semua rute</a> &middot; <a href="layanan">Kembali ke Layanan</a></p>
 </section>
 <script>
 // Buka pertanyaan yang dituju lewat tautan #id

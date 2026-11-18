@@ -3,6 +3,21 @@
 
 Options -Indexes
 
+# URL bersih untuk halaman publik di folder utama (tanpa .php).
+# Folder deprixa/ (admin) tidak disentuh. Halaman baru harus ditambahkan ke daftar ini.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # index.php -> /
+  RewriteCond %{THE_REQUEST} ^(GET|HEAD)\s/index\.php[?\s]
+  RewriteRule ^index\.php$ / [R=301,L]
+  # alamat lama dengan .php -> alamat bersih (hanya GET, supaya form POST tidak terganggu)
+  RewriteCond %{THE_REQUEST} ^(GET|HEAD)\s/(about-us|awards|contact-us|cookie-policy|faq|layanan|privacy-policy|refund-policy|rute-pengiriman|terms-and-conditions|tracking|ekspedisi-jakarta-[a-z0-9-]+)\.php[?\s]
+  RewriteRule ^(about-us|awards|contact-us|cookie-policy|faq|layanan|privacy-policy|refund-policy|rute-pengiriman|terms-and-conditions|tracking|ekspedisi-jakarta-[a-z0-9-]+)\.php$ /$1 [R=301,L]
+  # alamat bersih -> file .php
+  RewriteCond %{REQUEST_FILENAME}.php -f
+  RewriteRule ^(about-us|awards|contact-us|cookie-policy|faq|layanan|privacy-policy|refund-policy|rute-pengiriman|terms-and-conditions|tracking|ekspedisi-jakarta-[a-z0-9-]+)$ $1.php [L]
+</IfModule>
+
 # Blokir file yang tidak boleh dibuka dari browser (log, backup, database, pengaturan)
 <FilesMatch "(\.(log|sql|bak|old|orig|swp|sqlite|ini|env|inc|md|lock)$|^\.|~$)">
   <IfModule mod_authz_core.c>

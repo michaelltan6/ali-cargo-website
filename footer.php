@@ -14,19 +14,19 @@
     <div class="footer-block menu-block about-block">
       <header>Sekilas Tentang Kami</header>
       <ul>
-        <li><a href="about-us.php">Tentang Kami</a></li>
-        <li><a href="layanan.php">Layanan</a></li>
-        <li><a href="rute-pengiriman.php">Rute Pengiriman</a></li>
-        <li><a href="faq.php">FAQ</a></li>
-        <li><a href="contact-us.php">Hubungi Kami</a></li>
+        <li><a href="about-us">Tentang Kami</a></li>
+        <li><a href="layanan">Layanan</a></li>
+        <li><a href="rute-pengiriman">Rute Pengiriman</a></li>
+        <li><a href="faq">FAQ</a></li>
+        <li><a href="contact-us">Hubungi Kami</a></li>
       </ul>
     </div>
 
     <div class="footer-block menu-block tools-block">
       <header>Tools</header>
       <ul>
-        <li><a href="tracking.php">Track A Shipment</a></li>
-        <li><a href="contact-us.php">Dapatkan Quote</a></li>
+        <li><a href="tracking">Track A Shipment</a></li>
+        <li><a href="contact-us">Dapatkan Quote</a></li>
       </ul>
     </div>
 
@@ -41,9 +41,9 @@
     <section class="footer-baseline">
       <p class="footer-text">&copy; Copyright PT. ANEKA LINTAS INDONESIA CARGO <?php echo date('Y'); ?></p>
       <ul class="footer-links">
-        <li><a href="privacy-policy.php">Privacy Policy</a></li>
-        <li><a href="cookie-policy.php">Cookie Policy</a></li>
-        <li><a href="terms-and-conditions.php">Terms And Conditions</a></li>
+        <li><a href="privacy-policy">Privacy Policy</a></li>
+        <li><a href="cookie-policy">Cookie Policy</a></li>
+        <li><a href="terms-and-conditions">Terms And Conditions</a></li>
       </ul>
     </section>
     <a href="#" id="back-top" aria-label="Kembali ke atas"></a>

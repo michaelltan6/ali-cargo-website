@@ -11,7 +11,7 @@
 	<meta name="keywords" content="" />
 	<meta name="author" content="">	
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="canonical" href="https://www.anekalintasindcargo.com/awards.php" />
+  <link rel="canonical" href="https://www.anekalintasindcargo.com/awards" />
 
     <link rel="stylesheet" href="deprixa_components/css/bootstrap-mpd.css" />
 	<link rel="stylesheet" href="deprixa_components/css/global.css" />

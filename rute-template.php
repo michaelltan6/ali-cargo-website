@@ -44,7 +44,7 @@ ls_head($title, $desc, $path, [
 ?>
 <section class="ls-hero">
   <div class="ls-wrap">
-    <nav class="ls-crumb" aria-label="Navigasi"><a href="index.php">Beranda</a> &rsaquo; <a href="layanan.php">Layanan</a> &rsaquo; <a href="rute-pengiriman.php">Rute</a> &rsaquo; <?php echo ls_h($name); ?></nav>
+    <nav class="ls-crumb" aria-label="Navigasi"><a href="/">Beranda</a> &rsaquo; <a href="layanan">Layanan</a> &rsaquo; <a href="rute-pengiriman">Rute</a> &rsaquo; <?php echo ls_h($name); ?></nav>
     <h1><?php echo ls_h($titleH1); ?></h1>
     <p class="ls-lead">Aneka Lintas Indonesia Cargo melayani pengiriman barang dari Jakarta ke <?php echo $n; ?> kota tujuan di <?php echo ls_h($name); ?>. <?php echo ls_h($jenisText); ?> Estimasi waktu tempuh <?php echo $min; ?> sampai <?php echo $max; ?> hari, tergantung kota tujuan.</p>
   </div>
@@ -65,7 +65,7 @@ ls_head($title, $desc, $path, [
 <section class="ls-wrap ls-section">
   <h2>Yang perlu kamu tahu</h2>
   <ul class="ls-list">
-    <li>Ongkos dihitung per kg atau per m&sup3; (kubikasi), sesuai tujuan dan barang kamu. <a href="faq.php#ongkos">Lihat cara hitungnya</a>.</li>
+    <li>Ongkos dihitung per kg atau per m&sup3; (kubikasi), sesuai tujuan dan barang kamu. <a href="faq#ongkos">Lihat cara hitungnya</a>.</li>
     <li>Harga berlaku untuk pengantaran di dalam kota tujuan, bukan ke luar kota.</li>
     <li>Biaya bongkar, pajak, dan biaya lain di luar pengiriman tidak termasuk.</li>
     <li>Kalau ada kekurangan, kerusakan, atau kehilangan barang karena kelalaian kami, kami yang bertanggung jawab.</li>
@@ -75,6 +75,6 @@ ls_head($title, $desc, $path, [
 <section class="ls-wrap ls-section">
   <h2>Wilayah lain</h2>
   <?php ls_region_links($regKey); ?>
-  <p><a href="rute-pengiriman.php">Lihat semua rute</a> &middot; <a href="faq.php">Pertanyaan yang sering diajukan</a></p>
+  <p><a href="rute-pengiriman">Lihat semua rute</a> &middot; <a href="faq">Pertanyaan yang sering diajukan</a></p>
 </section>
 <?php ls_foot();

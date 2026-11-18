@@ -203,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="white-part"></div>
         <div class="red-part"></div>
         <div class="header-content">
-            <a href="index.php" class="logo-link">
+            <a href="/" class="logo-link">
                 <img src="logoAli.png" alt="Logo" class="logo-image">
                 <div class="company-name">
                     <span>ANEKA LINTAS</span>
@@ -212,11 +212,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </a>
             <nav class="menu-nav">
-                <a href="layanan.php">Layanan</a>
-                <a href="tracking.php">Tracking Kiriman</a>
-                <a href="about-us.php">Tentang Kami</a>
+                <a href="layanan">Layanan</a>
+                <a href="tracking">Tracking Kiriman</a>
+                <a href="about-us">Tentang Kami</a>
                 <a href="gallery.php">Gallery</a>
-                <a href="contact-us.php">Hubungi Kami</a>
+                <a href="contact-us">Hubungi Kami</a>
                 <a href="login.php">LOGIN</a>
             </nav>
         </div>

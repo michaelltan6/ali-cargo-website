@@ -7,7 +7,7 @@ $sales = [
 ];
 ls_head('Hubungi Kami - Aneka Lintas Indonesia Cargo',
     'Hubungi PT. Aneka Lintas Indonesia Cargo lewat WhatsApp, telepon, atau formulir. Kantor di Ruko Hawaii, Cengkareng, Jakarta Barat. Senin-Sabtu 09.00-18.00.',
-    'contact-us.php', [
+    'contact-us', [
         '@context' => 'https://schema.org',
         '@type' => 'LocalBusiness',
         'name' => 'PT. Aneka Lintas Indonesia Cargo',
@@ -20,7 +20,7 @@ ls_head('Hubungi Kami - Aneka Lintas Indonesia Cargo',
 ?>
 <section class="ls-hero">
   <div class="ls-wrap">
-    <nav class="ls-crumb" aria-label="Navigasi"><a href="index.php">Beranda</a> &rsaquo; Hubungi Kami</nav>
+    <nav class="ls-crumb" aria-label="Navigasi"><a href="/">Beranda</a> &rsaquo; Hubungi Kami</nav>
     <h1>Hubungi Kami</h1>
     <p class="ls-lead">Mau tanya ongkos, estimasi waktu, atau cara kirim barang? Tim kami siap membantu, Senin sampai Sabtu pukul 09.00 - 18.00 WIB.</p>
   </div>

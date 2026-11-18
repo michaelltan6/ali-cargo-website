@@ -11,7 +11,7 @@ function ls_data() { static $d = null; if ($d === null) { $d = include __DIR__ .
 function ls_h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 function ls_wa($text, $number = ALI_WA) { return 'https://wa.me/' . $number . '?text=' . rawurlencode($text); }
 function ls_jenis($j) { return $j === 'darat' ? 'Cargo Darat' : 'Cargo Laut (kapal reguler)'; }
-function ls_page($regKey) { $d = ls_data(); return 'ekspedisi-jakarta-' . $d['slug'][$regKey] . '.php'; }
+function ls_page($regKey) { $d = ls_data(); return 'ekspedisi-jakarta-' . $d['slug'][$regKey]; }
 
 // Rentang estimasi hari terkecil dan terbesar dari daftar tujuan
 function ls_range($rows) {

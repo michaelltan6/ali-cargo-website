@@ -11,7 +11,7 @@
 	<meta name="keywords" content="" />
 	<meta name="author" content="">	
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="canonical" href="https://www.anekalintasindcargo.com/cookie-policy.php" />
+  <link rel="canonical" href="https://www.anekalintasindcargo.com/cookie-policy" />
 
       
    <link href="deprixa_components/content/cssefe4.css?v=635906170601831033" rel="stylesheet"/>  

@@ -4,7 +4,7 @@ require_once('deprixa/database.php');
 
 // Redirect if no consignment number is provided
 if (empty($_POST['Consignment'])) {
-    header("Location: tracking.php");
+    header("Location: tracking");
     exit;
 }
 
@@ -245,7 +245,7 @@ if ($cons) {
         <div class="white-part"></div>
         <div class="red-part"></div>
         <div class="header-content">
-            <a href="index.php" class="logo-link">
+            <a href="/" class="logo-link">
                 <img src="logoAli.png" alt="Logo Aneka Lintas Indonesia Cargo" class="logo-image">
                 <div class="company-name">
                     <span>ANEKA LINTAS</span>
@@ -254,11 +254,11 @@ if ($cons) {
                 </div>
             </a>
             <nav class="menu-nav">
-                <a href="layanan.php">Layanan</a>
-                <a href="tracking.php">Tracking Kiriman</a>
-                <a href="about-us.php">Tentang Kami</a>
+                <a href="layanan">Layanan</a>
+                <a href="tracking">Tracking Kiriman</a>
+                <a href="about-us">Tentang Kami</a>
                 <a href="gallery.php">Gallery</a>
-                <a href="contact-us.php">Hubungi Kami</a>
+                <a href="contact-us">Hubungi Kami</a>
                 <a href="login.php">LOGIN</a>
             </nav>
         </div>
@@ -460,7 +460,7 @@ if ($cons) {
         <div class="white-part"></div>
         <div class="red-part"></div>
         <div class="header-content">
-            <a href="index.php" class="logo-link">
+            <a href="/" class="logo-link">
                 <img src="logoAli.png" alt="Logo Aneka Lintas Indonesia Cargo" class="logo-image">
                 <div class="company-name">
                     <span>ANEKA LINTAS</span>
@@ -469,11 +469,11 @@ if ($cons) {
                 </div>
             </a>
             <nav class="menu-nav">
-                <a href="layanan.php">Layanan</a>
-                <a href="tracking.php">Lacak Kiriman Anda</a>
-                <a href="about-us.php">Tentang Kami</a>
+                <a href="layanan">Layanan</a>
+                <a href="tracking">Lacak Kiriman Anda</a>
+                <a href="about-us">Tentang Kami</a>
                 <a href="gallery.php">Gallery</a>
-                <a href="contact-us.php">Hubungi Kami</a>
+                <a href="contact-us">Hubungi Kami</a>
                 <a href="login.php">LOGIN</a>
             </nav>
         </div>
@@ -495,7 +495,7 @@ if ($cons) {
                     <h1><img src="deprixa_components/images/error.png" /></h1>
                     <h3>Tracking number not found,</h3>
                     <p><span style="color:#FF0000"><?php echo htmlspecialchars($cons); ?></span> check the number or Contact Us.</p>
-                    <div class="text-center"><a href="index.php" class="btn-system btn-small">Back To Home</a></div>
+                    <div class="text-center"><a href="/" class="btn-system btn-small">Back To Home</a></div>
                 </div>					
             </div>
         </div>
