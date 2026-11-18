@@ -328,22 +328,23 @@ if ($cons) {
                     <thead><tr><th>Nama barang</th><th class="num">Qty</th><th class="num">P (cm)</th><th class="num">L (cm)</th><th class="num">T (cm)</th><th class="num">Berat (kg)</th></tr></thead>
                     <tbody>
                     <?php foreach ($items as $item):
-                        $n = function ($v, $d) { return is_numeric($v) ? number_format((float)$v, $d, '.', '') : '-'; }; ?>
+                        $n = function ($v, $d) { return is_numeric($v) ? number_format((float)$v, $d, '.', '') : '-'; };
+                        $kg = function ($v) { if (!is_numeric($v)) { return '-'; } $t = number_format((float)$v, 3, ',', '.'); return rtrim(rtrim($t, '0'), ','); }; ?>
                         <tr>
                             <td><?php echo $e($item['item_name'] ?? '-'); ?></td>
                             <td class="num"><?php echo $n($item['quantity'], 0); ?></td>
                             <td class="num"><?php echo $n($item['length'], 0); ?></td>
                             <td class="num"><?php echo $n($item['width'], 0); ?></td>
                             <td class="num"><?php echo $n($item['height'], 0); ?></td>
-                            <td class="num"><?php echo $n($item['item_weight'], 3); ?></td>
+                            <td class="num"><?php echo $kg($item['item_weight']); ?></td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
                     <tfoot><tr>
                         <td>Total</td>
                         <td class="num"><?php echo number_format($total_quantity, 0, '.', ''); ?></td>
-                        <td class="num" colspan="3">Volume: <?php echo number_format($total_volume_m3, 3, '.', ''); ?> m³</td>
-                        <td class="num"><?php echo number_format($total_weight_kg, 3, '.', ''); ?></td>
+                        <td class="num" colspan="3">Volume: <?php echo rtrim(rtrim(number_format($total_volume_m3, 3, ',', '.'), '0'), ','); ?> m³</td>
+                        <td class="num"><?php echo rtrim(rtrim(number_format($total_weight_kg, 3, ',', '.'), '0'), ','); ?></td>
                     </tr></tfoot>
                 </table>
                 </div>
