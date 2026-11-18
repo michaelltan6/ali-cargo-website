@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/layanan-lib.php';
 $faq = [
- ['id'=>'waktu','q'=>'Berapa lama pengiriman dari Jakarta?','a'=>'Tergantung kota tujuan. Beberapa contoh: Cirebon 1-2 hari, Bandung dan Surabaya 2-3 hari, Medan 5-7 hari, Makassar 7-10 hari, Balikpapan 10-12 hari, Papua 21-25 hari. Daftar lengkap ada di halaman Rute. Estimasi bisa bergeser sedikit, terutama untuk pengiriman lewat kapal.'],
+ ['id'=>'waktu','q'=>'Berapa lama pengiriman dari Jakarta?','a'=>'Tergantung kota tujuan. Beberapa contoh: Cirebon dan Bandung 1-2 hari, Surabaya 2-3 hari, Medan 5-7 hari, Makassar 7-10 hari, Balikpapan 10-12 hari, Papua 21-25 hari. Daftar lengkap ada di halaman Rute. Estimasi bisa bergeser sedikit, terutama untuk pengiriman lewat kapal.'],
  ['id'=>'ongkos','q'=>'Bagaimana cara hitung ongkos kirim?','a'=>'Tarif tersedia per kg dan per m³ (kubikasi), dan tiap tujuan punya minimum pengiriman sendiri. Untuk kubikasi, kalikan panjang × lebar × tinggi dalam meter. Kirim kota tujuan, berat, dan ukuran barang ke tim kami, kami hitungkan mana yang berlaku dan kirim penawarannya.'],
  ['id'=>'antar','q'=>'Apakah ongkos sudah termasuk diantar sampai alamat?','a'=>'Harga berlaku untuk pengantaran di dalam kota tujuan, bukan ke luar kota. Kalau alamat penerima di luar kota tujuan, tanyakan dulu ke tim kami.'],
  ['id'=>'tidak-termasuk','q'=>'Biaya apa saja yang tidak termasuk?','a'=>'Harga pengiriman tidak termasuk biaya bongkar, pajak, dan biaya lain di luar pengiriman.'],

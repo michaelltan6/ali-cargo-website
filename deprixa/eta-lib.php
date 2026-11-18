@@ -48,7 +48,7 @@ function ali_eta_rows($table = 'reg') {
         array('TUBAN', 4, 5, 'Darat', 'JAWA'),
         array('TUREN', 5, 6, 'Darat', 'JAWA'),
         array('TULUNG AGUNG', 4, 5, 'Darat', 'JAWA'),
-        array('BANDUNG', 2, 3, 'Darat', 'JAWA'),
+        array('BANDUNG', 1, 2, 'Darat', 'JAWA'),
         array('CIREBON', 1, 2, 'Darat', 'JAWA'),
         array('CIMAHI', 2, 3, 'Darat', 'JAWA'),
         array('PADALARANG', 2, 3, 'Darat', 'JAWA'),

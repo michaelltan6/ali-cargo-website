@@ -147,7 +147,7 @@ return [
       [
         'kota' => 'Bandung',
         'jenis' => 'darat',
-        'hari' => '2-3',
+        'hari' => '1-2',
         'penerus' => false,
       ],
       [
