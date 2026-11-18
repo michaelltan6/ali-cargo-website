@@ -189,7 +189,7 @@ require_once('deprixa/library.php');
     <section class="track-num">
       <h3>MASUKKAN NOMOR RESI</h3>
       <div class="search-bar">
-        <form action="tracking-result.php" method="post" name="form" id="form">
+        <form action="tracking-result" method="post" name="form" id="form">
           <div class="form-group mob-track">
             <div class="input-group">
               <input type="text" class="form-control" name="Consignment" id="Consignment" placeholder="Contoh: ALI12345">

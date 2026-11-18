@@ -214,7 +214,7 @@ $hm_wa = function ($t) { return ls_h(ls_wa($t)); };
           <a class="hm-btn hm-btn-ghost" href="rute-pengiriman">Lihat rute dan estimasi</a>
         </div>
       </div>
-      <form class="hm-track" action="tracking-result.php" method="post" id="form">
+      <form class="hm-track" action="tracking-result" method="post" id="form">
         <h2>Lacak kiriman</h2>
         <p>Masukkan nomor resi dari kami.</p>
         <input type="text" name="Consignment" id="Consignment" placeholder="Contoh: ALI 7507" required autocomplete="off">
