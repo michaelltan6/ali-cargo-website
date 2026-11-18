@@ -88,7 +88,6 @@ if ($cons) {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, follow" />
     <link rel="icon" type="image/png" href="logoAli.png" />
-    <meta name="robots" content="noindex, follow" />
     <link rel="stylesheet" href="deprixa/asset1/css/font-awesome.min.css" type="text/css" media="screen">  
     <link href="deprixa_components/content/cssefe4.css" rel="stylesheet"/>
     <link rel="stylesheet" href="deprixa/css/tracking.css" type="text/css" />   
@@ -412,7 +411,6 @@ if ($cons) {
     <meta name="author" content="">	
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/png" href="logoAli.png" />
-    <meta name="robots" content="noindex, follow" />
     <link rel="stylesheet" href="deprixa/asset1/css/font-awesome.min.css" type="text/css" media="screen">  
     <link href="deprixa_components/content/cssefe4.css" rel="stylesheet"/>
     <link rel="stylesheet" href="deprixa/css/tracking.css" type="text/css" />   
