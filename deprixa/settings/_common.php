@@ -44,6 +44,9 @@ function st_auth($emptyBody = false) {
     if (!function_exists('isUser') || !isUser() || (isset($_SESSION['user_type']) ? $_SESSION['user_type'] : '') !== 'Administrator') {
         st_json($emptyBody ? array() : array('msg' => 'sesi', 'details' => 'Silakan login lagi.'), 401);
     }
+    if (!ali_is_owner()) {
+        st_json($emptyBody ? array() : array('msg' => 'error', 'details' => 'Hanya pemilik sistem yang boleh mengubah pengaturan dan akun.'), 403);
+    }
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && !st_same_origin()) {
         st_json(array('msg' => 'error', 'details' => 'Permintaan ditolak.'), 403);
     }

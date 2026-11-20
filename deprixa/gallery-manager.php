@@ -61,6 +61,12 @@ function gm_upload_error_text($code) {
 /* ---------- Hanya Administrator yang sudah login ---------- */
 $isAjax  = (($_POST['ajax'] ?? '') === '1');
 $isAdmin = function_exists('isUser') && isUser() && (($_SESSION['user_type'] ?? '') === 'Administrator');
+$isOwner = function_exists('ali_is_owner') && ali_is_owner();
+if ($isAdmin && !$isOwner) {
+    if ($isAjax) { gm_json(403, ['ok' => false, 'message' => 'Hanya pemilik sistem yang boleh mengelola gallery.']); }
+    gm_clear_output();
+    requireOwner();
+}
 if (!$isAdmin) {
     if ($isAjax) {
         gm_json(401, ['ok' => false, 'message' => 'Sesi login sudah habis. Silakan login lagi.']);

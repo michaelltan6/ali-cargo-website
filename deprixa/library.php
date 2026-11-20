@@ -133,6 +133,32 @@ function requireAdmin($json = false) {
     exit;
 }
 
+// Pemilik sistem: satu-satunya akun yang boleh membuka Manajemen Akun dan Pengaturan.
+// Ganti username di bawah kalau pemiliknya berpindah.
+if (!defined('ALI_OWNER_USER')) { define('ALI_OWNER_USER', 'michaelltan6'); }
+function ali_is_owner() {
+    return isUser()
+        && (($_SESSION['user_type'] ?? '') === 'Administrator')
+        && strcasecmp((string)($_SESSION['user_name'] ?? ''), ALI_OWNER_USER) === 0;
+}
+// Dipakai di awal halaman yang khusus pemilik. $json=true untuk endpoint AJAX.
+function requireOwner($json = false) {
+    if (ali_is_owner()) { return; }
+    if (!isUser()) { requireAdmin($json); return; }
+    http_response_code(403);
+    if ($json) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Hanya pemilik sistem yang boleh mengakses ini.']);
+        exit;
+    }
+    echo '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Akses dibatasi</title></head>'
+       . '<body style="font-family:Arial,sans-serif;background:#f5f7f9;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0">'
+       . '<div style="background:#fff;border-radius:12px;padding:32px 36px;max-width:420px;box-shadow:0 6px 18px rgba(0,0,0,.08);text-align:center">'
+       . '<h2 style="margin:0 0 10px">Akses dibatasi</h2><p style="color:#5b6570;line-height:1.5">Halaman ini hanya bisa dibuka oleh pemilik sistem.</p>'
+       . '<a href="admin.php" style="display:inline-block;margin-top:10px;padding:10px 18px;border-radius:8px;background:#e11d27;color:#fff;text-decoration:none;font-weight:700">Kembali ke dashboard</a></div></body></html>';
+    exit;
+}
+
 // Untuk aksi yang mengubah/menghapus data: permintaan harus datang dari halaman website sendiri.
 function sameOriginOk() {
     $host = $_SERVER['HTTP_HOST'] ?? '';

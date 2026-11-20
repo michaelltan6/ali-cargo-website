@@ -31,6 +31,7 @@ if (!isUser()) {
     header("Location: ../login.php");
     exit;
 }
+requireOwner();
 
 $qname = $_SESSION['user_name'] ?? '';
 $qrole = $_SESSION['user_type'] ?? '';

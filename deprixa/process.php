@@ -111,6 +111,9 @@ try {
             if (!$authenticated) {
                 throw new Exception("Authentication required to update company details.");
             }
+            if (!ali_is_owner()) {
+                throw new Exception("Hanya pemilik sistem yang boleh mengubah data perusahaan.");
+            }
             $cname = limpiar($_POST['cname'] ?? '');
             $nit = limpiar($_POST['nit'] ?? '');
             $cphone = limpiar($_POST['cphone'] ?? '');

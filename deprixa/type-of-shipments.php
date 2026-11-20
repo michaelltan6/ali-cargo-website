@@ -7,6 +7,7 @@ require_once('database-settings.php');
 require_once('database.php');
 require_once('library.php');
 requireAdmin();
+requireOwner();
 ?>
 
 <!DOCTYPE html>

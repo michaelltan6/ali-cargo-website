@@ -15,6 +15,7 @@ if (!function_exists('isUser') || !isUser()) {
     header("Location: login.php");
     exit;
 }
+requireOwner();
 
 // Log session data for debugging
 // (log data dimatikan) error_log("Session data in service_mode.php: " . print_r($_SESSION, true));

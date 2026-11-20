@@ -4,7 +4,7 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/php_error.log');
 
-if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') {
+if (function_exists('ali_is_owner') && ali_is_owner()) {
 ?>
 <div class="row">
     <div class="col-sm-12">

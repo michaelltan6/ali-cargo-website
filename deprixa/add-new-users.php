@@ -10,6 +10,7 @@ $sql = "SELECT *
 		FROM offices";
 $result = dbQuery($sql);
 requireAdmin();
+requireOwner();
 ?>
 
 <!DOCTYPE html>

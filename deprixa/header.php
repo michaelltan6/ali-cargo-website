@@ -82,7 +82,7 @@ if (!function_exists('isUser') || !isUser()) {
                                 <div class="dropdown-item noti-title">
                                     <h5 class="text-overflow"><small>Selamat Datang ! <?php echo htmlspecialchars($_SESSION['user_type'] ?? 'Guest'); ?></small></h5>
                                 </div>
-                                <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') { ?>
+                                <?php if (function_exists('ali_is_owner') && ali_is_owner()) { ?>
                                     <a href="preferences.php" class="dropdown-item notify-item">
                                         <i class="zmdi zmdi-settings"></i> <span>Pengaturan</span>
                                     </a>
@@ -109,7 +109,7 @@ if (!function_exists('isUser') || !isUser()) {
                         <li>
                             <a href="admin.php"><i class="zmdi zmdi-view-dashboard"></i> <span> Dashboard </span></a>
                         </li>
-                        <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'Administrator') { ?>
+                        <?php if (function_exists('ali_is_owner') && ali_is_owner()) { ?>
                             <li class="has-submenu">
                                 <a href="#"><i class="fa fa-users"></i> <span> MANAJEMEN AKUN </span></a>
                                 <ul class="submenu">
