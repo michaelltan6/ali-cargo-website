@@ -104,7 +104,7 @@ function dash_pay($row) {
                         <thead>
                             <tr>
                                 <th>Tracking</th>
-                                <th>Pengirim</th>
+                                <th>Kode Customer</th>
                                 <th>Penerima</th>
                                 <th>Tujuan</th>
                                 <th>Tgl diterima</th>
@@ -125,7 +125,7 @@ function dash_pay($row) {
                         ?>
                             <tr>
                                 <td><b><?php echo htmlspecialchars($row['cons_no']); ?></b></td>
-                                <td><?php echo htmlspecialchars($row['ship_name']); ?></td>
+                                <td><?php echo htmlspecialchars(trim((string)($row['shipper_cc'] ?? ''))); ?></td>
                                 <td><?php echo htmlspecialchars($row['rev_name']); ?></td>
                                 <td><?php echo htmlspecialchars($row['pickup_time'] ?? ''); ?></td>
                                 <td><?php echo htmlspecialchars(ali_ship_date($row)); ?></td>
