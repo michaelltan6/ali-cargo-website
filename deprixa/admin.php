@@ -40,6 +40,17 @@ function dash_status($s) {
             'Landed' => ['Arrived', 'st-arr'], 'Delayed' => ['Delayed', 'st-late'], 'Delivered' => ['Delivered', 'st-fin']];
     return $map[$s] ?? [$s, 'st-fin'];
 }
+// ETA: tampil tanggalnya saja, kosong kalau belum diisi
+function dash_eta($row) {
+    $v = trim((string)($row['eta'] ?? ''));
+    return ($v === '' || strpos($v, '0000') === 0) ? '-' : substr($v, 0, 10);
+}
+// Angka format Indonesia (koma desimal), tanpa nol di belakang; 0 tampil '-'
+function dash_num($v) {
+    if (!is_numeric($v) || (float)$v == 0) { return '-'; }
+    return rtrim(rtrim(number_format((float)$v, 3, ',', '.'), '0'), ',');
+}
+
 function dash_pay($row) {
     $t = (string)($row['payment_term'] ?? '');
     if (in_array($t, ['7', '14', '30'], true)) { return 'Tempo ' . $t . ' hari'; }
@@ -96,8 +107,10 @@ function dash_pay($row) {
                                 <th>Pengirim</th>
                                 <th>Penerima</th>
                                 <th>Tujuan</th>
-                                <th>Pembayaran</th>
                                 <th>Tgl diterima</th>
+                                <th>ETA</th>
+                                <th>Berat (kg)</th>
+                                <th>Volume (m³)</th>
                                 <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
@@ -105,7 +118,7 @@ function dash_pay($row) {
                         <tbody>
                         <?php
                         try {
-                            $stmt = dbQuery("SELECT * FROM courier WHERE status <> 'Delivered'" . $scope . " ORDER BY collection_date DESC, cid DESC", $scopeParams);
+                            $stmt = dbQuery("SELECT c.*, COALESCE(t.w, 0) AS tot_w, COALESCE(t.v, 0) AS tot_v FROM courier c LEFT JOIN (SELECT courier_id, SUM(quantity * weight) AS w, SUM(quantity * volume) AS v FROM courier_items GROUP BY courier_id) t ON t.courier_id = c.cid WHERE c.status <> 'Delivered'" . $scope . " ORDER BY c.collection_date DESC, c.cid DESC", $scopeParams);
                             while ($row = dbFetchAssoc($stmt)) {
                                 [$stLabel, $stClass] = dash_status($row['status']);
                                 $cid = (int)$row['cid'];
@@ -115,8 +128,10 @@ function dash_pay($row) {
                                 <td><?php echo htmlspecialchars($row['ship_name']); ?></td>
                                 <td><?php echo htmlspecialchars($row['rev_name']); ?></td>
                                 <td><?php echo htmlspecialchars($row['pickup_time'] ?? ''); ?></td>
-                                <td><?php echo htmlspecialchars(dash_pay($row)); ?></td>
                                 <td><?php echo htmlspecialchars(ali_ship_date($row)); ?></td>
+                                <td><?php echo htmlspecialchars(dash_eta($row)); ?></td>
+                                <td class="num"><?php echo htmlspecialchars(dash_num($row['tot_w'])); ?></td>
+                                <td class="num"><?php echo htmlspecialchars(dash_num($row['tot_v'])); ?></td>
                                 <td><span class="st <?php echo $stClass; ?>"><?php echo htmlspecialchars($stLabel); ?></span></td>
                                 <td class="dash-act">
                                     <?php if ($isAdmin) { ?>
@@ -128,7 +143,7 @@ function dash_pay($row) {
                         <?php
                             }
                         } catch (PDOException $e) {
-                            echo "<tr><td colspan='8'>Error: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                            echo "<tr><td colspan='10'>Error: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
                         }
                         ?>
                         </tbody>
@@ -155,15 +170,15 @@ $(document).ready(function() {
         pageLength: 20,
         lengthChange: true,
         lengthMenu: [[20, 50, 100, -1], [20, 50, 100, 'Semua']],
-        order: [[5, 'desc']],
-        columnDefs: [{ targets: 7, orderable: false, searchable: false }],
+        order: [[4, 'desc']],
+        columnDefs: [{ targets: 9, orderable: false, searchable: false }, { targets: [6, 7], className: 'text-right' }],
         language: { search: 'Cari:', lengthMenu: 'Tampilkan _MENU_ data', info: '_START_–_END_ dari _TOTAL_ pengiriman', infoEmpty: 'Tidak ada pengiriman berjalan', zeroRecords: 'Tidak ada data yang cocok', emptyTable: 'Tidak ada pengiriman berjalan', paginate: { previous: 'Sebelumnya', next: 'Berikutnya' } }
     });
 
     // Klik kotak ringkasan = filter status
     $('.dash-tile[data-filter]').on('click', function(e) {
         e.preventDefault();
-        table.column(6).search($(this).data('filter') || '').draw();
+        table.column(8).search($(this).data('filter') || '').draw();
         $('.dash-tile').removeClass('on'); $(this).addClass('on');
     });
 
