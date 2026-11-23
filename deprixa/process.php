@@ -226,12 +226,12 @@ try {
             // Nomor SPB: kosong = otomatis (lanjut urut). Kalau diisi harus belum dipakai.
             require_once __DIR__ . '/courier-lib.php';
             courier_columns_ready();
-            $spb_no = (int)($_POST['spb_no'] ?? 0);
-            if ($spb_no <= 0) { $spb_no = courier_next_spb(); }
-            if (courier_spb_taken($spb_no, 0)) {
-                throw new Exception("Nomor SPB $spb_no sudah dipakai pengiriman lain.");
-            }
             $book_code = courier_book_code($_POST['book_code'] ?? 'ALI');
+            $spb_no = (int)($_POST['spb_no'] ?? 0);
+            if ($spb_no <= 0) { $spb_no = courier_next_spb($book_code); }
+            if (courier_spb_taken($spb_no, 0, $book_code)) {
+                throw new Exception("Nomor SPB $spb_no sudah dipakai pengiriman $book_code lain.");
+            }
             $cons_no = courier_tracking_no($book_code, $spb_no); // nomor tracking = pembukuan + nomor SPB
             $partner = mb_substr(trim(limpiar($_POST['partner'] ?? '')), 0, 100);
             $charge_unit = (($_POST['charge_unit'] ?? 'kg') === 'm3') ? 'm3' : 'kg';
@@ -412,8 +412,9 @@ try {
             require_once __DIR__ . '/courier-lib.php';
             if (courier_columns_ready() && array_key_exists('spb_no', $_POST)) {
                 $spb_no = (int)($_POST['spb_no'] ?? 0);
-                if ($spb_no > 0 && courier_spb_taken($spb_no, (int)$cid)) {
-                    throw new Exception("Nomor SPB $spb_no sudah dipakai pengiriman lain.");
+                $book_chk = courier_book_code($_POST['book_code'] ?? 'ALI');
+                if ($spb_no > 0 && courier_spb_taken($spb_no, (int)$cid, $book_chk)) {
+                    throw new Exception("Nomor SPB $spb_no sudah dipakai pengiriman $book_chk lain.");
                 }
                 $rt = trim((string)($_POST['spb_return'] ?? ''));
                 $rtd = DateTime::createFromFormat('Y-m-d', $rt);

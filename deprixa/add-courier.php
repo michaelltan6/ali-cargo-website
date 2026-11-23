@@ -219,8 +219,8 @@ ob_end_clean();
                     </div>
                     <div class="ac-f ac-4">
                         <label for="spb_no">Nomor SPB (surat jalan)</label>
-                        <input type="number" name="spb_no" id="spb_no" min="1" value="<?php echo (int)courier_next_spb(); ?>">
-                        <span class="hint">Otomatis lanjut urut. Samakan dengan nomor cetak di surat jalan.</span>
+                        <input type="number" name="spb_no" id="spb_no" min="1" value="<?php echo (int)courier_next_spb('ALI'); ?>" data-next-ali="<?php echo (int)courier_next_spb('ALI'); ?>" data-next-ank="<?php echo (int)courier_next_spb('ANK'); ?>">
+                        <span class="hint">Otomatis lanjut urut per pembukuan (ALI dan ANK punya urutan sendiri). Samakan dengan nomor cetak di surat jalan.</span>
                     </div>
                     <div class="ac-f ac-4">
                         <label for="partner">Via / Partner</label>
@@ -317,7 +317,7 @@ ob_end_clean();
                 <div class="ac-save">
                     <div class="ac-f">
                         <label for="cons_no">Nomor tracking</label>
-                        <input type="text" name="cons_no" id="cons_no" readonly value="ALI <?php echo (int)courier_next_spb(); ?>">
+                        <input type="text" name="cons_no" id="cons_no" readonly value="ALI <?php echo (int)courier_next_spb('ALI'); ?>">
                         <span class="hint">Otomatis: pembukuan + nomor SPB.</span>
                     </div>
                     <input class="ac-btn" name="Submit" type="submit" id="submit" value="Simpan pengiriman">
@@ -580,7 +580,7 @@ ob_end_clean();
 (function(){var t=document.getElementById('payment_term'),h=document.getElementById('term-hint');function u(){h.style.display=t.value==='cash'?'none':'block';}t.addEventListener('change',u);u();})();
 </script>
 <script>
-(function(){var b=document.getElementById('book_code'),n=document.getElementById('spb_no'),c=document.getElementById('cons_no');function u(){c.value=b.value+' '+(n.value||'');}b.addEventListener('change',u);n.addEventListener('input',u);u();})();
+(function(){var b=document.getElementById('book_code'),n=document.getElementById('spb_no'),c=document.getElementById('cons_no');var typed=false;function u(){c.value=b.value+' '+(n.value||'');}b.addEventListener('change',function(){if(!typed){var nx=b.value==='ANK'?n.getAttribute('data-next-ank'):n.getAttribute('data-next-ali');if(nx){n.value=nx;}}u();});n.addEventListener('input',function(){typed=true;u();});u();})();
 </script>
 </body>
 </html>

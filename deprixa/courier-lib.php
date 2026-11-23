@@ -66,18 +66,20 @@ function courier_term_label($term) {
     return 'Cash';
 }
 
-// Nomor SPB berikutnya = nomor tertinggi yang sudah dipakai + 1.
-// Kalau belum ada satu pun, mulai dari 7507 (lanjutan dari file laporan September).
-function courier_next_spb() {
-    if (!courier_columns_ready()) { return 7507; }
-    $r = dbFetchAssoc(dbQuery("SELECT MAX(spb_no) AS m FROM courier"));
+// Nomor SPB berikutnya, urutannya terpisah per pembukuan (ALI dan ANK masing-masing punya urutan sendiri).
+// = nomor tertinggi di pembukuan itu + 1. Kalau belum ada: ALI mulai 7507 (lanjutan laporan September), ANK mulai 1.
+function courier_next_spb($book = 'ALI') {
+    $book = courier_book_code($book);
+    $start = ($book === 'ANK') ? 1 : 7507;
+    if (!courier_columns_ready()) { return $start; }
+    $r = dbFetchAssoc(dbQuery("SELECT MAX(spb_no) AS m FROM courier WHERE COALESCE(book_code, 'ALI') = ?", [$book]));
     $m = (int)($r['m'] ?? 0);
-    return $m > 0 ? $m + 1 : 7507;
+    return $m > 0 ? $m + 1 : $start;
 }
 
-// Nomor SPB sudah dipakai pengiriman lain? ($exceptCid = pengiriman yang sedang diedit)
-function courier_spb_taken($spb, $exceptCid = 0) {
-    $r = dbFetchAssoc(dbQuery("SELECT COUNT(*) AS c FROM courier WHERE spb_no = ? AND cid <> ?", [(int)$spb, (int)$exceptCid]));
+// Nomor SPB sudah dipakai pengiriman lain di pembukuan yang sama? ($exceptCid = pengiriman yang sedang diedit)
+function courier_spb_taken($spb, $exceptCid = 0, $book = 'ALI') {
+    $r = dbFetchAssoc(dbQuery("SELECT COUNT(*) AS c FROM courier WHERE spb_no = ? AND cid <> ? AND COALESCE(book_code, 'ALI') = ?", [(int)$spb, (int)$exceptCid, courier_book_code($book)]));
     return (int)($r['c'] ?? 0) > 0;
 }
 
