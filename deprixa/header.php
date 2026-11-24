@@ -134,6 +134,9 @@ if (!function_exists('isUser') || !isUser()) {
                         <li class="has-submenu">
                             <a href="customer-profile.php"><i class="fa fa-users"></i> <span> CUSTOMER </span></a>
                         </li>
+                        <li class="has-submenu">
+                            <a href="catatan.php"><i class="fa fa-th-large"></i> <span> CATATAN </span></a>
+                        </li>
                         <?php
                         try {
                             $stmt = dbQuery("SELECT * FROM online_booking WHERE status = ?", ['Pending']);
