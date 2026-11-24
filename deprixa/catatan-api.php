@@ -29,12 +29,14 @@ try {
     case 'board': {
         kb_ensure_defaults($scope, $owner);
         kb_archive_sweep($scope, $owner);
+        kb_purge_old($scope, $owner);
+        $files = kb_files_of($scope, $owner);
         $cols = []; $st = dbQuery("SELECT id, name, position, is_done, color FROM kb_columns WHERE scope = ? AND owner = ? ORDER BY position, id", [$scope, $owner]);
         while ($r = dbFetchAssoc($st)) { $r['id'] = (int)$r['id']; $r['is_done'] = (int)$r['is_done']; $cols[] = $r; }
         $cards = []; $st = dbQuery("SELECT id, column_id, title, notes, priority, due_date, assignee, created_by, position, finished_at FROM kb_cards WHERE scope = ? AND owner = ? AND archived_at IS NULL ORDER BY position, id", [$scope, $owner]);
-        while ($r = dbFetchAssoc($st)) { $r['id'] = (int)$r['id']; $r['column_id'] = (int)$r['column_id']; $cards[] = $r; }
+        while ($r = dbFetchAssoc($st)) { $r['id'] = (int)$r['id']; $r['column_id'] = (int)$r['column_id']; $r['files'] = $files[$r['id']] ?? []; $cards[] = $r; }
         $ar = dbFetchAssoc(dbQuery("SELECT COUNT(*) AS c FROM kb_cards WHERE scope = ? AND owner = ? AND archived_at IS NOT NULL", [$scope, $owner]));
-        kb_ok(['columns' => $cols, 'cards' => $cards, 'archived' => (int)($ar['c'] ?? 0), 'people' => $scope === 'company' ? kb_people() : [], 'me' => $me]);
+        kb_ok(['columns' => $cols, 'cards' => $cards, 'archived' => (int)($ar['c'] ?? 0), 'people' => $scope === 'company' ? kb_people() : [], 'me' => $me, 'used' => kb_used($scope, $owner), 'keep_days' => KB_KEEP_DAYS]);
     }
 
     case 'archive_list': {
@@ -70,14 +72,16 @@ try {
             }
             dbQuery("UPDATE kb_cards SET title = ?, notes = ?, priority = ?, due_date = ?, assignee = ?, column_id = ?, position = ?, finished_at = ?, updated_at = ? WHERE id = ?",
                 [$title, $notes, $pr, $due, $assignee, $colId, $newPos, $fin, $now, $id]);
+            kb_ok(['id' => $id]);
         } else {
             $m = dbFetchAssoc(dbQuery("SELECT MAX(position) AS m FROM kb_cards WHERE column_id = ? AND archived_at IS NULL", [$colId]));
             $pos = (int)($m['m'] ?? -1) + 1;
             $fin = ((int)$col['is_done'] === 1) ? $now : null;
             dbQuery("INSERT INTO kb_cards (scope, owner, column_id, title, notes, priority, due_date, assignee, created_by, position, created_at, updated_at, finished_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$scope, $owner, $colId, $title, $notes, $pr, $due, $assignee, $me, $pos, $now, $now, $fin]);
+            global $dbConn;
+            kb_ok(['id' => (int)$dbConn->lastInsertId()]);
         }
-        kb_ok();
     }
 
     case 'card_move': {
@@ -103,6 +107,7 @@ try {
     case 'card_delete': {
         $id = (int)($_POST['id'] ?? 0);
         if (!kb_card_row($id, $scope, $owner)) { kb_fail('Kartu tidak ditemukan.'); }
+        kb_remove_files([$id]);
         dbQuery("DELETE FROM kb_cards WHERE id = ?", [$id]);
         kb_ok();
     }
@@ -112,6 +117,48 @@ try {
         if (!kb_card_row($id, $scope, $owner)) { kb_fail('Kartu tidak ditemukan.'); }
         // finished_at dibuat baru supaya tidak langsung diarsipkan lagi di minggu yang sama
         dbQuery("UPDATE kb_cards SET archived_at = NULL, finished_at = ?, updated_at = ? WHERE id = ?", [kb_now(), kb_now(), $id]);
+        kb_ok();
+    }
+
+    case 'file_upload': {
+        $cid = (int)($_POST['card_id'] ?? 0);
+        if (!kb_card_row($cid, $scope, $owner)) { kb_fail('Kartu tidak ditemukan.'); }
+        $f = $_FILES['file'] ?? null;
+        if (!$f || !is_uploaded_file($f['tmp_name'] ?? '')) {
+            $e = (int)($f['error'] ?? 0);
+            kb_fail(($e === UPLOAD_ERR_INI_SIZE || $e === UPLOAD_ERR_FORM_SIZE) ? 'File terlalu besar untuk server.' : 'File tidak terkirim.');
+        }
+        if ((int)$f['error'] !== UPLOAD_ERR_OK) { kb_fail('Upload gagal (kode ' . (int)$f['error'] . ').'); }
+        if ($f['size'] <= 0) { kb_fail('File kosong.'); }
+        if ($f['size'] > KB_MAX_BYTES) { kb_fail('Ukuran file maksimal 5 MB.'); }
+        $cnt = dbFetchAssoc(dbQuery("SELECT COUNT(*) AS c FROM kb_files WHERE card_id = ?", [$cid]));
+        if ((int)($cnt['c'] ?? 0) >= KB_MAX_FILES) { kb_fail('Maksimal ' . KB_MAX_FILES . ' lampiran per kartu.'); }
+        $orig = str_replace(['\\', '/'], '_', kb_clean($f['name'] ?? 'file', 120));
+        $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
+        $allowed = kb_allowed();
+        if (!isset($allowed[$ext])) { kb_fail('Jenis file tidak diizinkan. Boleh: jpg, png, webp, pdf, xlsx, docx, csv, txt.'); }
+        $fi = new finfo(FILEINFO_MIME_TYPE);
+        $mime = (string)$fi->file($f['tmp_name']);
+        if (!in_array($mime, $allowed[$ext], true)) { kb_fail('Isi file tidak sesuai dengan jenisnya.'); }
+        if ($mime === 'application/zip' || $mime === 'application/vnd.openxml-formats-package') {
+            $mime = $ext === 'xlsx' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        }
+        if ($ext === 'csv') { $mime = 'text/csv'; }
+        $stored = bin2hex(random_bytes(16));
+        if (!@move_uploaded_file($f['tmp_name'], kb_dir() . '/' . $stored)) { kb_fail('Gagal menyimpan file di server.'); }
+        @chmod(kb_dir() . '/' . $stored, 0640);
+        dbQuery("INSERT INTO kb_files (card_id, scope, owner, orig_name, stored_name, mime, size, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [$cid, $scope, $owner, $orig, $stored, $mime, (int)$f['size'], $me, kb_now()]);
+        kb_ok();
+    }
+
+    case 'file_delete': {
+        $fid = (int)($_POST['id'] ?? 0);
+        $r = dbFetchAssoc(dbQuery("SELECT id, stored_name FROM kb_files WHERE id = ? AND scope = ? AND owner = ?", [$fid, $scope, $owner]));
+        if (!$r) { kb_fail('Lampiran tidak ditemukan.'); }
+        $path = kb_dir() . '/' . basename((string)$r['stored_name']);
+        if (is_file($path)) { @unlink($path); }
+        dbQuery("DELETE FROM kb_files WHERE id = ?", [$fid]);
         kb_ok();
     }
 

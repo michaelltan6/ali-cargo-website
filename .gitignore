@@ -6,3 +6,6 @@ php_error.log
 *.bak
 .env
 .DS_Store
+
+# lampiran Catatan (jangan masuk GitHub)
+deprixa/kb-files/

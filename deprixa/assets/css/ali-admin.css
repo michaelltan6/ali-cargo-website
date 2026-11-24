@@ -185,3 +185,11 @@ a.dash-tile:hover, .dash-tile.on { border-color: #1f9d55; color: #333; text-deco
 .kb-sw { width: 28px; height: 28px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 1px #cfd5db; cursor: pointer; }
 .kb-sw.on { box-shadow: 0 0 0 2px #222; }
 @media (max-width: 600px) { .kb-col { flex-basis: 85vw; } .kb-row { grid-template-columns: 1fr; } .kb-col-tools { opacity: 1; } }
+
+.kb-sub { font-weight: 500; font-size: 12px; color: #6b7681; }
+.kb-files { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.kb-file { display: flex; align-items: center; gap: 8px; background: #f5f7f9; border-radius: 8px; padding: 6px 8px; }
+.kb-file img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; display: block; }
+.kb-file-ic { width: 40px; text-align: center; font-size: 22px; }
+.kb-file-n { flex: 1; min-width: 0; font-size: 13px; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kb-new { background: #fdf6e3; }

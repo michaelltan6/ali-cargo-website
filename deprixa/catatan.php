@@ -19,6 +19,7 @@ rp_start('Catatan dan tugas', 'th-large', 'Masuk sebagai ' . ($_SESSION['user_na
     </div>
 </div>
 <p class="kb-hint" id="kb-hint"></p>
+<p class="kb-hint" id="kb-used"></p>
 <div id="kb-board" class="kb-board"></div>
 <div id="kb-archive" class="kb-archive" style="display:none"></div>
 
@@ -38,6 +39,9 @@ rp_start('Catatan dan tugas', 'th-large', 'Masuk sebagai ' . ($_SESSION['user_na
             <div><label>Tenggat</label><input type="date" id="kc-due"></div>
             <div id="kc-assignee-wrap"><label>Penanggung jawab</label><select id="kc-assignee"></select></div>
         </div>
+        <label>Lampiran <span class="kb-sub">(maks 5 file, 5 MB per file)</span></label>
+        <div id="kc-files" class="kb-files"></div>
+        <input type="file" id="kc-file" multiple accept=".jpg,.jpeg,.png,.webp,.pdf,.xlsx,.docx,.csv,.txt,image/*">
         <div class="kb-modal-btns">
             <button type="button" class="kb-btn kb-danger" id="kc-del">Hapus</button>
             <span class="kb-spacer"></span>
@@ -66,8 +70,9 @@ rp_start('Catatan dan tugas', 'th-large', 'Masuk sebagai ' . ($_SESSION['user_na
 </div>
 <?php
 $js = <<<'JS'
-var KB = { scope: 'personal', cols: [], cards: [], people: [], me: '', archived: 0, view: 'board', editCard: null, editCol: null, color: '#8a949e' };
+var KB = { scope: 'personal', cols: [], cards: [], people: [], me: '', archived: 0, view: 'board', editCard: null, pending: [], used: 0, keep: 90, editCol: null, color: '#8a949e' };
 var COLORS = ['#8a949e', '#3b82f6', '#f59e0b', '#22a06b', '#e11d27', '#8b5cf6'];
+function fmtSize(b) { return b >= 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
 var PR = { rendah: 'Rendah', sedang: 'Sedang', tinggi: 'Tinggi' };
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function api(action, data, ok) {
@@ -93,6 +98,7 @@ function render() {
     $('#kb-hint').text(hint + ' Kartu di kolom "selesai" otomatis masuk arsip tiap Senin.');
     $('.kb-tab').each(function () { $(this).toggleClass('on', $(this).data('scope') === KB.scope); });
     $('#kb-archive-n').text(KB.archived);
+    $('#kb-used').text('Lampiran terpakai: ' + fmtSize(KB.used) + '. Lampiran kartu arsip dihapus otomatis setelah ' + KB.keep + ' hari (kartunya tetap ada).');
     var html = '';
     KB.cols.forEach(function (col, i) {
         var cards = KB.cards.filter(function (c) { return c.column_id === col.id; });
@@ -108,7 +114,7 @@ function render() {
                 '<div class="kb-card-t">' + esc(c.title) + '</div>' +
                 (c.notes ? '<div class="kb-card-n">' + esc(c.notes) + '</div>' : '') +
                 '<div class="kb-meta"><span class="kb-chip kb-pr-' + esc(c.priority) + '">' + esc(PR[c.priority] || '') + '</span>' + dueInfo(c, !!col.is_done) +
-                (c.assignee ? '<span class="kb-chip kb-who">' + esc(c.assignee) + '</span>' : '') + '</div></article>';
+                (c.assignee ? '<span class="kb-chip kb-who">' + esc(c.assignee) + '</span>' : '') + ((c.files && c.files.length) ? '<span class="kb-chip">&#128206; ' + c.files.length + '</span>' : '') + '</div></article>';
         });
         html += '</div><button type="button" class="kb-add" data-col="' + col.id + '">+ Tambah kartu</button></section>';
     });
@@ -117,7 +123,7 @@ function render() {
 }
 function load() {
     api('board', {}, function (res) {
-        KB.cols = res.columns; KB.cards = res.cards; KB.archived = res.archived; KB.people = res.people || []; KB.me = res.me || '';
+        KB.cols = res.columns; KB.cards = res.cards; KB.archived = res.archived; KB.used = res.used || 0; KB.keep = res.keep_days || 90; KB.people = res.people || []; KB.me = res.me || '';
         if (KB.view === 'board') { render(); } else { loadArchive(); $('#kb-archive-n').text(KB.archived); }
     });
 }
@@ -165,6 +171,7 @@ function openCard(card, colId) {
         var opts = '<option value="">(belum ditentukan)</option>' + KB.people.map(function (p) { return '<option>' + esc(p) + '</option>'; }).join('');
         $('#kc-assignee').html(opts).val(card ? card.assignee : '');
     }
+    KB.pending = []; $('#kc-file').val(''); drawFiles();
     $('#kc-del').toggle(!!card);
     $('#kb-card-modal').css('display', 'flex'); setTimeout(function () { $('#kc-title').focus(); }, 30);
 }
@@ -174,8 +181,66 @@ $('#kc-cancel').on('click', function () { $('#kb-card-modal').hide(); });
 $('#kc-save').on('click', function () {
     var t = $.trim($('#kc-title').val()); if (!t) { $('#kc-title').focus(); return; }
     api('card_save', { id: KB.editCard ? KB.editCard.id : 0, title: t, notes: $('#kc-notes').val(), column_id: $('#kc-col').val(), priority: $('#kc-pr').val(), due_date: $('#kc-due').val(), assignee: KB.scope === 'company' ? $('#kc-assignee').val() : '' },
-        function () { $('#kb-card-modal').hide(); load(); });
+        function (res) {
+            var id = res.id; $('#kc-save').prop('disabled', true).text('Menyimpan...');
+            uploadAll(id, KB.pending.slice(), function () { $('#kc-save').prop('disabled', false).text('Simpan'); KB.pending = []; $('#kb-card-modal').hide(); load(); });
+        });
 });
+/* ---- lampiran ---- */
+function drawFiles() {
+    var h = '', old = KB.editCard && KB.editCard.files ? KB.editCard.files : [];
+    old.forEach(function (f) {
+        h += '<div class="kb-file">' + (f.image ? '<a href="catatan-file.php?id=' + f.id + '&v=1" target="_blank"><img src="catatan-file.php?id=' + f.id + '&v=1" alt=""></a>' : '<span class="kb-file-ic">&#128196;</span>') +
+            '<a class="kb-file-n" href="catatan-file.php?id=' + f.id + '">' + esc(f.name) + '</a><span class="kb-sub">' + fmtSize(f.size) + '</span>' +
+            '<button type="button" class="kb-ic" data-fdel="' + f.id + '" title="Hapus lampiran">&#10005;</button></div>';
+    });
+    KB.pending.forEach(function (f, i) {
+        h += '<div class="kb-file kb-new"><span class="kb-file-ic">&#128206;</span><span class="kb-file-n">' + esc(f.name) + '</span><span class="kb-sub">' + fmtSize(f.size) + ' &middot; belum diunggah</span>' +
+            '<button type="button" class="kb-ic" data-pdel="' + i + '" title="Batalkan">&#10005;</button></div>';
+    });
+    $('#kc-files').html(h);
+}
+// Foto besar dikecilkan dulu di browser supaya hemat ruang server.
+function shrink(file, cb) {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 400 * 1024) { cb(file); return; }
+    var img = new Image(), url = URL.createObjectURL(file);
+    img.onload = function () {
+        var m = 1600, w = img.width, h = img.height, k = Math.min(1, m / Math.max(w, h));
+        var cv = document.createElement('canvas'); cv.width = Math.round(w * k); cv.height = Math.round(h * k);
+        var cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(url);
+        cv.toBlob(function (b) { if (b && b.size < file.size) { cb(new File([b], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' })); } else { cb(file); } }, 'image/jpeg', 0.82);
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); cb(file); };
+    img.src = url;
+}
+$('#kc-file').on('change', function () {
+    var list = Array.prototype.slice.call(this.files), self = this, left = list.length;
+    var have = (KB.editCard && KB.editCard.files ? KB.editCard.files.length : 0) + KB.pending.length;
+    list.forEach(function (f) {
+        if (have >= 5) { left--; rpNotify({ icon: 'warning', title: 'Maksimal 5 lampiran per kartu' }); return; }
+        have++;
+        shrink(f, function (g) {
+            if (g.size > 5 * 1024 * 1024) { rpNotify({ icon: 'warning', title: g.name + ' lebih dari 5 MB' }); } else { KB.pending.push(g); }
+            if (--left <= 0) { drawFiles(); }
+        });
+    });
+    self.value = '';
+});
+$('#kc-files').on('click', '[data-pdel]', function () { KB.pending.splice(+$(this).data('pdel'), 1); drawFiles(); });
+$('#kc-files').on('click', '[data-fdel]', function () {
+    var id = +$(this).data('fdel');
+    api('file_delete', { id: id }, function () { if (KB.editCard) { KB.editCard.files = KB.editCard.files.filter(function (f) { return f.id !== id; }); } drawFiles(); load(); });
+});
+function uploadAll(cardId, files, done) {
+    if (!files.length) { done(); return; }
+    var f = files.shift(), fd = new FormData();
+    fd.append('action', 'file_upload'); fd.append('scope', KB.scope); fd.append('card_id', cardId); fd.append('file', f, f.name);
+    fetch('catatan-api.php', { method: 'POST', credentials: 'same-origin', body: fd }).then(function (r) { return r.json(); }).then(function (res) {
+        if (!res.success) { rpNotify({ icon: 'error', title: 'Lampiran gagal: ' + f.name, text: res.message }); }
+        uploadAll(cardId, files, done);
+    }).catch(function () { rpNotify({ icon: 'error', title: 'Lampiran gagal: ' + f.name }); uploadAll(cardId, files, done); });
+}
 $('#kc-del').on('click', function () {
     if (!KB.editCard) { return; }
     rpNotify({ icon: 'warning', title: 'Hapus kartu ini?', text: 'Kartu dihapus permanen.', showCancelButton: true, confirmButtonText: 'Hapus', cancelButtonText: 'Batal' }).then(function (r) {
