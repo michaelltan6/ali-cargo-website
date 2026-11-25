@@ -481,26 +481,48 @@ try {
             if ($cid <= 0) {
                 throw new Exception("Invalid courier ID.");
             }
-            $stmt = dbQuery("SELECT * FROM courier WHERE cid = ?", [$cid]);
-            if (dbNumRows($stmt) == 0) {
-                throw new Exception("No courier found with ID: $cid");
+            $cur = dbFetchAssoc(dbQuery("SELECT * FROM courier WHERE cid = ?", [$cid]));
+            if (!$cur) {
+                throw new Exception("Pengiriman tidak ditemukan.");
+            }
+            if (($_SESSION['user_type'] ?? '') === 'Employee' && ($cur['officename'] ?? '') !== ($_SESSION['user_name'] ?? '')) {
+                throw new Exception("Pengiriman ini bukan milik akun Anda.");
             }
 
-            $status = limpiar($_POST['status'] ?? '');
+            // Hanya status yang dikenal. Selesai (Delivered) lewat tombol "Selesaikan pengiriman".
+            $statusLabels = ['Finished' => 'Finished', 'In-Transit' => 'On Delivery', 'On-Hold' => 'On Hold', 'Landed' => 'Arrived', 'Delayed' => 'Delayed'];
+            $status = (string)($_POST['status'] ?? '');
+            if (!isset($statusLabels[$status])) {
+                throw new Exception("Status tidak valid. Pilih salah satu dari daftar.");
+            }
             $pick_time = limpiar($_POST['pick_time'] ?? '');
+            if (trim($pick_time) === '') {
+                throw new Exception("Lokasi baru wajib diisi.");
+            }
             $comments = limpiar($_POST['comments'] ?? '');
-            $user = limpiar($_POST['user'] ?? $_SESSION['user_name'] ?? 'Unknown');
-            $cons_no = limpiar($_POST['cons_no'] ?? '');
+            $user = $_SESSION['user_name'] ?? 'Unknown';
+            $cons_no = (string)($cur['cons_no'] ?? '');
 
-            $stmt = dbQuery(
+            // Tanggal dan jam dari form. Kalau kosong atau tidak valid, pakai waktu sekarang.
+            date_default_timezone_set('Asia/Jakarta');
+            $bk = DateTime::createFromFormat('Y-m-d\TH:i', (string)($_POST['bk_time'] ?? ''));
+            $bk_time = $bk ? $bk->format('Y-m-d H:i:00') : date('Y-m-d H:i:s');
+
+            dbQuery(
                 "UPDATE courier SET status = ?, pick_time = ?, comments = ?, user = ?, last_updated = NOW() WHERE cid = ?",
                 [$status, $pick_time, $comments, $user, $cid]
             );
 
-            $stmt = dbQuery(
-                "INSERT INTO courier_track (cid, cons_no, status, pick_time, comments, user, bk_time) VALUES (?, ?, ?, ?, ?, ?, NOW())",
-                [$cid, $cons_no, $status, $pick_time, $comments, $user]
+            dbQuery(
+                "INSERT INTO courier_track (cid, cons_no, status, pick_time, comments, user, bk_time) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [$cid, $cons_no, $status, $pick_time, $comments, $user, $bk_time]
             );
+
+            // Cek ulang dari database supaya pesan sukses benar-benar sesuai hasilnya
+            $chk = dbFetchAssoc(dbQuery("SELECT status FROM courier WHERE cid = ?", [$cid]));
+            if (!$chk || ($chk['status'] ?? '') !== $status) {
+                throw new Exception("Status gagal tersimpan. Coba lagi.");
+            }
 
             // Recalculate progress_percentage if status changes to Delivered
             if ($status === 'Delivered') {
@@ -529,8 +551,10 @@ try {
 
             $response = [
                 'success' => true,
-                'message' => 'Status pengiriman berhasil diubah.',
-                'redirect' => 'admin.php'
+                'message' => 'Status ' . $cons_no . ' sekarang: ' . $statusLabels[$status] . '.',
+                'status' => $status,
+                'status_label' => $statusLabels[$status],
+                'redirect' => 'edit-courier.php?cid=' . (int)$cid
             ];
         } elseif ($_GET['action'] === 'update_bookmode') {
             if (!$authenticated) {

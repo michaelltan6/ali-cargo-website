@@ -387,7 +387,10 @@ if ($count > 0) {
                     </div>
                     <div class="ac-f ac-4">
                         <label for="st_status">Status baru</label>
-                        <select name="status" id="st_status">
+                        <select name="status" id="st_status" required>
+                            <?php if (!in_array($status ?? '', ['Finished', 'In-Transit', 'On-Hold', 'Landed', 'Delayed'], true)): ?>
+                            <option value="" selected disabled>&mdash; pilih status &mdash;</option>
+                            <?php endif; ?>
                             <option value="Finished" <?php echo ($status == 'Finished') ? 'selected' : ''; ?>>Finished</option>
                             <option value="In-Transit" <?php echo ($status == 'In-Transit') ? 'selected' : ''; ?>>On Delivery</option>
                             <option value="On-Hold" <?php echo ($status == 'On-Hold') ? 'selected' : ''; ?>>On Hold</option>
@@ -685,6 +688,24 @@ if ($count > 0) {
                 return isValid;
             }
         });
+    </script>
+    <script>
+    // Perbarui status lewat AJAX supaya hasilnya tampil sebagai notifikasi, bukan data mentah.
+    $(document).on('submit', '#frmShipment', function(e) {
+        e.preventDefault();
+        var f = $(this), btn = f.find('input[type=submit]');
+        btn.prop('disabled', true).val('MENYIMPAN...');
+        $.ajax({ url: 'process.php?action=update-status', type: 'POST', dataType: 'json', data: f.serialize(),
+            success: function(res) {
+                if (res && res.success) {
+                    Swal.fire({ icon: 'success', title: 'Status diperbarui', text: res.message, timer: 1600, showConfirmButton: false }).then(function() { location.href = res.redirect || location.href; });
+                } else {
+                    btn.prop('disabled', false).val('UPDATE STATUS');
+                    Swal.fire({ icon: 'error', title: 'Gagal memperbarui status', text: res ? String(res.message || '').replace(/^Error:\s*/, '') : 'Tidak ada respons dari server' });
+                }
+            },
+            error: function() { btn.prop('disabled', false).val('UPDATE STATUS'); Swal.fire({ icon: 'error', title: 'Gagal menghubungi server' }); } });
+    });
     </script>
     <script>
     $(document).on('click', '#btn-finish', function() {
