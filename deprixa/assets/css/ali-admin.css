@@ -193,3 +193,21 @@ a.dash-tile:hover, .dash-tile.on { border-color: #1f9d55; color: #333; text-deco
 .kb-file-ic { width: 40px; text-align: center; font-size: 22px; }
 .kb-file-n { flex: 1; min-width: 0; font-size: 13px; color: #222; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .kb-new { background: #fdf6e3; }
+
+/* gambar langsung tampil di kartu */
+.kb-pics { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 8px; }
+.kb-pics.one { grid-template-columns: 1fr; }
+.kb-pic { position: relative; display: block; border-radius: 8px; overflow: hidden; background: #eef1f4; aspect-ratio: 4 / 3; }
+.kb-pics.one .kb-pic { aspect-ratio: auto; max-height: 220px; }
+.kb-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.kb-pics.one .kb-pic img { height: auto; max-height: 220px; object-fit: contain; background: #f5f7f9; }
+.kb-more { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(15,20,28,.55); color: #fff; font-size: 18px; font-weight: 800; }
+.kb-gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.kb-g { position: relative; margin: 0; border-radius: 10px; overflow: hidden; background: #f5f7f9; border: 1px solid #e6eaee; }
+.kb-g img { width: 100%; max-height: 220px; object-fit: contain; display: block; cursor: zoom-in; background: #eef1f4; }
+.kb-g figcaption { font-size: 12px; padding: 5px 8px; color: #4a5560; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kb-g-x { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border: 0; border-radius: 50%; background: rgba(15,20,28,.65); color: #fff; cursor: pointer; font-size: 12px; }
+.kb-g-x:hover { background: #e11d27; }
+.kb-lb { position: fixed; inset: 0; background: rgba(10,14,20,.88); z-index: 6000; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
+.kb-lb img { max-width: 100%; max-height: 100%; border-radius: 6px; }
+@media (max-width: 600px) { .kb-gallery { grid-template-columns: 1fr; } }

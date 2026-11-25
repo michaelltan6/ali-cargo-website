@@ -51,6 +51,8 @@ rp_start('Catatan dan tugas', 'th-large', 'Masuk sebagai ' . ($_SESSION['user_na
     </div>
 </div>
 
+<div class="kb-lb" id="kb-lb" style="display:none"><img id="kb-lb-img" alt=""></div>
+
 <!-- Kolom -->
 <div class="kb-modal" id="kb-col-modal" style="display:none">
     <div class="kb-modal-box kb-small">
@@ -112,7 +114,7 @@ function render() {
         cards.forEach(function (c) {
             html += '<article class="kb-card kb-p-' + esc(c.priority) + '" draggable="true" data-id="' + c.id + '">' +
                 '<div class="kb-card-t">' + esc(c.title) + '</div>' +
-                (c.notes ? '<div class="kb-card-n">' + esc(c.notes) + '</div>' : '') +
+                (c.notes ? '<div class="kb-card-n">' + esc(c.notes) + '</div>' : '') + tilePics(c) +
                 '<div class="kb-meta"><span class="kb-chip kb-pr-' + esc(c.priority) + '">' + esc(PR[c.priority] || '') + '</span>' + dueInfo(c, !!col.is_done) +
                 (c.assignee ? '<span class="kb-chip kb-who">' + esc(c.assignee) + '</span>' : '') + ((c.files && c.files.length) ? '<span class="kb-chip">&#128206; ' + c.files.length + '</span>' : '') + '</div></article>';
         });
@@ -120,6 +122,17 @@ function render() {
     });
     if (!KB.cols.length) { html = '<p class="kb-empty">Belum ada kolom.</p>'; }
     $('#kb-board').html(html);
+}
+function imgs(c) { return (c.files || []).filter(function (f) { return f.image; }); }
+function tilePics(c) {
+    var im = imgs(c); if (!im.length) { return ''; }
+    var show = im.slice(0, 4), cls = show.length === 1 ? 'kb-pics one' : 'kb-pics';
+    var h = '<div class="' + cls + '">';
+    show.forEach(function (f, i) {
+        var more = (i === 3 && im.length > 4) ? '<span class="kb-more">+' + (im.length - 3) + '</span>' : '';
+        h += '<span class="kb-pic"><img loading="lazy" draggable="false" alt="" src="catatan-file.php?id=' + f.id + '&v=1">' + more + '</span>';
+    });
+    return h + '</div>';
 }
 function load() {
     api('board', {}, function (res) {
@@ -189,8 +202,18 @@ $('#kc-save').on('click', function () {
 /* ---- lampiran ---- */
 function drawFiles() {
     var h = '', old = KB.editCard && KB.editCard.files ? KB.editCard.files : [];
-    old.forEach(function (f) {
-        h += '<div class="kb-file">' + (f.image ? '<a href="catatan-file.php?id=' + f.id + '&v=1" target="_blank"><img src="catatan-file.php?id=' + f.id + '&v=1" alt=""></a>' : '<span class="kb-file-ic">&#128196;</span>') +
+    var pics = old.filter(function (f) { return f.image; }), docs = old.filter(function (f) { return !f.image; });
+    if (pics.length) {
+        h += '<div class="kb-gallery">';
+        pics.forEach(function (f) {
+            h += '<figure class="kb-g"><img draggable="false" data-big="catatan-file.php?id=' + f.id + '&v=1" src="catatan-file.php?id=' + f.id + '&v=1" alt="' + esc(f.name) + '">' +
+                '<button type="button" class="kb-g-x" data-fdel="' + f.id + '" title="Hapus gambar">&#10005;</button>' +
+                '<figcaption>' + esc(f.name) + ' <span class="kb-sub">' + fmtSize(f.size) + '</span></figcaption></figure>';
+        });
+        h += '</div>';
+    }
+    docs.forEach(function (f) {
+        h += '<div class="kb-file"><span class="kb-file-ic">&#128196;</span>' +
             '<a class="kb-file-n" href="catatan-file.php?id=' + f.id + '">' + esc(f.name) + '</a><span class="kb-sub">' + fmtSize(f.size) + '</span>' +
             '<button type="button" class="kb-ic" data-fdel="' + f.id + '" title="Hapus lampiran">&#10005;</button></div>';
     });
@@ -227,6 +250,8 @@ $('#kc-file').on('change', function () {
     });
     self.value = '';
 });
+$('#kc-files').on('click', '.kb-g img', function () { $('#kb-lb-img').attr('src', $(this).data('big')); $('#kb-lb').css('display', 'flex'); });
+$('#kb-lb').on('click', function () { $(this).hide(); });
 $('#kc-files').on('click', '[data-pdel]', function () { KB.pending.splice(+$(this).data('pdel'), 1); drawFiles(); });
 $('#kc-files').on('click', '[data-fdel]', function () {
     var id = +$(this).data('fdel');
@@ -281,7 +306,7 @@ $('#kb-board').on('click', '.kb-ic', function (e) {
     api('col_order', { order: ids }, load);
 });
 $('.kb-modal').on('mousedown', function (e) { if (e.target === this) { $(this).hide(); } });
-$(document).on('keydown', function (e) { if (e.key === 'Escape') { $('.kb-modal').hide(); } });
+$(document).on('keydown', function (e) { if (e.key === 'Escape') { if ($('#kb-lb').is(':visible')) { $('#kb-lb').hide(); } else { $('.kb-modal').hide(); } } });
 /* ---- tarik dan lepas ---- */
 var dragEl = null;
 $('#kb-board').on('dragstart', '.kb-card', function (e) { dragEl = this; this.classList.add('kb-drag'); try { e.originalEvent.dataTransfer.setData('text/plain', this.getAttribute('data-id')); e.originalEvent.dataTransfer.effectAllowed = 'move'; } catch (x) {} });
