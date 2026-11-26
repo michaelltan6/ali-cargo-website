@@ -16,6 +16,8 @@ Options -Indexes
   # gallery: ada folder bernama gallery, jadi dipetakan langsung ke gallery.php
   RewriteRule ^gallery/$ /gallery [R=301,L]
   RewriteRule ^gallery$ gallery.php [L]
+  # API tracking untuk customer: /api/v1/shipments ... (header Authorization diteruskan ke PHP)
+  RewriteRule ^api/v1/?(.*)$ api-v1.php?path=$1 [QSA,L,E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
   # alamat bersih -> file .php
   RewriteCond %{REQUEST_FILENAME}.php -f
   RewriteRule ^(about-us|awards|contact-us|cookie-policy|faq|layanan|privacy-policy|refund-policy|rute-pengiriman|terms-and-conditions|tracking|tracking-result|ekspedisi-jakarta-[a-z0-9-]+)$ $1.php [L]

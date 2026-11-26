@@ -17,6 +17,7 @@ if (function_exists('ali_is_owner') && ali_is_owner()) {
                 <a class="dropdown-item" href="type-of-shipments.php"><i class="fa fa-truck"></i> Tipe Pengiriman</a>
                 <a class="dropdown-item" href="add-office.php"><i class="fa fa-map-marker"></i> Lokasi</a>
                 <a class="dropdown-item" href="gallery-manager.php"><i class="fa fa-picture-o"></i> Gallery Website</a>
+                <a class="dropdown-item" href="api-keys.php"><i class="fa fa-plug"></i> API Customer</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="preferences.php"><i class="fa fa-briefcase"></i> Kantor</a>
             </div>
