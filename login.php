@@ -244,6 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <button type="submit" class="btn btn-primary">Log in</button>
                     </div>
                 </form>
+                <p style="margin-top:14px;font-size:14px">Customer ALI Cargo? <a href="/portal/login.php">Masuk ke Portal Customer</a></p>
             </div>
         </section>
     </main>

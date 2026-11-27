@@ -18,6 +18,7 @@ if (function_exists('ali_is_owner') && ali_is_owner()) {
                 <a class="dropdown-item" href="add-office.php"><i class="fa fa-map-marker"></i> Lokasi</a>
                 <a class="dropdown-item" href="gallery-manager.php"><i class="fa fa-picture-o"></i> Gallery Website</a>
                 <a class="dropdown-item" href="api-keys.php"><i class="fa fa-plug"></i> API Customer</a>
+                <a class="dropdown-item" href="customer-accounts.php"><i class="fa fa-user-circle"></i> Akun Portal Customer</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="preferences.php"><i class="fa fa-briefcase"></i> Kantor</a>
             </div>
