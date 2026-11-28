@@ -160,6 +160,19 @@ function requireOwner($json = false) {
 }
 
 // Untuk aksi yang mengubah/menghapus data: permintaan harus datang dari halaman website sendiri.
+// Untuk aksi hapus lewat link (GET): tolak kalau klik datang dari situs lain.
+function ali_same_site_click() {
+    $sfs = strtolower((string)($_SERVER['HTTP_SEC_FETCH_SITE'] ?? ''));
+    if ($sfs !== '' && !in_array($sfs, ['same-origin', 'same-site', 'none'], true)) { return false; }
+    $ref = (string)($_SERVER['HTTP_REFERER'] ?? '');
+    if ($ref !== '') {
+        $h = strtolower((string)parse_url($ref, PHP_URL_HOST));
+        $me = strtolower(preg_replace('/:\d+$/', '', (string)($_SERVER['HTTP_HOST'] ?? '')));
+        if ($h !== $me) { return false; }
+    }
+    return true;
+}
+
 function sameOriginOk() {
     $host = $_SERVER['HTTP_HOST'] ?? '';
     foreach (['HTTP_ORIGIN', 'HTTP_REFERER'] as $k) {

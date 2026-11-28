@@ -15,7 +15,7 @@ require_once('deprixa/funciones.php');
 // Check if user is already logged in and session is valid
 if (isset($_SESSION['user_name']) && !empty($_SESSION['user_name']) && isUser()) {
     if ($_SESSION['user_type'] === 'client') {
-        header("Location: deprixa/panel-customer/customer.php");
+        header("Location: /portal/");
         exit;
     } else {
         header("Location: deprixa/admin.php");

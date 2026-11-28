@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['delete_ids'])) {
     }
 }
 
-header("Location: " . $_SERVER['HTTP_REFERER']);
+$back = (string)($_SERVER['HTTP_REFERER'] ?? '');
+header('Location: ' . (ali_same_site_click() && $back !== '' ? $back : 'admin.php'));
 exit;
 ?>
